@@ -2396,6 +2396,12 @@ Aanop	|CLONE_PARAMS *|clone_params_new|NN PerlInterpreter *const from \
 		|NN PerlInterpreter *const to
 Anop	|void	|clone_params_del|NN CLONE_PARAMS *param
 #endif
+
+p	|INSTRUCTION*	|codeseq_start_instruction|NN CODESEQ* codeseq
+p	|void	|compile_op|NN OP* startop|NN CODESEQ* codeseq
+ap	|CODESEQ*	|new_codeseq
+p	|void	|free_codeseq|NULLOK CODESEQ* codeseq
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

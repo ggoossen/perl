@@ -5791,6 +5791,9 @@ Perl_cv_undef(pTHX_ CV *cv)
 
     pad_undef(cv);
 
+    free_codeseq(CvCODESEQ(cv));
+    CvCODESEQ(cv) = NULL;
+
     /* remove CvOUTSIDE unless this is an undef rather than a free */
     if (!SvREFCNT(cv) && CvOUTSIDE(cv)) {
 	if (!CvWEAKOUTSIDE(cv))
