@@ -783,6 +783,11 @@ PERL_CALLCONV void	Perl_op_dump(pTHX_ const OP *o)
 #define PERL_ARGS_ASSERT_OP_DUMP	\
 	assert(o)
 
+PERL_CALLCONV void	Perl_codeseq_dump(pTHX_ const CODESEQ *codeseq)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CODESEQ_DUMP	\
+	assert(codeseq)
+
 PERL_CALLCONV void	Perl_pmop_dump(pTHX_ PMOP* pm);
 PERL_CALLCONV void	Perl_dump_packsubs(pTHX_ const HV* stash)
 			__attribute__nonnull__(pTHX_1);
@@ -6986,7 +6991,7 @@ PERL_CALLCONV void	Perl_clone_params_del(CLONE_PARAMS *param)
 
 #endif
 
-PERL_CALLCONV INSTRUCTION*	Perl_codeseq_start_instruction(pTHX_ CODESEQ* codeseq)
+PERL_CALLCONV INSTRUCTION*	Perl_codeseq_start_instruction(pTHX_ const CODESEQ* codeseq)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CODESEQ_START_INSTRUCTION	\
 	assert(codeseq)

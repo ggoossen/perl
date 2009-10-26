@@ -384,6 +384,7 @@ Ap	|void	|dump_fds	|NN char* s
 Ap	|void	|dump_form	|NN const GV* gv
 Ap	|void	|gv_dump	|NN GV* gv
 Ap	|void	|op_dump	|NN const OP *o
+p	|void	|codeseq_dump	|NN const CODESEQ *codeseq
 Ap	|void	|pmop_dump	|NULLOK PMOP* pm
 Ap	|void	|dump_packsubs	|NN const HV* stash
 p	|void	|dump_packsubs_perl	|NN const HV* stash|bool justperl
@@ -2397,7 +2398,7 @@ Aanop	|CLONE_PARAMS *|clone_params_new|NN PerlInterpreter *const from \
 Anop	|void	|clone_params_del|NN CLONE_PARAMS *param
 #endif
 
-p	|INSTRUCTION*	|codeseq_start_instruction|NN CODESEQ* codeseq
+p	|INSTRUCTION*	|codeseq_start_instruction|NN const CODESEQ* codeseq
 p	|void	|compile_op|NN OP* startop|NN CODESEQ* codeseq
 ap	|CODESEQ*	|new_codeseq
 p	|void	|free_codeseq|NULLOK CODESEQ* codeseq
