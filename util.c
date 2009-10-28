@@ -1516,7 +1516,7 @@ Perl_die_nocontext(const char* pat, ...)
 }
 #endif /* PERL_IMPLICIT_CONTEXT */
 
-OP *
+OP*
 Perl_die(pTHX_ const char* pat, ...)
 {
     va_list args;

@@ -4223,7 +4223,7 @@ struct perl_memory_debug_header {
 typedef int (*runops_proc_t)(pTHX);
 typedef void (*share_proc_t) (pTHX_ SV *sv);
 typedef int  (*thrhook_proc_t) (pTHX);
-typedef OP* (*PPADDR_t[]) (pTHX);
+typedef int (*PPADDR_t[]) (pTHX);
 typedef bool (*destroyable_proc_t) (pTHX_ SV *sv);
 typedef void (*despatch_signals_proc_t) (pTHX);
 
@@ -4977,7 +4977,7 @@ struct tempsym; /* defined in pp_pack.c */
 #undef PERL_CKDEF
 #undef PERL_PPDEF
 #define PERL_CKDEF(s)	PERL_CALLCONV OP *s (pTHX_ OP *o);
-#define PERL_PPDEF(s)	PERL_CALLCONV INSTRUCTION *s (pTHX);
+#define PERL_PPDEF(s)	PERL_CALLCONV int s (pTHX);
 
 #include "proto.h"
 
