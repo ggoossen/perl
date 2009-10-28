@@ -1652,7 +1652,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    }
 	    assert(CxTYPE(cx) == CXt_EVAL);
 	    PL_restartjmpenv = cx->blk_eval.cur_top_env;
-	    PL_restartop = cx->blk_eval.ret_instr;
+	    run_set_next_instruction( cx->blk_eval.ret_instr );
 	    JMPENV_JUMP(3);
 	    /* NOTREACHED */
 	}

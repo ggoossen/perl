@@ -2295,8 +2295,7 @@ S_run_body(pTHX_ I32 oldscope)
 
     if (PL_restartop) {
 	PL_restartjmpenv = NULL;
-	PL_op = PL_restartop;
-	PL_restartop = 0;
+	run_set_next_instruction( PL_restartop );
 	CALLRUNOPS(aTHX);
     }
     else if (PL_main_start) {
