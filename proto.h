@@ -5180,7 +5180,7 @@ STATIC char *	S_bytes_to_uni(const U8 *start, STRLEN len, char *dest)
 
 #endif
 
-#if defined(PERL_IN_PP_CTL_C)
+#if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 STATIC OP*	S_docatch(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 

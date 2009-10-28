@@ -1416,7 +1416,7 @@
 #define bytes_to_uni		S_bytes_to_uni
 #endif
 #endif
-#if defined(PERL_IN_PP_CTL_C)
+#if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define docatch			S_docatch
 #define dofindlabel		S_dofindlabel
@@ -3889,7 +3889,7 @@
 #define bytes_to_uni		S_bytes_to_uni
 #endif
 #endif
-#if defined(PERL_IN_PP_CTL_C)
+#if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define docatch(a)		S_docatch(aTHX_ a)
 #define dofindlabel(a,b,c,d)	S_dofindlabel(aTHX_ a,b,c,d)
