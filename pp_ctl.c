@@ -2224,7 +2224,8 @@ PP(pp_return)
     if (clear_errsv) {
 	CLEAR_ERRSV();
     }
-    return ret_instr;
+    RUN_SET_NEXT_INSTRUCTION( ret_instr);
+    return NORMAL;
 }
 
 PP(pp_last)
