@@ -52,6 +52,7 @@ typedef PERL_BITFIELD16 Optype;
 #else
 #define BASEOP				\
     OP*		op_next;		\
+    INSTRUCTION*		op_unstack_instr;		\
     OP*		op_sibling;		\
     MADPROP_IN_BASEOP			\
     PADOFFSET	op_targ;		\
@@ -459,6 +460,7 @@ struct loop {
     OP *	op_redoop;
     OP *	op_nextop;
     OP *	op_lastop;
+    INSTRUCTION *	op_last_instr;
 };
 
 #define cUNOPx(o)	((UNOP*)o)

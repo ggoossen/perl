@@ -2413,6 +2413,8 @@ typedef struct pvop PVOP;
 typedef struct loop LOOP;
 
 typedef struct block_hooks BHK;
+
+typedef void* INSTR_ARG;
 typedef struct instruction INSTRUCTION;
 typedef struct codeseq CODESEQ;
 
@@ -4977,7 +4979,7 @@ struct tempsym; /* defined in pp_pack.c */
 #undef PERL_CKDEF
 #undef PERL_PPDEF
 #define PERL_CKDEF(s)	PERL_CALLCONV OP *s (pTHX_ OP *o);
-#define PERL_PPDEF(s)	PERL_CALLCONV int s (pTHX);
+#define PERL_PPDEF(s)	PERL_CALLCONV int s (pTHX_ INSTR_ARG instr_arg);
 
 #include "proto.h"
 
