@@ -1184,7 +1184,8 @@ PP(pp_flip)
     dSP;
 
     if (GIMME == G_ARRAY) {
-	RETURNOP(((LOGOP*)cUNOP->op_first)->op_other);
+	RUN_SET_NEXT_INSTRUCTION(((LOGOP*)cUNOP->op_first)->op_other_instr);
+	RETURN;
     }
     else {
 	dTOPss;
@@ -1213,7 +1214,8 @@ PP(pp_flip)
 	    else {
 		sv_setiv(targ, 0);
 		SP--;
-		RETURNOP(((LOGOP*)cUNOP->op_first)->op_other);
+		RUN_SET_NEXT_INSTRUCTION(((LOGOP*)cUNOP->op_first)->op_other_instr);
+		RETURN;
 	    }
 	}
 	sv_setpvs(TARG, "");
