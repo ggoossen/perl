@@ -2698,7 +2698,6 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 
     switch (ret) {
     case 0:
- redo_body:
 	if (PL_op == (OP*)(&myop)) {
 	    PL_op = PL_ppaddr[OP_ENTEREVAL](aTHX);
 	    if (!PL_op)
