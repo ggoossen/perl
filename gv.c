@@ -2301,8 +2301,14 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     PUSHs(MUTABLE_SV(cv));
     PUTBACK;
 
-    if ((PL_op = PL_ppaddr[OP_ENTERSUB](aTHX)))
-      CALLRUNOPS(aTHX);
+    INSTRUCTION* oldinstr = run_get_next_instruction();
+    RUN_SET_NEXT_INSTRUCTION(NULL);
+
+    PL_ppaddr[OP_ENTERSUB](aTHX);
+
+    if (run_get_next_instruction())
+	CALLRUNOPS(aTHX);
+
     LEAVE;
     SPAGAIN;
 
@@ -2310,6 +2316,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     PUTBACK;
     POPSTACK;
     CATCH_SET(oldcatch);
+
+    RUN_SET_NEXT_INSTRUCTION(oldinstr);
 
     if (postpr) {
       int ans;
