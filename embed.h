@@ -1456,6 +1456,7 @@
 #define rpeep(a)		Perl_rpeep(aTHX_ a)
 #define rsignal_restore(a,b)	Perl_rsignal_restore(aTHX_ a,b)
 #define rsignal_save(a,b,c)	Perl_rsignal_save(aTHX_ a,b,c)
+#define runops_continue_from_jmpenv(a)	Perl_runops_continue_from_jmpenv(aTHX_ a)
 #define rxres_save(a,b)		Perl_rxres_save(aTHX_ a,b)
 #define sawparens(a)		Perl_sawparens(aTHX_ a)
 #define scalar(a)		Perl_scalar(aTHX_ a)
