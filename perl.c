@@ -565,6 +565,8 @@ perl_destruct(pTHXx)
 	PERL_UNUSED_VAR(x);
         if (PL_endav && !PL_minus_c)
             call_list(PL_scopestack_ix, PL_endav);
+	while (PL_scopestack_ix > 1)
+	    LEAVE;
         JMPENV_POP;
     }
     LEAVE;
@@ -4620,30 +4622,11 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		Perl_croak(aTHX_ "%"SVf"", SVfARG(atsv));
 	    }
 	    break;
-	case 1:
-	    STATUS_ALL_FAILURE;
-	    /* FALL THROUGH */
-	case 2:
-	    /* my_exit() was called */
-	    while (PL_scopestack_ix > oldscope)
-		LEAVE;
-	    FREETMPS;
-	    PL_curstash = PL_defstash;
-	    PL_curcop = &PL_compiling;
-	    CopLINE_set(PL_curcop, oldline);
-	    JMPENV_POP;
-	    my_exit_jump();
-	    /* NOTREACHED */
-	case 3:
-	    if (PL_restartop) {
-		PL_curcop = &PL_compiling;
-		CopLINE_set(PL_curcop, oldline);
-		JMPENV_JUMP(3);
-	    }
-	    PerlIO_printf(Perl_error_log, "panic: restartop\n");
-	    FREETMPS;
-	    break;
+	default:
+	    ret = runops_continue_from_jmpenv(ret);
 	}
+	assert(ret == 0);
+
 	JMPENV_POP;
     }
 }
