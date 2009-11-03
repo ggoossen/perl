@@ -2293,9 +2293,8 @@ S_run_body(pTHX_ I32 oldscope)
 
     /* do it */
 
-    if (PL_restartop) {
+    if (run_get_next_instruction()) {
 	PL_restartjmpenv = NULL;
-	run_set_next_instruction( PL_restartop );
 	CALLRUNOPS(aTHX);
     }
     else if (PL_main_start) {
@@ -2304,7 +2303,7 @@ S_run_body(pTHX_ I32 oldscope)
 	    CvCODESEQ(PL_main_cv) = new_codeseq();
 	    compile_op(PL_main_start, CvCODESEQ(PL_main_cv));
 	}
-	run_set_next_instruction( codeseq_start_instruction(CvCODESEQ(PL_main_cv)) );
+	RUN_SET_NEXT_INSTRUCTION( codeseq_start_instruction(CvCODESEQ(PL_main_cv)) );
 	CALLRUNOPS(aTHX);
     }
     my_exit(0);
@@ -2561,6 +2560,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
     if (!(flags & G_NOARGS))
 	myop.op_flags |= OPf_STACKED;
     myop.op_flags |= OP_GIMME_REVERSE(flags);
+    myop.op_type = OP_ENTERSUB;
     SAVEOP();
     PL_op = (OP*)&myop;
 
@@ -2588,7 +2588,6 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	myinstr[instr_idx].instr_arg = NULL;
 	instr_idx++;
     }
-    myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
 
     myinstr[instr_idx].instr_op = &myop;
     myinstr[instr_idx].instr_ppaddr = PL_ppaddr[myop.op_type];
@@ -2650,7 +2649,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	FREETMPS;
 	LEAVE;
     }
-    run_set_next_instruction( oldinstr );
+    RUN_SET_NEXT_INSTRUCTION( oldinstr );
     PL_op = oldop;
     return retval;
 }

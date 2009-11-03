@@ -105,7 +105,7 @@ PP(pp_and)
     else {
         if (PL_op->op_type == OP_AND)
 	    --SP;
-	run_set_next_instruction(cLOGOP->op_other_instr);
+	RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
 	RETURN;
     }
 }
@@ -216,7 +216,7 @@ PP(pp_cond_expr)
     dVAR; dSP;
     PERL_ASYNC_CHECK();
     if (SvTRUEx(POPs)) {
-	run_set_next_instruction(cLOGOP->op_other_instr);
+	RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
 	RETURN;
     }
     else 
@@ -439,7 +439,7 @@ PP(pp_or)
     else {
 	if (PL_op->op_type == OP_OR)
             --SP;
-	run_set_next_instruction(cLOGOP->op_other_instr);
+	RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
 	RETURN;
     }
 }
@@ -458,7 +458,7 @@ PP(pp_defined)
         if (!sv || !SvANY(sv)) {
 	    if (op_type == OP_DOR)
 		--SP;
-	    run_set_next_instruction(cLOGOP->op_other_instr);
+	    RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
 	    RETURN;
         }
     }
@@ -495,7 +495,7 @@ PP(pp_defined)
             RETURN; 
         if(op_type == OP_DOR)
             --SP;
-	run_set_next_instruction(cLOGOP->op_other_instr);
+	RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
 	RETURN;
     }
     /* assuming OP_DEFINED */
@@ -2490,7 +2490,7 @@ PP(pp_grepwhile)
 	else
 	    DEFSV_set(src);
 
-	run_set_next_instruction(cLOGOP->op_other_instr);
+	RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
 	RETURN;
     }
 }
@@ -2553,7 +2553,7 @@ PP(pp_leavesub)
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVESUB(sv);
-    run_set_next_instruction( cx->blk_sub.ret_instr );
+    RUN_SET_NEXT_INSTRUCTION( cx->blk_sub.ret_instr );
     RETURN;
 }
 
@@ -2721,7 +2721,7 @@ PP(pp_leavesublv)
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVESUB(sv);
-    run_set_next_instruction( cx->blk_sub.ret_instr );
+    RUN_SET_NEXT_INSTRUCTION( cx->blk_sub.ret_instr );
     RETURN;
 }
 
@@ -2909,7 +2909,7 @@ try_autoload:
 	    CvCODESEQ(cv) = new_codeseq();
 	    compile_op(CvSTART(cv), CvCODESEQ(cv));
 	}
-	run_set_next_instruction(codeseq_start_instruction(CvCODESEQ(cv)));
+	RUN_SET_NEXT_INSTRUCTION(codeseq_start_instruction(CvCODESEQ(cv)));
 
 	RETURN;
     }
