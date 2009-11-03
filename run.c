@@ -66,9 +66,10 @@ Perl_runops_continue_from_jmpenv(pTHX_ int ret)
 	/* NOTREACHED */
 	break;
     case 3:
-	if (run_get_next_instruction()) {
+	if (PL_restartjmpenv == PL_top_env) {
 	    PL_restartjmpenv = NULL;
-	    CALLRUNOPS(aTHX);
+	    if (run_get_next_instruction())
+		CALLRUNOPS(aTHX);
 	    return 0;
 	}
 	break;
@@ -84,7 +85,7 @@ Perl_runops_debug(pTHX)
     dVAR;
     assert(PL_run_next_instruction);
     if (!PL_run_next_instruction->instr_ppaddr) {
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING), "NULL OP IN RUN");
+	/* Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING), "NULL OP IN RUN"); */
 	return 0;
     }
 
