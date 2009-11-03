@@ -2097,6 +2097,8 @@ Perl_runops_debug(pTHX)
 
     DEBUG_l(Perl_deb(aTHX_ "Entering new RUNOPS level\n"));
     do {
+	assert(PL_stack_base[0] == &PL_sv_undef);
+	assert(PL_stack_sp >= PL_stack_base);
 	if (PL_debug) {
 	    if (PL_watchaddr && (*PL_watchaddr != PL_watchok))
 		PerlIO_printf(Perl_debug_log,
@@ -2111,7 +2113,6 @@ Perl_runops_debug(pTHX)
 		else
 		    debstack();
 	    }
-
 
 	    if (DEBUG_t_TEST_) debop(PL_op);
 	    if (DEBUG_P_TEST_) debprof(PL_op);
