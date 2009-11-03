@@ -1646,7 +1646,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    }
 	    assert(CxTYPE(cx) == CXt_EVAL);
 	    PL_restartjmpenv = cx->blk_eval.cur_top_env;
-	    run_set_next_instruction( cx->blk_eval.ret_instr );
+	    RUN_SET_NEXT_INSTRUCTION( cx->blk_eval.ret_instr );
 	    JMPENV_JUMP(3);
 	    /* NOTREACHED */
 	}
@@ -2874,10 +2874,8 @@ S_docatch(pTHX_ const INSTRUCTION *instr)
 	break;
     case 3:
 	/* die caught by an inner eval - continue inner loop */
-	if (PL_restartop && PL_restartjmpenv == PL_top_env) {
+	if (PL_restartjmpenv == PL_top_env) {
 	    PL_restartjmpenv = NULL;
-	    PL_op = PL_restartop;
-	    PL_restartop = 0;
 	    goto redo_body;
 	}
 	/* FALL THROUGH */
