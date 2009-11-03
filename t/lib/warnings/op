@@ -521,8 +521,8 @@ no warnings 'void' ;
 EXPECT
 Useless use of a constant (abc) in void context at - line 3.
 Useless use of a constant (7) in void context at - line 4.
-Useless use of a constant (xy) in void context at - line 5.
-Useless use of a constant (4) in void context at - line 6.
+Useless use of concatenation (.) or string in void context at - line 5.
+Useless use of addition (+) in void context at - line 6.
 Useless use of a constant (undef) in void context at - line 8.
 ########
 # op.c
@@ -608,13 +608,14 @@ EXPECT
 Parentheses missing around "local" list at - line 3.
 Parentheses missing around "local" list at - line 4.
 ########
-# op.c
+# TODO isn't "strict subs" enough op.c
 use warnings 'bareword' ;
 print (ABC || 1) ;
 no warnings 'bareword' ;
 print (ABC || 1) ;
 EXPECT
 Bareword found in conditional at - line 3.
+ABCABC
 ########
 --FILE-- abc
 

@@ -10,12 +10,6 @@
 
 /*
  * The fields of BASEOP are:
- *	op_next		Pointer to next ppcode to execute after this one.
- *			(Top level pre-grafted op points to first op,
- *			but this is replaced when op is grafted in, when
- *			this op will point to the real next op, and the new
- *			parent takes over role of remembering starting op.)
- *	op_ppaddr	Pointer to current ppcode's function.
  *	op_type		The type of the operation.
  *	op_opt		Whether or not the op has been optimised by the
  *			peephole optimiser.
@@ -52,9 +46,7 @@ typedef PERL_BITFIELD16 Optype;
 #define BASEOP BASEOP_DEFINITION
 #else
 #define BASEOP				\
-    OP*		op_next;		\
     OP*		op_sibling;		\
-    OP*		(*op_ppaddr)(pTHX);	\
     MADPROP_IN_BASEOP			\
     PADOFFSET	op_targ;		\
     PERL_BITFIELD16 op_type:9;		\
@@ -196,8 +188,6 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpDEREF_AV		32	/*   Want ref to AV. */
 #define OPpDEREF_HV		64	/*   Want ref to HV. */
 #define OPpDEREF_SV		(32|64)	/*   Want ref to SV. */
-/* Private for OP_RV2SV, OP_RV2AV, OP_RV2AV */
-#define OPpDEREFed		4	/* prev op was OPpDEREF */
   /* OP_ENTERSUB only */
 #define OPpENTERSUB_DB		16	/* Debug subroutine. */
 #define OPpENTERSUB_HASTARG	32	/* Called from OP tree. */
@@ -289,6 +279,9 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_ENTEREVAL */
 #define OPpEVAL_HAS_HH		2	/* Does it have a copy of %^H */
     
+/* Private for OP_WHILE_AND */
+#define OPpWHILE_AND_ONCE		2	/* Loop is executed at least once */
+
 struct op {
     BASEOP
 };

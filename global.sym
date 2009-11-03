@@ -75,7 +75,6 @@ Perl_cvgv_set
 Perl_cx_dump
 Perl_cxinc
 Perl_deb
-Perl_debop
 Perl_debprofdump
 Perl_debstack
 Perl_debstackptrs
@@ -508,6 +507,7 @@ Perl_save_clearsv
 Perl_save_delete
 Perl_save_destructor
 Perl_save_destructor_x
+Perl_save_freecodeseq
 Perl_save_freeop
 Perl_save_freepv
 Perl_save_freesv

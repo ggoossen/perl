@@ -76,8 +76,6 @@ like(B::Debug::_printop(B::main_start), qr/OP\s+\[OP_ENTER\]/);
 
 $a = `$X $path "-MO=Debug" -e "B::main_root->debug" $redir`;
 like($a, qr/op_next\s+0x0/m);
-$a = `$X $path "-MO=Debug" -e "B::main_start->debug" $redir`;
-like($a, qr/\[OP_ENTER\]/m);
 
 # pass missing FETCHSIZE, fixed with 1.06
 my $e = q(BEGIN{tie @a, __PACKAGE__;sub TIEARRAY {bless{}} sub FETCH{1}};print $a[1]);

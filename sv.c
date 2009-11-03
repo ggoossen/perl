@@ -5878,9 +5878,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 			&& !CvCONST(destructor)
 			/* Don't bother calling an empty destructor */
 			&& (CvISXSUB(destructor)
-			|| (CvSTART(destructor)
-			    && (CvSTART(destructor)->op_next->op_type
-						!= OP_LEAVESUB))))
+			     || 1 /* FIXME: CvROOT(destructor)->op_first != OP_LEAVESUB */ ))
 		    {
 			SV* const tmpref = newRV(sv);
 			SvREADONLY_on(tmpref); /* DESTROY() could be naughty */
@@ -11824,6 +11822,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    CvWEAKOUTSIDE(sstr)
 		    ? cv_dup(    CvOUTSIDE(dstr), param)
 		    : cv_dup_inc(CvOUTSIDE(dstr), param);
+		CvCODESEQ(dstr) = NULL;
 		if (!CvISXSUB(dstr))
 		    CvFILE(dstr) = SAVEPV(CvFILE(dstr));
 		break;
@@ -12760,9 +12759,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     OP_REFCNT_LOCK;
     PL_main_root	= OpREFCNT_inc(proto_perl->Imain_root);
     OP_REFCNT_UNLOCK;
-    PL_main_start	= proto_perl->Imain_start;
     PL_eval_root	= proto_perl->Ieval_root;
-    PL_eval_start	= proto_perl->Ieval_start;
 
     /* runtime control stuff */
     PL_curcopdb		= (COP*)any_dup(proto_perl->Icurcopdb, proto_perl);
@@ -13030,6 +13027,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_top_env		= &PL_start_env;
 
     PL_op		= proto_perl->Iop;
+    PL_run_next_instruction = NULL;
 
     PL_Sv		= NULL;
     PL_Xpv		= (XPV*)NULL;
@@ -13087,9 +13085,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 
 
-    /* Pluggable optimizer */
-    PL_peepp		= proto_perl->Ipeepp;
-    PL_rpeepp		= proto_perl->Irpeepp;
     /* op_free() hook */
     PL_opfreehook	= proto_perl->Iopfreehook;
 
@@ -13591,6 +13586,20 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 				    keysv, index, subscript_type);
       }
 
+    case OP_RV2SV:
+	if (cUNOPx(obase)->op_first->op_type == OP_GV) {
+	    /* $global */
+	    gv = cGVOPx_gv(cUNOPx(obase)->op_first);
+	    if (!gv)
+		break;
+	    if (match && (GvSV(gv) != uninit_sv))
+		break;
+	    return varname(gv, '$', 0, NULL, 0, FUV_SUBSCRIPT_NONE);
+	}
+	else /* ${expr} */
+	    return find_uninit_var(cUNOPx(obase)->op_first,
+		uninit_sv, 1);
+
     case OP_PADSV:
 	if (match && PAD_SVl(obase->op_targ) != uninit_sv)
 	    break;
@@ -13644,6 +13653,9 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 
     case OP_AELEM:
     case OP_HELEM:
+    {
+	bool negate = FALSE;
+
 	if (PL_op == obase)
 	    /* $a[uninit_expr] or $h{uninit_expr} */
 	    return find_uninit_var(cBINOPx(obase)->op_last, uninit_sv, match);
@@ -13669,28 +13681,44 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	if (!sv)
 	    break;
 
+	if (kid && kid->op_type == OP_NEGATE) {
+	    negate = TRUE;
+	    kid = cUNOPx(kid)->op_first;
+	}
+
 	if (kid && kid->op_type == OP_CONST && SvOK(cSVOPx_sv(kid))) {
 	    /* index is constant */
+	    SV* kidsv;
+	    if (negate) {
+		kidsv = sv_2mortal(newSVpvs("-"));
+		sv_catsv(kidsv, cSVOPx_sv(kid));
+	    }
+	    else
+		kidsv = cSVOPx_sv(kid);
 	    if (match) {
 		if (SvMAGICAL(sv))
 		    break;
 		if (obase->op_type == OP_HELEM) {
-		    HE* he = hv_fetch_ent(MUTABLE_HV(sv), cSVOPx_sv(kid), 0, 0);
+		    HE* he = hv_fetch_ent(MUTABLE_HV(sv), kidsv, 0, 0);
 		    if (!he || HeVAL(he) != uninit_sv)
 			break;
 		}
 		else {
-		    SV * const * const svp = av_fetch(MUTABLE_AV(sv), SvIV(cSVOPx_sv(kid)), FALSE);
+		    SV * const * const svp = av_fetch(MUTABLE_AV(sv),
+			negate ? - SvIV(cSVOPx_sv(kid)) : SvIV(cSVOPx_sv(kid)),
+			FALSE);
 		    if (!svp || *svp != uninit_sv)
 			break;
 		}
 	    }
-	    if (obase->op_type == OP_HELEM)
+	    if (obase->op_type == OP_HELEM) {
 		return varname(gv, '%', o->op_targ,
-			    cSVOPx_sv(kid), 0, FUV_SUBSCRIPT_HASH);
+			    kidsv, 0, FUV_SUBSCRIPT_HASH);
+	    }
 	    else
 		return varname(gv, '@', o->op_targ, NULL,
-			    SvIV(cSVOPx_sv(kid)), FUV_SUBSCRIPT_ARRAY);
+		    negate ? - SvIV(cSVOPx_sv(kid)) : SvIV(cSVOPx_sv(kid)),
+		    FUV_SUBSCRIPT_ARRAY);
 	}
 	else  {
 	    /* index is an expression;
@@ -13716,6 +13744,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		o->op_targ, NULL, 0, FUV_SUBSCRIPT_WITHIN);
 	}
 	break;
+    }
 
     case OP_AASSIGN:
 	/* only examine RHS */
@@ -13772,7 +13801,6 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 
 
     case OP_ENTEREVAL: /* could be eval $undef or $x='$undef'; eval $x */
-    case OP_RV2SV:
     case OP_CUSTOM: /* XS or custom code could trigger random warnings */
 
 	/* the following ops are capable of returning PL_sv_undef even for
@@ -13896,10 +13924,10 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    if (kid) {
 		const OPCODE type = kid->op_type;
 		if ( (type == OP_CONST && SvOK(cSVOPx_sv(kid)))
-		  || (type == OP_NULL  && ! (kid->op_flags & OPf_KIDS))
-		  || (type == OP_PUSHMARK)
-		)
-		continue;
+		    || (type == OP_NULL  && ! (kid->op_flags & OPf_KIDS))
+		    || (type == OP_PUSHMARK)
+		    )
+		    continue;
 	    }
 	    if (o2) { /* more than one found */
 		o2 = NULL;
@@ -13907,6 +13935,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    }
 	    o2 = kid;
 	}
+
 	if (o2)
 	    return find_uninit_var(o2, uninit_sv, match);
 

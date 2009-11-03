@@ -1917,7 +1917,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 */
 
 bool
-Perl_try_amagic_un(pTHX_ int method, int flags) {
+Perl_try_amagic_un(pTHX_ int method, int flags, SV* targ) {
     dVAR;
     dSP;
     SV* tmpsv;
@@ -1930,7 +1930,6 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
 	    SETs(tmpsv);
 	}
 	else {
-	    dTARGET;
 	    if (SvPADMY(TARG)) {
 		sv_setsv(TARG, tmpsv);
 		SETTARG;
@@ -1959,7 +1958,7 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
 */
 
 bool
-Perl_try_amagic_bin(pTHX_ int method, int flags) {
+Perl_try_amagic_bin(pTHX_ int method, int flags, SV* targ) {
     dVAR;
     dSP;
     SV* const left = TOPm1s;
@@ -1978,7 +1977,6 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
 		SETs(tmpsv);
 	    }
 	    else {
-		dATARGET;
 		(void)POPs;
 		if (opASSIGN || SvPADMY(TARG)) {
 		    sv_setsv(TARG, tmpsv);
@@ -2311,11 +2309,11 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     BINOP myop;
     SV* res;
     const bool oldcatch = CATCH_GET;
+    const INSTRUCTION* oldinstr = run_get_next_instruction();
 
     CATCH_SET(TRUE);
     Zero(&myop, 1, BINOP);
     myop.op_last = (OP *) &myop;
-    myop.op_next = NULL;
     myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
 
     PUSHSTACKi(PERLSI_OVERLOAD);
@@ -2325,7 +2323,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     if (PERLDB_SUB && PL_curstash != PL_debstash)
 	PL_op->op_private |= OPpENTERSUB_DB;
     PUTBACK;
-    pp_pushmark();
+    pp_pushmark(0, NULL);
 
     EXTEND(SP, notfound + 5);
     PUSHs(lr>0? right: left);
@@ -2338,8 +2336,13 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     PUSHs(MUTABLE_SV(cv));
     PUTBACK;
 
-    if ((PL_op = PL_ppaddr[OP_ENTERSUB](aTHX)))
-      CALLRUNOPS(aTHX);
+    RUN_SET_NEXT_INSTRUCTION(NULL);
+
+    PL_ppaddr[OP_ENTERSUB](aTHX_ 0, NULL);
+
+    if (run_get_next_instruction())
+	CALLRUNOPS(aTHX);
+
     LEAVE;
     SPAGAIN;
 
@@ -2347,6 +2350,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     PUTBACK;
     POPSTACK;
     CATCH_SET(oldcatch);
+
+    RUN_SET_NEXT_INSTRUCTION(oldinstr);
 
     if (postpr) {
       int ans;

@@ -8,7 +8,7 @@
  *
  */
 
-#define PP(s) OP * Perl_##s(pTHX)
+#define PP(s) int Perl_##s(pTHX_ INSTR_FLAGS ppflags, void *pparg)
 
 /*
 =head1 Stack Manipulation Macros
@@ -77,16 +77,17 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define GETTARGETSTACKED targ = (PL_op->op_flags & OPf_STACKED ? POPs : PAD_SV(PL_op->op_targ))
 #define dTARGETSTACKED SV * GETTARGETSTACKED
 
-#define GETTARGET targ = PAD_SV(PL_op->op_targ)
+#define GETTARGET targ = PAD_SV((ppflags & INSTRf_TARG_IN_ARG2) ? (PADOFFSET)pparg : PL_op->op_targ)
 #define dTARGET SV * GETTARGET
 
-#define GETATARGET targ = (PL_op->op_flags & OPf_STACKED ? sp[-1] : PAD_SV(PL_op->op_targ))
+#define GETATARGET targ = (ppflags & INSTRf_TARG_IN_ARG2 ? PAD_SV((PADOFFSET)pparg) \
+	: PL_op->op_flags & OPf_STACKED ? sp[-1] : PAD_SV(PL_op->op_targ))
 #define dATARGET SV * GETATARGET
 
 #define dTARG SV *targ
 
-#define NORMAL PL_op->op_next
-#define DIE return Perl_die
+#define NORMAL 0
+#define DIE Perl_die
 
 /*
 =for apidoc Ams||PUTBACK
@@ -120,6 +121,7 @@ Pops a long off the stack.
 #define PUTBACK		PL_stack_sp = sp
 #define RETURN		return (PUTBACK, NORMAL)
 #define RETURNOP(o)	return (PUTBACK, o)
+#define RETURNINSTR(instr)	return (PUTBACK, (instr))
 #define RETURNX(x)	return (x, PUTBACK, NORMAL)
 
 #define POPs		(*sp--)
@@ -414,14 +416,14 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 /* do SvGETMAGIC on the stack args before checking for overload */
 
-#define tryAMAGICun_MG(method, flags) STMT_START { \
+#define tryAMAGICun_MG(method, flags, targ) STMT_START {	\
 	if ( (SvFLAGS(TOPs) & (SVf_ROK|SVs_GMG)) \
-		&& Perl_try_amagic_un(aTHX_ method, flags)) \
+	        && Perl_try_amagic_un(aTHX_ method, flags, targ))	\
 	    return NORMAL; \
     } STMT_END
-#define tryAMAGICbin_MG(method, flags) STMT_START { \
+#define tryAMAGICbin_MG(method, flags, targ) STMT_START {		   \
 	if ( ((SvFLAGS(TOPm1s)|SvFLAGS(TOPs)) & (SVf_ROK|SVs_GMG)) \
-		&& Perl_try_amagic_bin(aTHX_ method, flags)) \
+	        && Perl_try_amagic_bin(aTHX_ method, flags, targ))	   \
 	    return NORMAL; \
     } STMT_END
 

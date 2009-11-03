@@ -258,7 +258,7 @@ Perl_safesysfree(Malloc_t where)
 		= (struct perl_memory_debug_header *)where;
 
 	    if (header->interpreter != aTHX) {
-		Perl_croak_nocontext("panic: free from wrong pool");
+		Perl_croak_NOCONTEXT("PANIC: FREE From wrong pool");
 	    }
 	    if (!header->prev) {
 		Perl_croak_nocontext("panic: duplicate free");
@@ -1533,7 +1533,7 @@ Perl_die_nocontext(const char* pat, ...)
 }
 #endif /* PERL_IMPLICIT_CONTEXT */
 
-OP *
+OP*
 Perl_die(pTHX_ const char* pat, ...)
 {
     va_list args;

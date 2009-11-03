@@ -36,6 +36,7 @@ EXTCONST char* const PL_op_name[] = {
 	"null",
 	"stub",
 	"scalar",
+	"nothing",
 	"pushmark",
 	"wantarray",
 	"const",
@@ -198,6 +199,7 @@ EXTCONST char* const PL_op_name[] = {
 	"flip",
 	"flop",
 	"and",
+	"while_and",
 	"or",
 	"xor",
 	"dor",
@@ -398,7 +400,13 @@ EXTCONST char* const PL_op_name[] = {
 	"syscall",
 	"lock",
 	"once",
+	"instr_jump",
+	"instr_cond_jump",
+	"instr_const",
+	"instr_const_list",
+	"instr_end",
 	"custom",
+	"foreach",
 };
 #endif
 
@@ -409,6 +417,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"null operation",
 	"stub",
 	"scalar",
+	"nothing",
 	"pushmark",
 	"wantarray",
 	"constant item",
@@ -567,10 +576,11 @@ EXTCONST char* const PL_op_desc[] = {
 	"grep iterator",
 	"map",
 	"map iterator",
-	"flipflop",
+	"range (or flop)",
 	"range (or flip)",
 	"range (or flop)",
 	"logical and (&&)",
+	"while",
 	"logical or (||)",
 	"logical xor",
 	"defined or (//)",
@@ -771,7 +781,13 @@ EXTCONST char* const PL_op_desc[] = {
 	"syscall",
 	"lock",
 	"once",
+	"instruction jump",
+	"instruction conditional jump",
+	"instruction constant",
+	"instruction constant list",
+	"instruction end",
 	"unknown custom operator",
+	"foreach loop",
 };
 #endif
 
@@ -796,6 +812,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_null,
 	Perl_pp_stub,
 	Perl_pp_null,	/* Perl_pp_scalar */
+	Perl_unimplemented_op,	/* Perl_pp_nothing */
 	Perl_pp_pushmark,
 	Perl_pp_wantarray,
 	Perl_pp_const,
@@ -952,12 +969,13 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_reverse,
 	Perl_pp_grepstart,
 	Perl_pp_grepwhile,
-	Perl_unimplemented_op,	/* Perl_pp_mapstart */
+	Perl_pp_grepstart,	/* Perl_pp_mapstart */
 	Perl_pp_mapwhile,
 	Perl_pp_range,
 	Perl_pp_flip,
 	Perl_pp_flop,
 	Perl_pp_and,
+	Perl_pp_and,	/* Perl_pp_while_and */
 	Perl_pp_or,
 	Perl_pp_xor,
 	Perl_pp_defined,	/* Perl_pp_dor */
@@ -1158,7 +1176,13 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_syscall,
 	Perl_pp_lock,
 	Perl_pp_once,
+	Perl_pp_instr_jump,
+	Perl_pp_instr_cond_jump,
+	Perl_pp_instr_const,
+	Perl_pp_instr_const_list,
+	Perl_pp_instr_end,
 	Perl_unimplemented_op,	/* Perl_pp_custom */
+	Perl_unimplemented_op,	/* Perl_pp_foreach */
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1180,6 +1204,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* null */
 	Perl_ck_null,		/* stub */
 	Perl_ck_fun,		/* scalar */
+	Perl_ck_null,		/* nothing */
 	Perl_ck_null,		/* pushmark */
 	Perl_ck_null,		/* wantarray */
 	Perl_ck_svconst,	/* const */
@@ -1243,7 +1268,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* i_add */
 	Perl_ck_null,		/* subtract */
 	Perl_ck_null,		/* i_subtract */
-	Perl_ck_concat,		/* concat */
+	Perl_ck_null,		/* concat */
 	Perl_ck_fun,		/* stringify */
 	Perl_ck_bitop,		/* left_shift */
 	Perl_ck_bitop,		/* right_shift */
@@ -1271,7 +1296,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_bitop,		/* bit_and */
 	Perl_ck_bitop,		/* bit_xor */
 	Perl_ck_bitop,		/* bit_or */
-	Perl_ck_null,		/* negate */
+	Perl_ck_negate,		/* negate */
 	Perl_ck_null,		/* i_negate */
 	Perl_ck_null,		/* not */
 	Perl_ck_bitop,		/* complement */
@@ -1294,7 +1319,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_index,		/* index */
 	Perl_ck_index,		/* rindex */
 	Perl_ck_fun,		/* sprintf */
-	Perl_ck_fun,		/* formline */
+	Perl_ck_formline,	/* formline */
 	Perl_ck_fun,		/* ord */
 	Perl_ck_fun,		/* chr */
 	Perl_ck_fun,		/* crypt */
@@ -1342,6 +1367,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* flip */
 	Perl_ck_null,		/* flop */
 	Perl_ck_null,		/* and */
+	Perl_ck_null,		/* while_and */
 	Perl_ck_null,		/* or */
 	Perl_ck_null,		/* xor */
 	Perl_ck_null,		/* dor */
@@ -1542,7 +1568,13 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_fun,		/* syscall */
 	Perl_ck_rfun,		/* lock */
 	Perl_ck_null,		/* once */
+	Perl_ck_null,		/* instr_jump */
+	Perl_ck_null,		/* instr_cond_jump */
+	Perl_ck_null,		/* instr_const */
+	Perl_ck_null,		/* instr_const_list */
+	Perl_ck_null,		/* instr_end */
 	Perl_ck_null,		/* custom */
+	Perl_ck_null,		/* foreach */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -1555,9 +1587,10 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 EXTCONST U32 PL_opargs[];
 #else
 EXTCONST U32 PL_opargs[] = {
-	0x00000000,	/* null */
+	0x00000b00,	/* null */
 	0x00000000,	/* stub */
 	0x00001b04,	/* scalar */
+	0x00000000,	/* nothing */
 	0x00000004,	/* pushmark */
 	0x00000004,	/* wantarray */
 	0x00000604,	/* const */
@@ -1591,7 +1624,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00001544,	/* subst */
 	0x00000344,	/* substcont */
 	0x00001804,	/* trans */
-	0x00000004,	/* sassign */
+	0x00000104,	/* sassign */
 	0x00022208,	/* aassign */
 	0x00002b0d,	/* chop */
 	0x00009b8c,	/* schop */
@@ -1712,14 +1745,15 @@ EXTCONST U32 PL_opargs[] = {
 	0x0002341d,	/* unshift */
 	0x0002d441,	/* sort */
 	0x00002409,	/* reverse */
-	0x00025441,	/* grepstart */
+	0x00025448,	/* grepstart */
 	0x00000348,	/* grepwhile */
-	0x00025441,	/* mapstart */
+	0x00025448,	/* mapstart */
 	0x00000348,	/* mapwhile */
 	0x00011300,	/* range */
 	0x00011100,	/* flip */
 	0x00000100,	/* flop */
 	0x00000300,	/* and */
+	0x00000300,	/* while_and */
 	0x00000300,	/* or */
 	0x00011206,	/* xor */
 	0x00000300,	/* dor */
@@ -1920,7 +1954,13 @@ EXTCONST U32 PL_opargs[] = {
 	0x0002140d,	/* syscall */
 	0x00007b04,	/* lock */
 	0x00000300,	/* once */
+	0x00000000,	/* instr_jump */
+	0x00000000,	/* instr_cond_jump */
+	0x00000000,	/* instr_const */
+	0x00000000,	/* instr_const_list */
+	0x00000000,	/* instr_end */
 	0x00000000,	/* custom */
+	0x00000940,	/* foreach */
 };
 #endif
 

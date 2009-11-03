@@ -1426,8 +1426,8 @@ finish:
     SvTAINT(sv);
 }
 
-OP *
-Perl_do_kv(pTHX)
+int
+Perl_do_kv(pTHX_ INSTR_FLAGS ppflags, void *pparg)
 {
     dVAR;
     dSP;

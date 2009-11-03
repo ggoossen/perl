@@ -20,11 +20,6 @@ typedef struct {
     AV *cscav;
     AV *bhkav;
     bool bhk_record;
-    peep_t orig_peep;
-    peep_t orig_rpeep;
-    int peep_recording;
-    AV *peep_recorder;
-    AV *rpeep_recorder;
 } my_cxt_t;
 
 START_MY_CXT
@@ -335,46 +330,6 @@ blockhook_test_eval(pTHX_ OP *const o)
 
 STATIC BHK bhk_csc, bhk_test;
 
-STATIC void
-my_peep (pTHX_ OP *o)
-{
-    dMY_CXT;
-
-    if (!o)
-	return;
-
-    MY_CXT.orig_peep(aTHX_ o);
-
-    if (!MY_CXT.peep_recording)
-	return;
-
-    for (; o; o = o->op_next) {
-	if (o->op_type == OP_CONST && cSVOPx_sv(o) && SvPOK(cSVOPx_sv(o))) {
-	    av_push(MY_CXT.peep_recorder, newSVsv(cSVOPx_sv(o)));
-	}
-    }
-}
-
-STATIC void
-my_rpeep (pTHX_ OP *o)
-{
-    dMY_CXT;
-
-    if (!o)
-	return;
-
-    MY_CXT.orig_rpeep(aTHX_ o);
-
-    if (!MY_CXT.peep_recording)
-	return;
-
-    for (; o; o = o->op_next) {
-	if (o->op_type == OP_CONST && cSVOPx_sv(o) && SvPOK(cSVOPx_sv(o))) {
-	    av_push(MY_CXT.rpeep_recorder, newSVsv(cSVOPx_sv(o)));
-	}
-    }
-}
-
 STATIC OP *
 THX_ck_entersub_args_lists(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
@@ -491,22 +446,6 @@ THX_mkLISTOP(pTHX_ U32 type, OP *first, OP *sib, OP *last)
     sib->op_sibling     = last;
     listop->op_last     = last;
     return (OP *)listop;
-}
-
-static char *
-test_op_linklist_describe(OP *start)
-{
-    SV *rv = sv_2mortal(newSVpvs(""));
-    OP *o;
-    o = start = LINKLIST(start);
-    do {
-        sv_catpvs(rv, ".");
-        sv_catpv(rv, OP_NAME(o));
-        if (o->op_type == OP_CONST)
-            sv_catsv(rv, cSVOPo->op_sv);
-        o = o->op_next;
-    } while (o && o != start);
-    return SvPVX(rv);
 }
 
 /** RPN keyword parser **/
@@ -724,7 +663,6 @@ static OP *THX_parse_keyword_stmtasexpr(pTHX)
     OP *o = parse_fullstmt(0);
     o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
     o->op_type = OP_LEAVE;
-    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
     return o;
 }
 
@@ -741,7 +679,6 @@ static OP *THX_parse_keyword_stmtsasexpr(pTHX)
     lex_read_unichar(0);
     o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
     o->op_type = OP_LEAVE;
-    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
     return o;
 }
 
@@ -762,7 +699,6 @@ static OP *THX_parse_keyword_blockasexpr(pTHX)
     OP *o = parse_block(0);
     o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
     o->op_type = OP_LEAVE;
-    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
     return o;
 }
 
@@ -1246,14 +1182,6 @@ BOOT:
     BhkENTRY_set(&bhk_csc, bhk_start, blockhook_csc_start);
     BhkENTRY_set(&bhk_csc, bhk_pre_end, blockhook_csc_pre_end);
     Perl_blockhook_register(aTHX_ &bhk_csc);
-
-    MY_CXT.peep_recorder = newAV();
-    MY_CXT.rpeep_recorder = newAV();
-
-    MY_CXT.orig_peep = PL_peepp;
-    MY_CXT.orig_rpeep = PL_rpeepp;
-    PL_peepp = my_peep;
-    PL_rpeepp = my_rpeep;
 }
 
 void
@@ -1266,8 +1194,6 @@ CLONE(...)
     MY_CXT.cscav = NULL;
     MY_CXT.bhkav = get_av("XS::APItest::bhkav", GV_ADDMULTI);
     MY_CXT.bhk_record = 0;
-    MY_CXT.peep_recorder = newAV();
-    MY_CXT.rpeep_recorder = newAV();
 
 void
 print_double(val)
@@ -2193,94 +2119,6 @@ test_op_list()
 		"const(3).const(4).]");
 	op_free(a);
 #undef check_op
-
-void
-test_op_linklist ()
-    PREINIT:
-        OP *o;
-    CODE:
-#define check_ll(o, expect) \
-    STMT_START { \
-	if (strNE(test_op_linklist_describe(o), (expect))) \
-	    croak("fail %s %s", test_op_linklist_describe(o), (expect)); \
-    } STMT_END
-        o = iv_op(1);
-        check_ll(o, ".const1");
-        op_free(o);
-
-        o = mkUNOP(OP_NOT, iv_op(1));
-        check_ll(o, ".const1.not");
-        op_free(o);
-
-        o = mkUNOP(OP_NOT, mkUNOP(OP_NEGATE, iv_op(1)));
-        check_ll(o, ".const1.negate.not");
-        op_free(o);
-
-        o = mkBINOP(OP_ADD, iv_op(1), iv_op(2));
-        check_ll(o, ".const1.const2.add");
-        op_free(o);
-
-        o = mkBINOP(OP_ADD, mkUNOP(OP_NOT, iv_op(1)), iv_op(2));
-        check_ll(o, ".const1.not.const2.add");
-        op_free(o);
-
-        o = mkUNOP(OP_NOT, mkBINOP(OP_ADD, iv_op(1), iv_op(2)));
-        check_ll(o, ".const1.const2.add.not");
-        op_free(o);
-
-        o = mkLISTOP(OP_LINESEQ, iv_op(1), iv_op(2), iv_op(3));
-        check_ll(o, ".const1.const2.const3.lineseq");
-        op_free(o);
-
-        o = mkLISTOP(OP_LINESEQ,
-                mkBINOP(OP_ADD, iv_op(1), iv_op(2)),
-                mkUNOP(OP_NOT, iv_op(3)),
-                mkLISTOP(OP_SUBSTR, iv_op(4), iv_op(5), iv_op(6)));
-        check_ll(o, ".const1.const2.add.const3.not"
-                    ".const4.const5.const6.substr.lineseq");
-        op_free(o);
-
-        o = mkBINOP(OP_ADD, iv_op(1), iv_op(2));
-        LINKLIST(o);
-        o = mkBINOP(OP_SUBTRACT, o, iv_op(3));
-        check_ll(o, ".const1.const2.add.const3.subtract");
-        op_free(o);
-#undef check_ll
-#undef iv_op
-
-void
-peep_enable ()
-    PREINIT:
-	dMY_CXT;
-    CODE:
-	av_clear(MY_CXT.peep_recorder);
-	av_clear(MY_CXT.rpeep_recorder);
-	MY_CXT.peep_recording = 1;
-
-void
-peep_disable ()
-    PREINIT:
-	dMY_CXT;
-    CODE:
-	MY_CXT.peep_recording = 0;
-
-SV *
-peep_record ()
-    PREINIT:
-	dMY_CXT;
-    CODE:
-	RETVAL = newRV_inc((SV *)MY_CXT.peep_recorder);
-    OUTPUT:
-	RETVAL
-
-SV *
-rpeep_record ()
-    PREINIT:
-	dMY_CXT;
-    CODE:
-	RETVAL = newRV_inc((SV *)MY_CXT.rpeep_recorder);
-    OUTPUT:
-	RETVAL
 
 =pod
 

@@ -116,7 +116,7 @@ BEGIN { $/ = "\n"; $\ = "\n"; }
 LINE: while (defined($_ = <ARGV>)) {
     chomp $_;
     our(@F) = split(' ', $_, 0);
-    '???';
+    1;
 }
 EOF
 is($a, $b);
@@ -200,6 +200,13 @@ $test /= 2 if ++$test;
 # 5
 -((1, 2) x 2);
 ####
+{
+    my $test = sub {
+	my $x;
+    }
+    ;
+}
+####
 # 6
 {
     my $test = sub : lvalue {
@@ -264,7 +271,7 @@ my($x, @a);
 $x = 1 foreach (@a);
 ####
 # 19
-for (my $i = 0; $i < 2;) {
+for (my $i = 0; $i < 2; ) {
     my $z = 1;
 }
 ####
@@ -317,7 +324,7 @@ foreach our $i (1, 2) {
 ####
 # 29
 my @x;
-print reverse sort(@x);
+print reverse(sort(@x));
 ####
 # 30
 my @x;
@@ -325,7 +332,7 @@ print((sort {$b cmp $a} @x));
 ####
 # 31
 my @x;
-print((reverse sort {$b <=> $a} @x));
+print reverse((sort {$b <=> $a} @x));
 ####
 # 32
 our @a;
@@ -333,7 +340,7 @@ print $_ foreach (reverse @a);
 ####
 # 33
 our @a;
-print $_ foreach (reverse 1, 2..5);
+print $_ foreach (reverse 1, 2 .. 5);
 ####
 # 34  (bug #38684)
 our @ary;
@@ -515,37 +522,85 @@ if (!GLIPP) { x() } elsif (!GLIPP) { z() } elsif (GLIPP) { t() }
 if (!GLIPP) { x() } elsif (!GLIPP) { z() } elsif (!GLIPP) { t() }
 if (!GLIPP) { x() } elsif (!GLIPP) { z() } elsif (!GLIPP) { t() }
 >>>>
-x();
-x();
-'???';
-x();
-x();
-x();
-x();
-do {
-    '???'
+x() if 1;
+x() if GLIPP;
+x() unless GLIPP;
+x() if GLIPP and GLIPP;
+x() if not GLIPP or GLIPP;
+x() if do {
+    GLIPP
 };
-do {
-    x()
+x() if do {
+    BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUQ"}
+    5;
+    GLIPP
 };
-do {
-    z()
+x() if do {
+    not GLIPP
 };
-do {
-    x()
-};
-do {
-    z()
-};
-do {
-    x()
-};
-'???';
-do {
-    t()
-};
-'???';
-!1;
+if (GLIPP) {
+    x();
+}
+else {
+    z();
+}
+if (not GLIPP) {
+    x();
+}
+else {
+    z();
+}
+if (GLIPP) {
+    x();
+}
+elsif (GLIPP) {
+    z();
+}
+if (not GLIPP) {
+    x();
+}
+elsif (GLIPP) {
+    z();
+}
+if (GLIPP) {
+    x();
+}
+elsif (not GLIPP) {
+    z();
+}
+if (not GLIPP) {
+    x();
+}
+elsif (not GLIPP) {
+    z();
+}
+if (not GLIPP) {
+    x();
+}
+elsif (not GLIPP) {
+    z();
+}
+elsif (GLIPP) {
+    t();
+}
+if (not GLIPP) {
+    x();
+}
+elsif (not GLIPP) {
+    z();
+}
+elsif (not GLIPP) {
+    t();
+}
+if (not GLIPP) {
+    x();
+}
+elsif (not GLIPP) {
+    z();
+}
+elsif (not GLIPP) {
+    t();
+}
 ####
 # TODO constant deparsing has been backed out for 5.12
 # XXXTODO ? $Config::Config{useithreads} && "doesn't work with threads"
@@ -626,14 +681,14 @@ my $pi = 4;
 ####
 our @a;
 my @b;
-@a = sort @a;
-@b = sort @b;
+@a = sort(@a);
+@b = sort(@b);
 ();
 ####
 our @a;
 my @b;
-@a = reverse @a;
-@b = reverse @b;
+@a = reverse(@a);
+@b = reverse(@b);
 ();
 ####
 my($r, $s, @a);

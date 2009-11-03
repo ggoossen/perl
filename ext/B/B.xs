@@ -499,50 +499,6 @@ walkoptree(pTHX_ SV *opsv, const char *method)
     }
 }
 
-static SV **
-oplist(pTHX_ OP *o, SV **SP)
-{
-    for(; o; o = o->op_next) {
-	SV *opsv;
-#if PERL_VERSION >= 9
-	if (o->op_opt == 0)
-	    break;
-	o->op_opt = 0;
-#else
-	if (o->op_seq == 0)
-	    break;
-	o->op_seq = 0;
-#endif
-	opsv = sv_newmortal();
-	sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ (OP*)o)), PTR2IV(o));
-	XPUSHs(opsv);
-        switch (o->op_type) {
-	case OP_SUBST:
-            SP = oplist(aTHX_ PMOP_pmreplstart(cPMOPo), SP);
-            continue;
-	case OP_SORT:
-	    if (o->op_flags & OPf_STACKED && o->op_flags & OPf_SPECIAL) {
-		OP *kid = cLISTOPo->op_first->op_sibling;   /* pass pushmark */
-		kid = kUNOP->op_first;                      /* pass rv2gv */
-		kid = kUNOP->op_first;                      /* pass leave */
-		SP = oplist(aTHX_ kid->op_next, SP);
-	    }
-	    continue;
-        }
-	switch (PL_opargs[o->op_type] & OA_CLASS_MASK) {
-	case OA_LOGOP:
-	    SP = oplist(aTHX_ cLOGOPo->op_other, SP);
-	    break;
-	case OA_LOOP:
-	    SP = oplist(aTHX_ cLOOPo->op_lastop, SP);
-	    SP = oplist(aTHX_ cLOOPo->op_nextop, SP);
-	    SP = oplist(aTHX_ cLOOPo->op_redoop, SP);
-	    break;
-	}
-    }
-    return SP;
-}
-
 typedef OP	*B__OP;
 typedef UNOP	*B__UNOP;
 typedef BINOP	*B__BINOP;
@@ -616,7 +572,6 @@ BOOT:
 #define B_begin_av()	PL_beginav_save
 #define B_end_av()	PL_endav
 #define B_main_root()	PL_main_root
-#define B_main_start()	PL_main_start
 #define B_amagic_generation()	PL_amagic_generation
 #define B_sub_generation()	PL_sub_generation
 #define B_defstash()	PL_defstash
@@ -665,9 +620,6 @@ B_main_cv()
 
 B::OP
 B_main_root()
-
-B::OP
-B_main_start()
 
 long 
 B_amagic_generation()
@@ -830,7 +782,6 @@ threadsv_names()
 # endif
 #endif
 
-#define OP_next(o)	o->op_next
 #define OP_sibling(o)	o->op_sibling
 #define OP_desc(o)	(char *)PL_op_desc[o->op_type]
 #define OP_targ(o)	o->op_targ
@@ -853,10 +804,6 @@ OP_size(o)
 	RETVAL = opsizes[cc_opclass(aTHX_ o)];
     OUTPUT:
 	RETVAL
-
-B::OP
-OP_next(o)
-	B::OP		o
 
 B::OP
 OP_sibling(o)
@@ -927,12 +874,6 @@ OP_spare(o)
 
 #endif
 
-void
-OP_oplist(o)
-	B::OP		o
-    PPCODE:
-	SP = oplist(aTHX_ o, SP);
-
 #define UNOP_first(o)	o->op_first
 
 MODULE = B	PACKAGE = B::UNOP		PREFIX = UNOP_
@@ -959,18 +900,20 @@ LOGOP_other(o)
 
 MODULE = B	PACKAGE = B::LISTOP		PREFIX = LISTOP_
 
-U32
+void
 LISTOP_children(o)
 	B::LISTOP	o
 	OP *		kid = NO_INIT
 	int		i = NO_INIT
-    CODE:
+    PPCODE:
 	i = 0;
-	for (kid = o->op_first; kid; kid = kid->op_sibling)
+	for (kid = o->op_first; kid; kid = kid->op_sibling) {
+            SV* opsv = newSV(0);
+	    sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ kid)), PTR2IV(kid));
+	    mXPUSHs(opsv);
 	    i++;
-	RETVAL = i;
-    OUTPUT:
-        RETVAL
+        }
+	XSRETURN(i);
 
 #define PMOP_pmnext(o)		o->op_pmnext
 #define PMOP_pmregexp(o)	PM_GETRE(o)
@@ -1894,12 +1837,10 @@ CvSTASH(cv)
 	B::CV	cv
 
 B::OP
-CvSTART(cv)
+CvROOT(cv)
 	B::CV	cv
-    ALIAS:
-	ROOT = 1
     CODE:
-	RETVAL = CvISXSUB(cv) ? NULL : ix ? CvROOT(cv) : CvSTART(cv);
+	RETVAL = CvISXSUB(cv) ? NULL : CvROOT(cv);
     OUTPUT:
 	RETVAL
 
