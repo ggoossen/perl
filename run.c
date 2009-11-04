@@ -68,8 +68,9 @@ Perl_runops_continue_from_jmpenv(pTHX_ int ret)
     case 3:
 	if (PL_restartjmpenv == PL_top_env) {
 	    PL_restartjmpenv = NULL;
-	    if (run_get_next_instruction())
-		CALLRUNOPS(aTHX);
+	    if (!run_get_next_instruction() || !PL_run_next_instruction->instr_ppaddr)
+		return 3;
+	    CALLRUNOPS(aTHX);
 	    return 0;
 	}
 	break;
