@@ -2400,14 +2400,14 @@ Anop	|void	|clone_params_del|NN CLONE_PARAMS *param
 #endif
 
 p	|INSTRUCTION*	|codeseq_start_instruction|NN const CODESEQ* codeseq
-p	|void	|compile_op|NN OP* startop|NN CODESEQ* codeseq
+Ep	|void	|compile_op|NN OP* startop|NN CODESEQ* codeseq
 Eap	|CODESEQ*	|new_codeseq
 Ep	|void	|free_codeseq|NULLOK CODESEQ* codeseq
 p	|const char*	|instruction_name|NULLOK const INSTRUCTION* instr
 
 p	|const INSTRUCTION*	|run_get_next_instruction
 p	|void	|run_set_next_instruction|NULLOK const INSTRUCTION* instr
-p	|void	|run_exec_codeseq|NN const CODESEQ* codeseq
+Ep	|void	|run_exec_codeseq|NN const CODESEQ* codeseq
 
 p	|void	|dump_op_short|NN const OP* o
 
