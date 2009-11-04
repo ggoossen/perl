@@ -2566,7 +2566,7 @@ S_fold_constants(pTHX_ register OP *o)
     PL_op = curop;
 
     codeseq = new_codeseq();
-    compile_op(PL_op, codeseq);
+    compile_op(curop, codeseq);
 
     oldscope = PL_scopestack_ix;
     create_eval_scope(G_FAKINGEVAL);
@@ -2613,6 +2613,7 @@ S_fold_constants(pTHX_ register OP *o)
     PL_diehook  = olddiehook;
     PL_curcop = &PL_compiling;
     free_codeseq(codeseq);
+    PL_op = NULL;
 
     if (PL_scopestack_ix > oldscope)
 	delete_eval_scope();
@@ -2647,7 +2648,7 @@ S_gen_constant_list(pTHX_ register OP *o)
     if (PL_parser && PL_parser->error_count)
 	return o;		/* Don't attempt to run with errors */
 
-    PL_op = curop = LINKLIST(o);
+    curop = LINKLIST(o);
     o->op_next = 0;
     CALL_PEEP(curop);
     codeseq = new_codeseq();
@@ -2656,7 +2657,9 @@ S_gen_constant_list(pTHX_ register OP *o)
     run_exec_codeseq(codeseq);
     assert(!(curop->op_flags & OPf_SPECIAL));
     assert(curop->op_type == OP_RANGE);
+    PL_op = curop;
     pp_anonlist();
+    PL_op = NULL;
     PL_tmps_floor = oldtmps_floor;
 
     o->op_type = OP_RV2AV;
