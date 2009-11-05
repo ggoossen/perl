@@ -398,6 +398,7 @@ EXTCONST char* const PL_op_name[] = {
 	"syscall",
 	"lock",
 	"once",
+	"instr_jump",
 	"custom",
 };
 #endif
@@ -771,6 +772,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"syscall",
 	"lock",
 	"once",
+	"instruction jump",
 	"unknown custom operator",
 };
 #endif
@@ -1158,6 +1160,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_syscall),
 	MEMBER_TO_FPTR(Perl_pp_lock),
 	MEMBER_TO_FPTR(Perl_pp_once),
+	MEMBER_TO_FPTR(Perl_pp_instr_jump),
 	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_custom */
 }
 #endif
@@ -1542,6 +1545,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* syscall */
 	MEMBER_TO_FPTR(Perl_ck_rfun),	/* lock */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* once */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* instr_jump */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* custom */
 }
 #endif
@@ -1712,9 +1716,9 @@ EXTCONST U32 PL_opargs[] = {
 	0x0002341d,	/* unshift */
 	0x0002d441,	/* sort */
 	0x00002409,	/* reverse */
-	0x00025441,	/* grepstart */
+	0x00025448,	/* grepstart */
 	0x00000348,	/* grepwhile */
-	0x00025441,	/* mapstart */
+	0x00025448,	/* mapstart */
 	0x00000348,	/* mapwhile */
 	0x00011300,	/* range */
 	0x00011100,	/* flip */
@@ -1920,6 +1924,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x0002140d,	/* syscall */
 	0x00007b04,	/* lock */
 	0x00000300,	/* once */
+	0x00000000,	/* instr_jump */
 	0x00000000,	/* custom */
 };
 #endif
