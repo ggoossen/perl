@@ -2896,6 +2896,8 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  q  quiet - currently only suppresses the 'EXECUTING' message\n"
       "  M  trace smart match resolution\n"
       "  B  dump suBroutine definitions, including special Blocks like BEGIN\n",
+      "  g  trace code generation\n",
+      "  G  dump generated code\n",
       NULL
     };
     int i = 0;
@@ -2904,7 +2906,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 
     if (isALPHA(**s)) {
 	/* if adding extra options, remember to update DEBUG_MASK */
-	static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAqMB";
+	static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAqMBgG";
 
 	for (; isALNUM(**s); (*s)++) {
 	    const char * const d = strchr(debopts,**s);
