@@ -5484,7 +5484,6 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
      * for our $x () sets OPpOUR_INTRO */
     loop->op_private = (U8)iterpflags;
     loop->op_targ = padoff;
-    append_elem(OP_FOREACH, (OP*)loop, cont);
     if (madsv)
 	op_getmad(madsv, (OP*)loop, 'v');
     PL_parser->copline = forline;
