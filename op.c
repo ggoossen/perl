@@ -9040,6 +9040,7 @@ Perl_rpeep(pTHX_ register OP *o)
 		}
 	    }
 	    else if (o->op_next && o->op_next->op_type == OP_READLINE
+		    && o->op_next->op_next
 		    && o->op_next->op_next->op_type == OP_CONCAT
 		    && (o->op_next->op_next->op_flags & OPf_STACKED))
 	    {
