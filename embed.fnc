@@ -1545,6 +1545,7 @@ pR	|OP*	|ck_fun		|NN OP *o
 pR	|OP*	|ck_glob	|NN OP *o
 pR	|OP*	|ck_grep	|NN OP *o
 pR	|OP*	|ck_index	|NN OP *o
+pR	|OP*	|ck_formline	|NN OP *o
 pR	|OP*	|ck_join	|NN OP *o
 pR	|OP*	|ck_lfun	|NN OP *o
 pR	|OP*	|ck_listiob	|NN OP *o
