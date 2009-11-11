@@ -9054,9 +9054,7 @@ Perl_rpeep(pTHX_ register OP *o)
 	case OP_DOR:
             fop = cLOGOP->op_first;
             sop = fop->op_sibling;
-	    while (cLOGOP->op_other->op_type == OP_NULL)
-		cLOGOP->op_other = cLOGOP->op_other->op_next;
-	    CALL_RPEEP(cLOGOP->op_other);
+	    peep(cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
           
           stitch_keys:	    
 	    o->op_opt = 1;
