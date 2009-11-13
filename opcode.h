@@ -1575,7 +1575,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 EXTCONST U32 PL_opargs[];
 #else
 EXTCONST U32 PL_opargs[] = {
-	0x00000000,	/* null */
+	0x00000b00,	/* null */
 	0x00000000,	/* stub */
 	0x00001b04,	/* scalar */
 	0x00000000,	/* nothing */
@@ -1612,7 +1612,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00001544,	/* subst */
 	0x00000344,	/* substcont */
 	0x00001804,	/* trans */
-	0x00000004,	/* sassign */
+	0x00000104,	/* sassign */
 	0x00022208,	/* aassign */
 	0x00002b0d,	/* chop */
 	0x00009b8c,	/* schop */

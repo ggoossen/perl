@@ -2751,6 +2751,7 @@ Perl_append_elem(pTHX_ I32 type, OP *first, OP *last)
     if (first->op_flags & OPf_KIDS)
 	((LISTOP*)first)->op_last->op_sibling = last;
     else {
+	assert((PL_opargs[first->op_type] & OA_CLASS_MASK) >= OA_UNOP);
 	first->op_flags |= OPf_KIDS;
 	((LISTOP*)first)->op_first = last;
     }
@@ -2822,6 +2823,7 @@ Perl_prepend_elem(pTHX_ I32 type, OP *first, OP *last)
 	    first->op_sibling = ((LISTOP*)last)->op_first;
 	    ((LISTOP*)last)->op_first = first;
 	}
+	assert((PL_opargs[last->op_type] & OA_CLASS_MASK) >= OA_UNOP);
 	last->op_flags |= OPf_KIDS;
 	return last;
     }
@@ -5448,7 +5450,7 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
 
     expr = list(expr);
     if (! sv)
-	sv = newUNOP(OP_NOTHING, 0, NULL);
+	sv = newOP(OP_NOTHING, 0);
     sv = scalar(sv);
 
     NewOp(1101,loop,1,LOOP);
