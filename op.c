@@ -7092,9 +7092,6 @@ Perl_ck_eval(pTHX_ OP *o)
 
 	    cLOGOPo->op_first = (OP*)kid;
 
-	    /* establish postfix order */
-	    o->op_start = sequence_op((OP*)kid);
-
 	    o->op_next = o;
 	    cLOGOPo->op_other = o;
 	    op_getmad(oldo,o,'O');
