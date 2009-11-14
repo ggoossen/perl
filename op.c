@@ -8945,6 +8945,8 @@ Perl_rpeep(pTHX_ register OP *o)
     if (!o || o->op_opt)
 	return;
 
+    return o;
+
     ENTER;
     SAVEOP();
     SAVEVPTR(PL_curcop);
