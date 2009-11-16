@@ -763,6 +763,7 @@
 #endif
 #if defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
+#define repl_is_constant	S_repl_is_constant
 #define pmtrans			S_pmtrans
 #endif
 #endif
@@ -3255,6 +3256,7 @@
 #endif
 #if defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
+#define repl_is_constant(a,b)	S_repl_is_constant(aTHX_ a,b)
 #define pmtrans(a,b,c)		S_pmtrans(aTHX_ a,b,c)
 #endif
 #endif

@@ -2716,6 +2716,12 @@ PERL_CALLCONV OP*	Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	assert(o); assert(expr)
 
 #if defined(PERL_IN_OP_C)
+STATIC bool	S_repl_is_constant(pTHX_ OP* o, bool* const repl_has_varsp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_REPL_IS_CONSTANT	\
+	assert(o); assert(repl_has_varsp)
+
 STATIC OP*	S_pmtrans(pTHX_ OP* o, OP* expr, OP* repl)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
