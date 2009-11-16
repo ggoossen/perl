@@ -1901,7 +1901,7 @@ PP(pp_dbstate)
 	    PAD_SET_CUR_NOSAVE(CvPADLIST(cv), 1);
 	    if (!CvCODESEQ(cv)) {
 		CvCODESEQ(cv) = new_codeseq();
-		compile_op(CvSTART(cv), CvCODESEQ(cv));
+		compile_op(CvROOT(cv), CvCODESEQ(cv));
 	    }
 	    RUN_SET_NEXT_INSTRUCTION( codeseq_start_instruction(CvCODESEQ(cv)) );
 	    return NORMAL;
@@ -2668,7 +2668,7 @@ PP(pp_goto)
 		
 		if (!CvCODESEQ(cv)) {
 		    CvCODESEQ(cv) = new_codeseq();
-		    compile_op(CvSTART(cv), CvCODESEQ(cv));
+		    compile_op(CvROOT(cv), CvCODESEQ(cv));
 		}
 		RUN_SET_NEXT_INSTRUCTION(codeseq_start_instruction(CvCODESEQ(cv)));
 
@@ -3030,7 +3030,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     PERL_UNUSED_VAR(newsp);
     PERL_UNUSED_VAR(optype);
 
-    return PL_eval_start;
+    return PL_eval_root;
 }
 
 
@@ -3109,7 +3109,7 @@ S_try_yyparse(pTHX)
  * a pointer that should be set to the just-compiled code.
  * outside is the lexically enclosing CV (if any) that invoked us.
  * Returns a bool indicating whether the compile was successful; if so,
- * PL_eval_start contains the first op of the compiled ocde; otherwise,
+ * PL_eval_startvcontains the first op of the compiled ocde; otherwise,
  * pushes undef (also croaks if startop != NULL).
  */
 
@@ -3771,7 +3771,7 @@ PP(pp_require)
     PL_op = NULL;
     if (doeval(gimme, NULL, NULL, PL_curcop->cop_seq)) {
 	CODESEQ* codeseq = new_codeseq(); /* FIXME memory leak */
-	compile_op(PL_eval_start, codeseq);
+	compile_op(PL_eval_root, codeseq);
 	DOCATCH(codeseq_start_instruction(codeseq));
     }
 
@@ -3906,7 +3906,7 @@ PP(pp_entereval)
 	    SAVEDELETE(PL_defstash, safestr, len);
 	}
 	CODESEQ* codeseq = new_codeseq(); /* FIXME memory leak */
-	compile_op(PL_eval_start, codeseq);
+	compile_op(PL_eval_root, codeseq);
 	DOCATCH(codeseq_start_instruction(codeseq));
 	return NORMAL;
     } else {
