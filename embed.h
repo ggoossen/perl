@@ -605,6 +605,12 @@
 #define newANONLIST		Perl_newANONLIST
 #define newANONHASH		Perl_newANONHASH
 #define newANONSUB		Perl_newANONSUB
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define aassign_common_vars_left	S_aassign_common_vars_left
+#define aassign_common_vars_right	S_aassign_common_vars_right
+#endif
+#endif
 #define newASSIGNOP		Perl_newASSIGNOP
 #define newCONDOP		Perl_newCONDOP
 #define newCONSTSUB		Perl_newCONSTSUB
@@ -2125,6 +2131,7 @@
 #define ck_exec			Perl_ck_exec
 #define ck_exists		Perl_ck_exists
 #define ck_exit			Perl_ck_exit
+#define ck_formline		Perl_ck_formline
 #define ck_ftst			Perl_ck_ftst
 #define ck_fun			Perl_ck_fun
 #define ck_glob			Perl_ck_glob
@@ -3092,6 +3099,12 @@
 #define newANONLIST(a)		Perl_newANONLIST(aTHX_ a)
 #define newANONHASH(a)		Perl_newANONHASH(aTHX_ a)
 #define newANONSUB(a,b,c)	Perl_newANONSUB(aTHX_ a,b,c)
+#if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define aassign_common_vars_left(a)	S_aassign_common_vars_left(aTHX_ a)
+#define aassign_common_vars_right(a)	S_aassign_common_vars_right(aTHX_ a)
+#endif
+#endif
 #define newASSIGNOP(a,b,c,d)	Perl_newASSIGNOP(aTHX_ a,b,c,d)
 #define newCONDOP(a,b,c,d)	Perl_newCONDOP(aTHX_ a,b,c,d)
 #define newCONSTSUB(a,b,c)	Perl_newCONSTSUB(aTHX_ a,b,c)
@@ -4630,6 +4643,7 @@
 #define ck_exec(a)		Perl_ck_exec(aTHX_ a)
 #define ck_exists(a)		Perl_ck_exists(aTHX_ a)
 #define ck_exit(a)		Perl_ck_exit(aTHX_ a)
+#define ck_formline(a)		Perl_ck_formline(aTHX_ a)
 #define ck_ftst(a)		Perl_ck_ftst(aTHX_ a)
 #define ck_fun(a)		Perl_ck_fun(aTHX_ a)
 #define ck_glob(a)		Perl_ck_glob(aTHX_ a)
