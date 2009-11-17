@@ -38,7 +38,6 @@ Returns the stash of the CV.
 
 #define CvSTASH(sv)	(0+((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_stash)
 #define CvSTASH_set(cv,st) Perl_cvstash_set(aTHX_ cv, st)
-#define CvSTART(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_start_u.xcv_start
 #define CvROOT(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_root_u.xcv_root
 #define CvXSUB(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_root_u.xcv_xsub
 #define CvXSUBANY(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_start_u.xcv_xsubany
@@ -63,6 +62,7 @@ Returns the stash of the CV.
 #define CvOUTSIDE(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside
 #define CvFLAGS(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_flags
 #define CvOUTSIDE_SEQ(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside_seq
+#define CvCODESEQ(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_codeseq
 
 #define CVf_METHOD	0x0001	/* CV is explicitly marked as a method */
 #define CVf_LVALUE	0x0002  /* CV return value can be used as lvalue */

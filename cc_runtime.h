@@ -62,7 +62,7 @@
 	case 2: JMPENV_POP; JMPENV_JUMP(2);	\
 	case 3:					\
 	    JMPENV_POP;				\
-	    if (PL_restartop && PL_restartop != nxt)		\
+	    if (!run_get_next_instruction())      \
 		JMPENV_JUMP(3);			\
 	}					\
 	PL_op = nxt;				\

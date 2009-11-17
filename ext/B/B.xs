@@ -529,47 +529,6 @@ walkoptree(pTHX_ OP *o, const char *method, SV *ref)
     return ref;
 }
 
-static SV **
-oplist(pTHX_ OP *o, SV **SP)
-{
-    for(; o; o = o->op_next) {
-#if PERL_VERSION >= 9
-	if (o->op_opt == 0)
-	    break;
-	o->op_opt = 0;
-#else
-	if (o->op_seq == 0)
-	    break;
-	o->op_seq = 0;
-#endif
-	XPUSHs(make_op_object(aTHX_ o));
-        switch (o->op_type) {
-	case OP_SUBST:
-            SP = oplist(aTHX_ PMOP_pmreplstart(cPMOPo), SP);
-            continue;
-	case OP_SORT:
-	    if (o->op_flags & OPf_STACKED && o->op_flags & OPf_SPECIAL) {
-		OP *kid = cLISTOPo->op_first->op_sibling;   /* pass pushmark */
-		kid = kUNOP->op_first;                      /* pass rv2gv */
-		kid = kUNOP->op_first;                      /* pass leave */
-		SP = oplist(aTHX_ kid->op_next, SP);
-	    }
-	    continue;
-        }
-	switch (PL_opargs[o->op_type] & OA_CLASS_MASK) {
-	case OA_LOGOP:
-	    SP = oplist(aTHX_ cLOGOPo->op_other, SP);
-	    break;
-	case OA_LOOP:
-	    SP = oplist(aTHX_ cLOOPo->op_lastop, SP);
-	    SP = oplist(aTHX_ cLOOPo->op_nextop, SP);
-	    SP = oplist(aTHX_ cLOOPo->op_redoop, SP);
-	    break;
-	}
-    }
-    return SP;
-}
-
 typedef OP	*B__OP;
 typedef UNOP	*B__UNOP;
 typedef BINOP	*B__BINOP;
@@ -711,10 +670,8 @@ sv_undef()
 
 void
 main_root()
-    ALIAS:
-	main_start = 1
     PPCODE:
-	PUSHs(make_op_object(aTHX_ ix ? PL_main_start : PL_main_root));
+	PUSHs(make_op_object(aTHX_ PL_main_root));
 
 UV
 sub_generation()
@@ -844,20 +801,15 @@ threadsv_names()
 #define IVp		0x60000
 #define char_pp		0x70000
 
-#define OP_next_ix		OPp | offsetof(struct op, op_next)
 #define OP_sibling_ix		OPp | offsetof(struct op, op_sibling)
 #define UNOP_first_ix		OPp | offsetof(struct unop, op_first)
 #define BINOP_last_ix		OPp | offsetof(struct binop, op_last)
-#define LOGOP_other_ix		OPp | offsetof(struct logop, op_other)
 #if PERL_VERSION >= 9
 #  define PMOP_pmreplstart_ix \
 		OPp | offsetof(struct pmop, op_pmstashstartu.op_pmreplstart)
 #else
 #  define PMOP_pmreplstart_ix	OPp | offsetof(struct pmop, op_pmreplstart)
 #endif
-#define LOOP_redoop_ix		OPp | offsetof(struct loop, op_redoop)
-#define LOOP_nextop_ix		OPp | offsetof(struct loop, op_nextop)
-#define LOOP_lastop_ix		OPp | offsetof(struct loop, op_lastop)
 
 #define OP_targ_ix		PADOFFSETp | offsetof(struct op, op_targ)
 #define OP_flags_ix		U8p | offsetof(struct op, op_flags)
@@ -908,18 +860,13 @@ void
 next(o)
 	B::OP		o
     ALIAS:
-	B::OP::next = OP_next_ix
 	B::OP::sibling = OP_sibling_ix
 	B::OP::targ = OP_targ_ix
 	B::OP::flags = OP_flags_ix
 	B::OP::private = OP_private_ix
 	B::UNOP::first = UNOP_first_ix
 	B::BINOP::last = BINOP_last_ix
-	B::LOGOP::other = LOGOP_other_ix
 	B::PMOP::pmreplstart = PMOP_pmreplstart_ix
-	B::LOOP::redoop = LOOP_redoop_ix
-	B::LOOP::nextop = LOOP_nextop_ix
-	B::LOOP::lastop = LOOP_lastop_ix
 	B::PMOP::pmflags = PMOP_pmflags_ix
 	B::SVOP::sv = SVOP_sv_ix
 	B::SVOP::gv = SVOP_gv_ix
@@ -965,6 +912,7 @@ next(o)
 	}
 	ST(0) = ret;
 	XSRETURN(1);
+ 
 
 char *
 name(o)
@@ -1032,25 +980,17 @@ type(o)
 #endif
 
 void
-oplist(o)
-	B::OP		o
-    PPCODE:
-	SP = oplist(aTHX_ o, SP);
-
-MODULE = B	PACKAGE = B::LISTOP
-
-U32
 children(o)
 	B::LISTOP	o
 	OP *		kid = NO_INIT
 	int		i = NO_INIT
-    CODE:
-	i = 0;
-	for (kid = o->op_first; kid; kid = kid->op_sibling)
-	    i++;
-	RETVAL = i;
-    OUTPUT:
-	RETVAL
+    PPCODE:
+        i = 0;
+        for (kid = o->op_first; kid; kid = kid->op_sibling) {
+            XPUSHs(make_op_object(aTHX_ kid));
+            i++;
+        }
+        XSRETURN(i);
 
 MODULE = B	PACKAGE = B::PMOP		PREFIX = PMOP_
 
@@ -1908,13 +1848,10 @@ CvCONST(cv)
 	B::CV	cv
 
 void
-CvSTART(cv)
-	B::CV	cv
-    ALIAS:
-	ROOT = 1
+CvROOT(cv)
+       B::CV   cv
     PPCODE:
-	PUSHs(make_op_object(aTHX_ CvISXSUB(cv) ? NULL
-			     : ix ? CvROOT(cv) : CvSTART(cv)));
+       PUSHs(make_op_object(aTHX_ CvISXSUB(cv) ? NULL : CvROOT(cv)));
 
 void
 CvXSUB(cv)

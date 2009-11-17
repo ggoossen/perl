@@ -333,6 +333,8 @@ Code missing after '/' in pack
 Code missing after '/' in unpack
 Compilation failed in require
 Corrupted regexp opcode %d > %d
+Could not find codesequence needed to clone instruction
+Could not find codesequence needed to clone loop instructions
 '%c' outside of string in pack
 Debug leaking scalars child failed%s%s with errno %d: %s
 Deep recursion on anonymous subroutine

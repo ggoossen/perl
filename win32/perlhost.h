@@ -1747,13 +1747,9 @@ win32_start_child(LPVOID arg)
     /* push a zero on the stack (we are the child) */
     {
 	dSP;
-	dTARGET;
-	PUSHi(0);
+	mXPUSHi(0);
 	PUTBACK;
     }
-
-    /* continue from next op */
-    PL_op = PL_op->op_next;
 
     {
 	dJMPENV;
@@ -1786,10 +1782,8 @@ restart:
 	    status = STATUS_EXIT;
 	    break;
 	case 3:
-	    if (PL_restartop) {
+	    if (run_get_next_instruction()) {
 		POPSTACK_TO(PL_mainstack);
-		PL_op = PL_restartop;
-		PL_restartop = (OP*)NULL;
 		goto restart;
 	    }
 	    PerlIO_printf(Perl_error_log, "panic: restartop\n");

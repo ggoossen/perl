@@ -290,7 +290,6 @@ Perl_cv_undef(pTHX_ CV *cv)
 
 	op_free(CvROOT(cv));
 	CvROOT(cv) = NULL;
-	CvSTART(cv) = NULL;
 	LEAVE;
     }
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
@@ -396,6 +395,10 @@ Perl_cv_undef(pTHX_ CV *cv)
     }
     if (CvISXSUB(cv) && CvXSUB(cv)) {
 	CvXSUB(cv) = NULL;
+    }
+    if (CvCODESEQ(cv)) {
+	codeseq_refcnt_dec(CvCODESEQ(cv));
+	CvCODESEQ(cv) = NULL;
     }
     /* delete all flags except WEAKOUTSIDE and CVGV_RC, which indicate the
      * ref status of CvOUTSIDE and CvGV */
@@ -1636,7 +1639,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     OP_REFCNT_LOCK;
     CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
     OP_REFCNT_UNLOCK;
-    CvSTART(cv)		= CvSTART(proto);
+    CvXSUBANY(cv)		= CvXSUBANY(proto);
     CvOUTSIDE(cv)	= MUTABLE_CV(SvREFCNT_inc_simple(outside));
     CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
 
@@ -1697,6 +1700,14 @@ Perl_cv_clone(pTHX_ CV *proto)
 	PL_curpad[ix] = sv;
     }
 
+    if (!CvCODESEQ(proto)) {
+	compile_cv(cv);
+	CvCODESEQ(proto)       = CvCODESEQ(cv);
+    }
+    else
+	CvCODESEQ(cv)       = CvCODESEQ(proto);
+    codeseq_refcnt_inc(CvCODESEQ(proto));
+
     DEBUG_Xv(
 	PerlIO_printf(Perl_debug_log, "\nPad CV clone\n");
 	cv_dump(outside, "Outside");
@@ -1712,7 +1723,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 	 * so try to grab the current const value, and if successful,
 	 * turn into a const sub:
 	 */
-	SV* const const_sv = op_const_sv(CvSTART(cv), cv);
+	SV* const const_sv = op_const_sv(CvROOT(cv), cv);
 	if (const_sv) {
 	    SvREFCNT_dec(cv);
 	    cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);

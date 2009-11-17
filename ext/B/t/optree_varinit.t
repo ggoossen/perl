@@ -11,6 +11,7 @@ BEGIN {
 }
 use OptreeCheck;
 use Config;
+skip_all("test not for new codegen") if $^V >= v5.13;
 plan tests	=> 22;
 SKIP: {
 skip "no perlio in this build", 22 unless $Config::Config{useperlio};

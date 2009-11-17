@@ -64,6 +64,11 @@ Perl_ck_warner
 Perl_ck_warner_d
 Perl_ckwarn
 Perl_ckwarn_d
+Perl_codeseq_refcnt_dec
+Perl_codeseq_refcnt_inc
+Perl_codeseq_start_instruction
+Perl_compile_cv
+Perl_compile_op
 Perl_croak
 Perl_croak_no_modify
 Perl_croak_sv
@@ -81,7 +86,6 @@ Perl_cvstash_set
 Perl_cx_dump
 Perl_cxinc
 Perl_deb
-Perl_debop
 Perl_debprofdump
 Perl_debstack
 Perl_debstackptrs
@@ -127,6 +131,7 @@ Perl_filter_read
 Perl_find_runcv
 Perl_find_rundefsv
 Perl_find_rundefsvoffset
+Perl_finish_optree
 Perl_foldEQ
 Perl_foldEQ_latin1
 Perl_foldEQ_locale
@@ -406,6 +411,7 @@ Perl_newWHENOP
 Perl_newWHILEOP
 Perl_newXS
 Perl_newXS_flags
+Perl_new_codeseq
 Perl_new_collate
 Perl_new_ctype
 Perl_new_numeric
@@ -420,7 +426,6 @@ Perl_op_clear
 Perl_op_contextualize
 Perl_op_dump
 Perl_op_free
-Perl_op_linklist
 Perl_op_lvalue
 Perl_op_null
 Perl_op_prepend_elem
@@ -504,6 +509,9 @@ Perl_require_pv
 Perl_rninstr
 Perl_rsignal
 Perl_rsignal_state
+Perl_run_exec_codeseq
+Perl_run_get_next_instruction
+Perl_run_set_next_instruction
 Perl_runops_debug
 Perl_runops_standard
 Perl_rv2cv_op_cv

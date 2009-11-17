@@ -377,6 +377,16 @@ string/length pair.
 #define cophh_delete_sv(cophh, key, hash, flags) \
     Perl_refcounted_he_new_sv(aTHX_ cophh, key, hash, (SV *)NULL, flags)
 
+#define RUN_SET_NEXT_INSTRUCTION(instr)		\
+    STMT_START {							\
+	DEBUG_t(PerlIO_printf(Perl_debug_log,				\
+		"Instruction jump to 0x%p %s, was 0x%p %s at %s:%d\n",	\
+		(void*)(instr), instruction_name(instr),	\
+		(void*)PL_run_next_instruction, instruction_name(PL_run_next_instruction), \
+		__FILE__, __LINE__));					\
+	run_set_next_instruction(instr);				\
+    } STMT_END								\
+
 #include "mydtrace.h"
 
 struct cop {
@@ -589,7 +599,8 @@ be zero.
 
 /* subroutine context */
 struct block_sub {
-    OP *	retop;	/* op to execute on exit from sub */
+    const INSTRUCTION *	ret_instr;	/* instruction to continue executing on exit from sub */
+    CODESEQ *   codeseq;
     /* Above here is the same for sub, format and eval.  */
     CV *	cv;
     /* Above here is the same for sub and format.  */
@@ -602,7 +613,8 @@ struct block_sub {
 
 /* format context */
 struct block_format {
-    OP *	retop;	/* op to execute on exit from sub */
+    const INSTRUCTION *	ret_instr;	/* op to execute on exit from sub */
+    CODESEQ *   codeseq;
     /* Above here is the same for sub, format and eval.  */
     CV *	cv;
     /* Above here is the same for sub and format.  */
@@ -620,10 +632,13 @@ struct block_format {
 		CopLINE((const COP *)CvSTART(cv)),			\
 		CopSTASHPV((const COP *)CvSTART(cv)));			\
 									\
+	assert(CvCODESEQ(cv));						\
+	Perl_codeseq_refcnt_inc(aTHX_ CvCODESEQ(cv));			\
+	cx->blk_sub.codeseq = CvCODESEQ(cv);				\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
 	cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;			\
-	cx->blk_sub.retop = NULL;					\
+	cx->blk_sub.ret_instr = NULL;					\
 	if (!CvDEPTH(cv)) {						\
 	    SvREFCNT_inc_simple_void_NN(cv);				\
 	    SvREFCNT_inc_simple_void_NN(cv);				\
@@ -642,10 +657,12 @@ struct block_format {
 	cx->blk_u16 = 0;
 
 
-#define PUSHFORMAT(cx, retop)						\
+#define PUSHFORMAT(cx, ret_instr)						\
+	codeseq_refcnt_inc(CvCODESEQ(cv));				\
+        cx->blk_format.codeseq = CvCODESEQ(cv);				\
 	cx->blk_format.cv = cv;						\
 	cx->blk_format.gv = gv;						\
-	cx->blk_format.retop = (retop);					\
+	cx->blk_format.ret_instr = (ret_instr);					\
 	cx->blk_format.dfoutgv = PL_defoutgv;				\
 	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
 
@@ -686,6 +703,7 @@ struct block_format {
 		CLEAR_ARGARRAY(cx->blk_sub.argarray);			\
 	    }								\
 	}								\
+	codeseq_refcnt_dec(cx->blk_sub.codeseq);			\
 	sv = MUTABLE_SV(cx->blk_sub.cv);				\
 	if (sv && (CvDEPTH((const CV*)sv) = cx->blk_sub.olddepth))	\
 	    sv = NULL;						\
@@ -698,12 +716,14 @@ struct block_format {
     } STMT_END
 
 #define POPFORMAT(cx)							\
+    codeseq_refcnt_dec(cx->blk_format.codeseq);				\
 	setdefout(cx->blk_format.dfoutgv);				\
 	SvREFCNT_dec(cx->blk_format.dfoutgv);
 
 /* eval context */
 struct block_eval {
-    OP *	retop;	/* op to execute on exit from eval */
+    const INSTRUCTION *	ret_instr;	/* op to execute on exit from eval */
+    CODESEQ *   codeseq;
     /* Above here is the same for sub, format and eval.  */
     SV *	old_namesv;
     OP *	old_eval_root;
@@ -728,7 +748,8 @@ struct block_eval {
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_parser ? PL_parser->linestr : NULL;	\
 	cx->blk_eval.cv = NULL; /* set by doeval(), as applicable */	\
-	cx->blk_eval.retop = NULL;					\
+	cx->blk_eval.codeseq = NULL; /* set by doeval(), as applicable */ \
+	cx->blk_eval.ret_instr = NULL;					\
 	cx->blk_eval.cur_top_env = PL_top_env; 				\
     } STMT_END
 
@@ -737,14 +758,24 @@ struct block_eval {
 	PL_in_eval = CxOLD_IN_EVAL(cx);					\
 	optype = CxOLD_OP_TYPE(cx);					\
 	PL_eval_root = cx->blk_eval.old_eval_root;			\
+	codeseq_refcnt_dec(cx->blk_eval.codeseq);			\
 	if (cx->blk_eval.old_namesv)					\
 	    sv_2mortal(cx->blk_eval.old_namesv);			\
     } STMT_END
 
+
 /* loop context */
+
+struct loop_instructions {
+    const INSTRUCTION* next_instr;
+    const INSTRUCTION* last_instr;
+    const INSTRUCTION* redo_instr;
+};
+
 struct block_loop {
     I32		resetsp;
     LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */
+    const LOOP_INSTRUCTIONS* loop_instrs;
     union {	/* different ways of locating the iteration variable */
 	SV      **svp;
 	GV      *gv;
@@ -784,18 +815,20 @@ struct block_loop {
 #define CxHASARGS(c)	(((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
 #define CxLVAL(c)	(0 + (c)->blk_u16)
 
-#define PUSHLOOP_PLAIN(cx, s)						\
+#define PUSHLOOP_PLAIN(cx, s, loop_instrs)						\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
+	cx->blk_loop.loop_instrs = loop_instrs;				\
 	cx->blk_loop.itervar_u.svp = NULL;
 
-#define PUSHLOOP_FOR(cx, ivar, s)					\
+#define PUSHLOOP_FOR(cx, ivar, s, loop_instrs)				\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
+	cx->blk_loop.loop_instrs = loop_instrs;				\
 	cx->blk_loop.itervar_u.svp = (SV**)(ivar);
 
 #define POPLOOP(cx)							\
@@ -808,11 +841,11 @@ struct block_loop {
 
 /* given/when context */
 struct block_givwhen {
-	OP *leave_op;
+	const INSTRUCTION *leave_op_instr;
 };
 
-#define PUSHGIVEN(cx)							\
-	cx->blk_givwhen.leave_op = cLOGOP->op_other;
+#define PUSHGIVEN(cx, instr)							\
+	cx->blk_givwhen.leave_op_instr = instr;
 
 #define PUSHWHEN PUSHGIVEN
 
@@ -890,6 +923,13 @@ struct block {
 	PL_curpm         = cx->blk_oldpm;
 
 /* substitution context */
+
+struct substcont_instructions {
+    const INSTRUCTION* pmreplstart_instr;
+    const INSTRUCTION* subst_next_instr;
+    PMOP * pm;
+};
+
 struct subst {
     U8		sbu_type;	/* what kind of context this is */
     U8		sbu_rflags;
@@ -1087,6 +1127,7 @@ L<perlcall>.
 #define PERLSI_WARNHOOK		7
 #define PERLSI_DIEHOOK		8
 #define PERLSI_REQUIRE		9
+#define PERLSI_COMPILE		0xa
 
 struct stackinfo {
     AV *		si_stack;	/* stack for current runlevel */
@@ -1192,7 +1233,7 @@ See L<perlcall/Lightweight Callbacks>.
     SV **newsp;			/* set by POPBLOCK */			\
     PERL_CONTEXT *cx;							\
     CV *multicall_cv;							\
-    OP *multicall_cop;							\
+    INSTRUCTION *multicall_instr;					\
     bool multicall_oldcatch; 						\
     U8 hasargs = 0		/* used by PUSHSUB */
 
@@ -1203,9 +1244,12 @@ See L<perlcall/Lightweight Callbacks>.
 	AV * const padlist = CvPADLIST(cv);				\
 	ENTER;								\
  	multicall_oldcatch = CATCH_GET;					\
-	SAVETMPS; SAVEVPTR(PL_op);					\
+	SAVETMPS; SAVEVPTR(PL_run_next_instruction);			\
 	CATCH_SET(TRUE);						\
 	PUSHSTACKi(PERLSI_SORT);					\
+	if (!CvCODESEQ(cv)) {						\
+	    Perl_compile_cv(aTHX_ cv);					\
+	}								\
 	PUSHBLOCK(cx, CXt_SUB|CXp_MULTICALL, PL_stack_sp);		\
 	PUSHSUB(cx);							\
 	if (++CvDEPTH(cv) >= 2) {					\
@@ -1215,12 +1259,12 @@ See L<perlcall/Lightweight Callbacks>.
 	SAVECOMPPAD();							\
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
 	multicall_cv = cv;						\
-	multicall_cop = CvSTART(cv);					\
+	multicall_instr = Perl_codeseq_start_instruction(aTHX_ CvCODESEQ(cv));	\
     } STMT_END
 
 #define MULTICALL \
     STMT_START {							\
-	PL_op = multicall_cop;						\
+        Perl_run_set_next_instruction(aTHX_ multicall_instr);			\
 	CALLRUNOPS(aTHX);						\
     } STMT_END
 

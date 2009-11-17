@@ -631,7 +631,6 @@ unless ($define{'DEBUGGING'}) {
 		    Perl_debstackptrs
 		    Perl_pad_sv
 		    Perl_hv_assert
-		    PL_block_type
 		    PL_watchaddr
 		    PL_watchok
 		    PL_watch_pvx

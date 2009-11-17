@@ -268,7 +268,6 @@ do_test('reference to anon sub with empty prototype',
     NV = 0					# $] < 5.009
     PROTOTYPE = ""
     COMP_STASH = $ADDR\\t"main"
-    START = $ADDR ===> \\d+
     ROOT = $ADDR
     XSUB = 0x0					# $] < 5.009
     XSUBANY = 0					# $] < 5.009
@@ -279,6 +278,7 @@ do_test('reference to anon sub with empty prototype',
     OWNER = $ADDR)?
     FLAGS = 0x404				# $] < 5.009
     FLAGS = 0x490				# $] >= 5.009
+    CODESEQ = 0x0				# $] >= 5.011
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
@@ -296,7 +296,6 @@ do_test('reference to named subroutine without prototype',
     IV = 0					# $] < 5.009
     NV = 0					# $] < 5.009
     COMP_STASH = $ADDR\\t"main"
-    START = $ADDR ===> \\d+
     ROOT = $ADDR
     XSUB = 0x0					# $] < 5.009
     XSUBANY = 0					# $] < 5.009
@@ -306,6 +305,7 @@ do_test('reference to named subroutine without prototype',
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
 )?    FLAGS = 0x0
+    CODESEQ = $ADDR				# $] >= 5.011
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
@@ -592,6 +592,7 @@ do_test('constant subroutine',
     FLAGS = 0x200				# $] < 5.009
     FLAGS = 0xc00				# $] >= 5.009 && $] < 5.013
     FLAGS = 0xc					# $] >= 5.013
+    CODESEQ = 0x0				# $] >= 5.013
     OUTSIDE_SEQ = 0
     PADLIST = 0x0
     OUTSIDE = 0x0 \\(null\\)');	
@@ -644,7 +645,6 @@ do_test('FORMAT',
     NV = 0					# $] < 5.009
 (?:    PV = 0
 )?    COMP_STASH = 0x0
-    START = $ADDR ===> \\d+
     ROOT = $ADDR
     XSUB = 0x0					# $] < 5.009
     XSUBANY = 0					# $] < 5.009
@@ -654,6 +654,7 @@ do_test('FORMAT',
     MUTEXP = $ADDR
     OWNER = $ADDR
 )?    FLAGS = 0x0
+    CODESEQ = 0x0				# $] >= 5.011
     OUTSIDE_SEQ = \\d+
     LINES = 0
     PADLIST = $ADDR

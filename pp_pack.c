@@ -2275,6 +2275,8 @@ PP(pp_unpack)
     const char *strend = s + rlen;
     const char *patend = pat + llen;
     I32 cnt;
+    PERL_UNUSED_ARG(pparg);
+    PERL_UNUSED_ARG(ppflags);
 
     PUTBACK;
     cnt = unpackstring(pat, patend, s, strend,

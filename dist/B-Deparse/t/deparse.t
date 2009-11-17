@@ -118,7 +118,7 @@ BEGIN { $/ = "\n"; $\ = "\n"; }
 LINE: while (defined($_ = <ARGV>)) {
     chomp $_;
     our(@F) = split(' ', $_, 0);
-    '???';
+    1;
 }
 EOF
 is($a, $b,
@@ -206,6 +206,13 @@ $test /= 2 if ++$test;
 # list x
 -((1, 2) x 2);
 ####
+{
+    my $test = sub {
+	my $x;
+    }
+    ;
+}
+####
 # lvalue sub
 {
     my $test = sub : lvalue {
@@ -266,7 +273,7 @@ my($x, @a);
 $x = 1 foreach (@a);
 ####
 # 2 arguments in a 3 argument for
-for (my $i = 0; $i < 2;) {
+for (my $i = 0; $i < 2; ) {
     my $z = 1;
 }
 ####
@@ -319,7 +326,7 @@ foreach our $i (1, 2) {
 ####
 # reverse sort
 my @x;
-print reverse sort(@x);
+print reverse(sort(@x));
 ####
 # sort with cmp
 my @x;
@@ -327,7 +334,7 @@ print((sort {$b cmp $a} @x));
 ####
 # reverse sort with block
 my @x;
-print((reverse sort {$b <=> $a} @x));
+print reverse((sort {$b <=> $a} @x));
 ####
 # foreach reverse
 our @a;
@@ -335,7 +342,7 @@ print $_ foreach (reverse @a);
 ####
 # foreach reverse (not inplace)
 our @a;
-print $_ foreach (reverse 1, 2..5);
+print $_ foreach (reverse 1, 2 .. 5);
 ####
 # bug #38684
 our @ary;
@@ -517,37 +524,85 @@ if (!GLIPP) { x() } elsif (!GLIPP) { z() } elsif (GLIPP) { t() }
 if (!GLIPP) { x() } elsif (!GLIPP) { z() } elsif (!GLIPP) { t() }
 if (!GLIPP) { x() } elsif (!GLIPP) { z() } elsif (!GLIPP) { t() }
 >>>>
-x();
-x();
-'???';
-x();
-x();
-x();
-x();
-do {
-    '???'
+x() if 1;
+x() if 'glipp';
+x() unless 'glipp';
+x() if 'glipp' and 'glipp';
+x() if not 'glipp' or 'glipp';
+x() if do {
+    'glipp'
 };
-do {
-    x()
+x() if do {
+    BEGIN {${^WARNING_BITS} = "TUUUUUUUUUUQ\001"}
+    5;
+    'glipp'
 };
-do {
-    z()
+x() if do {
+    not 'glipp'
 };
-do {
-    x()
-};
-do {
-    z()
-};
-do {
-    x()
-};
-'???';
-do {
-    t()
-};
-'???';
-!1;
+if ('glipp') {
+    x();
+}
+else {
+    z();
+}
+if (not 'glipp') {
+    x();
+}
+else {
+    z();
+}
+if ('glipp') {
+    x();
+}
+elsif ('glipp') {
+    z();
+}
+if (not 'glipp') {
+    x();
+}
+elsif ('glipp') {
+    z();
+}
+if ('glipp') {
+    x();
+}
+elsif (not 'glipp') {
+    z();
+}
+if (not 'glipp') {
+    x();
+}
+elsif (not 'glipp') {
+    z();
+}
+if (not 'glipp') {
+    x();
+}
+elsif (not 'glipp') {
+    z();
+}
+elsif ('glipp') {
+    t();
+}
+if (not 'glipp') {
+    x();
+}
+elsif (not 'glipp') {
+    z();
+}
+elsif (not 'glipp') {
+    t();
+}
+if (not 'glipp') {
+    x();
+}
+elsif (not 'glipp') {
+    z();
+}
+elsif (not 'glipp') {
+    t();
+}
 ####
 # TODO constant deparsing has been backed out for 5.12
 # XXXTODO ? $Config::Config{useithreads} && "doesn't work with threads"
@@ -635,15 +690,15 @@ my $pi = 4;
 # in place sort
 our @a;
 my @b;
-@a = sort @a;
-@b = sort @b;
+@a = sort(@a);
+@b = sort(@b);
 ();
 ####
 # in place reverse
 our @a;
 my @b;
-@a = reverse @a;
-@b = reverse @b;
+@a = reverse(@a);
+@b = reverse(@b);
 ();
 ####
 # #71870 Use of uninitialized value in bitwise and B::Deparse
@@ -680,9 +735,9 @@ pop @_;
 "foo" =~ (1 ? y/foo// : /bar/);
 "foo" =~ (1 ? s/foo// : /bar/);
 >>>>
-'foo' =~ ($_ =~ /foo/);
-'foo' =~ ($_ =~ tr/fo//);
-'foo' =~ ($_ =~ s/foo//);
+'foo' =~ (1 ? /foo/ : /bar/);
+'foo' =~ (1 ? tr/fo// : /bar/);
+'foo' =~ (1 ? s/foo// : /bar/);
 ####
 # Test @threadsv_names under 5005threads
 foreach $' (1, 2) {

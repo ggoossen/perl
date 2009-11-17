@@ -60,10 +60,11 @@ my %alias;
 # Format is "this function" => "does these op names"
 my @raw_alias = (
 		 Perl_do_kv => [qw( keys values )],
-		 Perl_unimplemented_op => [qw(padany mapstart custom)],
+		 Perl_unimplemented_op => [qw(padany custom foreach nothing)],
 		 # All the ops with a body of { return NORMAL; }
 		 Perl_pp_null => [qw(scalar regcmaybe lineseq scope)],
 
+		 Perl_pp_grepstart => ['mapstart'],
 		 Perl_pp_goto => ['dump'],
 		 Perl_pp_require => ['dofile'],
 		 Perl_pp_untie => ['dbmclose'],
@@ -94,7 +95,7 @@ my @raw_alias = (
 		 Perl_pp_shmwrite => [qw(shmread msgsnd msgrcv semop)],
 		 Perl_pp_send => ['syswrite'],
 		 Perl_pp_defined => [qw(dor dorassign)],
-                 Perl_pp_and => ['andassign'],
+                 Perl_pp_and => [qw(andassign while_and)],
 		 Perl_pp_or => ['orassign'],
 		 Perl_pp_ucfirst => ['lcfirst'],
 		 Perl_pp_sle => [qw(slt sgt sge)],
@@ -598,9 +599,10 @@ __END__
 
 # Nothing.
 
-null		null operation		ck_null		0	
+null		null operation		ck_null		%	
 stub		stub			ck_null		0
 scalar		scalar			ck_fun		s%	S
+nothing		nothing			ck_null		0
 
 # Pushy stuff.
 
@@ -655,7 +657,7 @@ trans		transliteration (tr///)	ck_match	is"	S
 # Lvalue operators.
 # sassign is special-cased for op class
 
-sassign		scalar assignment	ck_sassign	s0
+sassign		scalar assignment	ck_sassign	s1
 aassign		list assignment		ck_null		t2	L L
 
 chop		chop			ck_spair	mts%	L
@@ -692,7 +694,7 @@ add		addition (+)		ck_null		IfsT2	S S
 i_add		integer addition (+)	ck_null		ifsT2	S S
 subtract	subtraction (-)		ck_null		IfsT2	S S
 i_subtract	integer subtraction (-)	ck_null		ifsT2	S S
-concat		concatenation (.) or string	ck_concat	fsT2	S S
+concat		concatenation (.) or string	ck_null	fsT2	S S
 stringify	string			ck_fun		fsT@	S
 
 left_shift	left bitshift (<<)	ck_bitop	fsT2	S S
@@ -725,7 +727,7 @@ bit_and		bitwise and (&)		ck_bitop	fst2	S S
 bit_xor		bitwise xor (^)		ck_bitop	fst2	S S
 bit_or		bitwise or (|)		ck_bitop	fst2	S S
 
-negate		negation (-)		ck_null		Ifst1	S
+negate		negation (-)		ck_negate		Ifst1	S
 i_negate	integer negation (-)	ck_null		ifsT1	S
 not		not			ck_null		ifs1	S
 complement	1's complement (~)	ck_bitop	fst1	S
@@ -760,7 +762,7 @@ index		index			ck_index	isT@	S S S?
 rindex		rindex			ck_index	isT@	S S S?
 
 sprintf		sprintf			ck_fun		fmst@	S L
-formline	formline		ck_fun		ms@	S L
+formline	formline		ck_formline		ms@	S L
 ord		ord			ck_fun		ifsTu%	S?
 chr		chr			ck_fun		fsTu%	S?
 crypt		crypt			ck_fun		fsT@	S S
@@ -815,21 +817,22 @@ unshift		unshift			ck_push		imsT@	A L
 sort		sort			ck_sort		dm@	C? L
 reverse		reverse			ck_fun		mt@	L
 
-grepstart	grep			ck_grep		dm@	C L
+grepstart	grep			ck_grep		dt@	C L
 grepwhile	grep iterator		ck_null		dt|	
 
-mapstart	map			ck_grep		dm@	C L
+mapstart	map			ck_grep		dt@	C L
 mapwhile	map iterator		ck_null		dt|
 
 # Range stuff.
 
-range		flipflop		ck_null		|	S S
+range		range (or flop)		ck_null		|	S S
 flip		range (or flip)		ck_null		1	S S
-flop		range (or flop)		ck_null		1
+flop		range (or flop) instruction		ck_null		1
 
 # Control.
 
 and		logical and (&&)		ck_null		|	
+while_and		while			ck_null		|	
 or		logical or (||)			ck_null		|	
 xor		logical xor			ck_null		fs2	S S	
 dor		defined or (//)			ck_null		|
@@ -1097,6 +1100,11 @@ lock		lock			ck_rfun		s%	R
 
 once		once			ck_null		|	
 
+instr_jump		instruction jump		ck_null		0
+instr_cond_jump		instruction conditional jump		ck_null		0
+instr_const_list	instruction constant list		ck_null		0
+instr_end		instruction end		ck_null		0
+
 custom		unknown custom operator		ck_null		0
 
 # For smart dereference for each/keys/values
@@ -1106,3 +1114,5 @@ rvalues		values on reference			ck_each		t%	S
 
 # y///r
 transr		transliteration (tr///)	ck_match	is"	S
+
+foreach		foreach loop	ck_null		d{	

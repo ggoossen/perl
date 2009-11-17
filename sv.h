@@ -484,7 +484,6 @@ typedef U16 cv_flags_t;
 #define _XPVCV_COMMON								\
     HV *	xcv_stash;							\
     union {									\
-	OP *	xcv_start;							\
 	ANY	xcv_xsubany;							\
     }		xcv_start_u;					    		\
     union {									\
@@ -498,6 +497,7 @@ typedef U16 cv_flags_t;
     U32		xcv_outside_seq; /* the COP sequence (at the point of our	\
 				  * compilation) in the lexically enclosing	\
 				  * sub */					\
+    CODESEQ *	xcv_codeseq;							\
     cv_flags_t	xcv_flags
 
 struct xpvfm {

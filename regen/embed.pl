@@ -144,7 +144,7 @@ open IN, 'pp.sym' or die $!;
 	    push @embed, ['pR', 'OP *', $_, 'NN OP *o'];
 	}
 	elsif (/^pp_/) {
-	    push @embed, ['p', 'OP *', $_];
+	    push @embed, ['p', 'int', $_, 'INSTR_FLAGS ppflags', 'NULLOK void *pparg'];
 	}
 	else {
 	    warn "Illegal symbol '$_' in pp.sym";
