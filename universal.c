@@ -834,6 +834,19 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
     XSRETURN_UNDEF; /* Can't happen. */
 }
 
+XS(XS_Internals_sv_dump)
+{
+    dVAR;
+    dXSARGS;
+    SV * const sv = SvRV(ST(0));
+    PERL_UNUSED_ARG(cv);
+    if (items != 1)
+	croak_xs_usage(cv, "sv");
+
+    sv_dump(sv);
+    XSRETURN_UNDEF;
+}
+
 XS(XS_Internals_hv_clear_placehold)
 {
     dVAR;
@@ -1618,6 +1631,7 @@ struct xsub_details details[] = {
     {"Internals::SvREADONLY", XS_Internals_SvREADONLY, "\\[$%@];$"},
     {"Internals::SvREFCNT", XS_Internals_SvREFCNT, "\\[$%@];$"},
     {"Internals::hv_clear_placeholders", XS_Internals_hv_clear_placehold, "\\%"},
+    {"Internals::sv_dump",XS_Internals_sv_dump, "\\[$%@]");
     {"PerlIO::get_layers", XS_PerlIO_get_layers, "*;@"},
     {"Internals::hash_seed", XS_Internals_hash_seed, ""},
     {"Internals::rehash_seed", XS_Internals_rehash_seed, ""},
