@@ -2067,7 +2067,7 @@ PP(pp_leaveloop)
     PMOP *newpm;
     SV **mark;
 
-    POPBLOCK(cx,newpm);
+    POPBLOCK_normal(cx,newpm);
     assert(CxTYPE_is_LOOP(cx));
     mark = newsp;
     newsp = PL_stack_base + cx->blk_loop.resetsp;
@@ -3938,7 +3938,7 @@ PP(pp_leaveeval)
     I32 optype;
     SV *namesv;
 
-    POPBLOCK(cx,newpm);
+    POPBLOCK_normal(cx,newpm);
     POPEVAL(cx);
     namesv = cx->blk_eval.old_namesv;
     ret_instr = cx->blk_eval.ret_instr;
@@ -4064,7 +4064,7 @@ PP(pp_leavetry)
     register PERL_CONTEXT *cx;
     I32 optype;
 
-    POPBLOCK(cx,newpm);
+    POPBLOCK_normal(cx,newpm);
     POPEVAL(cx);
     PERL_UNUSED_VAR(optype);
 
@@ -4129,7 +4129,7 @@ PP(pp_leavegiven)
     PMOP *newpm;
     PERL_UNUSED_CONTEXT;
 
-    POPBLOCK(cx,newpm);
+    POPBLOCK_normal(cx,newpm);
     assert(CxTYPE(cx) == CXt_GIVEN);
 
     TAINT_NOT;
@@ -4729,7 +4729,7 @@ PP(pp_leavewhen)
     SV **newsp;
     PMOP *newpm;
 
-    POPBLOCK(cx,newpm);
+    POPBLOCK_normal(cx,newpm);
     assert(CxTYPE(cx) == CXt_WHEN);
 
     SP = newsp;
