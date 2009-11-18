@@ -4338,6 +4338,7 @@ thread.h			Threading header
 time64.c			64 bit clean time.h (code)
 time64_config.h			64 bit clean time.h (configuration)
 time64.h			64 bit clean time.h (header)
+t/internals/code-gen.t			See if the code generation is correct
 t/io/argv.t			See if ARGV stuff works
 t/io/binmode.t			See if binmode() works
 t/io/crlf.t			See if :crlf works
@@ -4702,7 +4703,6 @@ t/re/substT.t			See if substitution works with -T
 t/re/subst_wamp.t		See if substitution works with $& present
 t/re/uniprops.t			Test unicode \p{} regex constructs
 t/run/cloexec.t			Test close-on-exec.
-t/run/code-gen.t			See if the code generation is correct
 t/run/exit.t			Test perl's exit status.
 t/run/fresh_perl.t		Tests that require a fresh perl.
 t/run/noswitch.t		Test aliasing ARGV for other switch tests
