@@ -631,7 +631,6 @@ Ap	|void	|op_refcnt_lock
 Ap	|void	|op_refcnt_unlock
 p	|OP*	|sequence_op	|NULLOK OP *o
 #if defined(PERL_IN_OP_C)
-s	|OP*	|linklist	|NN OP *o
 s	|OP*	|listkids	|NULLOK OP* o
 #endif
 : Used in S_doeval in pp_ctl.c
