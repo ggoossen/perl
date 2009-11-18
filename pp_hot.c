@@ -54,6 +54,7 @@ PP(pp_nextstate)
     PERL_UNUSED_VAR(ppflags);
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
+    assert(PL_markstack_ptr == PL_markstack + cxstack[cxstack_ix].blk_oldmarksp); /* No stray PUSHMARKs */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
     PERL_ASYNC_CHECK();
