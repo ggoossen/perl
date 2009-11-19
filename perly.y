@@ -802,7 +802,7 @@ listop	:	LSTOP indirob argexpr /* map {...} @args or print $fh @args */
 			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $<opval>$ = newANONATTRSUB($2, 0, (OP*)NULL, $3); }
 		    listexpr		%prec LSTOP  /* ... @bar */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				 append_elem(OP_LIST,
 				   prepend_elem(OP_LIST, $<opval>4, $5), $1));
 			}
@@ -870,14 +870,14 @@ subscripted:    star '{' expr ';' '}'        /* *main::{something} */
 			  TOKEN_GETMAD($5,$$,'}');
 			}
 	|	term ARROW '(' ')'          /* $subref->() */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				   newCVREF(0, scalar($1)));
 			  TOKEN_GETMAD($2,$$,'a');
 			  TOKEN_GETMAD($3,$$,'(');
 			  TOKEN_GETMAD($4,$$,')');
 			}
 	|	term ARROW '(' expr ')'     /* $subref->(@args) */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				   append_elem(OP_LIST, $4,
 				       newCVREF(0, scalar($1))));
 			  TOKEN_GETMAD($2,$$,'a');
@@ -886,14 +886,14 @@ subscripted:    star '{' expr ';' '}'        /* *main::{something} */
 			}
 
 	|	subscripted '(' expr ')'   /* $foo->{bar}->(@args) */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				   append_elem(OP_LIST, $3,
 					       newCVREF(0, scalar($1))));
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($4,$$,')');
 			}
 	|	subscripted '(' ')'        /* $foo->{bar}->() */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				   newCVREF(0, scalar($1)));
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($3,$$,')');
@@ -1072,7 +1072,7 @@ termdo	:       DO term	%prec UNIOP                     /* do $filename */
 			  TOKEN_GETMAD($1,$$,'D');
 			}
 	|	DO WORD '(' ')'                         /* do somesub() */
-			{ $$ = newUNOP(OP_ENTERSUB,
+			{ $$ = convert(OP_ENTERSUB,
 			    OPf_SPECIAL|OPf_STACKED,
 			    prepend_elem(OP_LIST,
 				scalar(newCVREF(
@@ -1084,7 +1084,7 @@ termdo	:       DO term	%prec UNIOP                     /* do $filename */
 			  TOKEN_GETMAD($4,$$,')');
 			}
 	|	DO WORD '(' expr ')'                    /* do somesub(@args) */
-			{ $$ = newUNOP(OP_ENTERSUB,
+			{ $$ = convert(OP_ENTERSUB,
 			    OPf_SPECIAL|OPf_STACKED,
 			    append_elem(OP_LIST,
 				$4,
@@ -1097,7 +1097,7 @@ termdo	:       DO term	%prec UNIOP                     /* do $filename */
 			  TOKEN_GETMAD($5,$$,')');
 			}
 	|	DO scalar '(' ')'                      /* do $subref () */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
+			{ $$ = convert(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
 			    prepend_elem(OP_LIST,
 				scalar(newCVREF(0,scalar($2))), (OP*)NULL)); dep();
 			  TOKEN_GETMAD($1,$$,'o');
@@ -1105,7 +1105,7 @@ termdo	:       DO term	%prec UNIOP                     /* do $filename */
 			  TOKEN_GETMAD($4,$$,')');
 			}
 	|	DO scalar '(' expr ')'                 /* do $subref (@args) */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
+			{ $$ = convert(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
 			    prepend_elem(OP_LIST,
 				$4,
 				scalar(newCVREF(0,scalar($2))))); dep();
@@ -1176,15 +1176,15 @@ term	:	termbinop
 	|	THING	%prec '('
 			{ $$ = $1; }
 	|	amper                                /* &foo; */
-			{ $$ = newUNOP(OP_ENTERSUB, 0, scalar($1)); }
+			{ $$ = convert(OP_ENTERSUB, 0, scalar($1)); }
 	|	amper '(' ')'                        /* &foo() */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($1));
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED, scalar($1));
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($3,$$,')');
 			}
 	|	amper '(' expr ')'                   /* &foo(@args) */
 			{
-			  $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+			  $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				append_elem(OP_LIST, $3, scalar($1)));
 			  DO_MAD({
 			      OP* op = $$;
@@ -1196,7 +1196,7 @@ term	:	termbinop
 			  })
 			}
 	|	NOAMP WORD listexpr                  /* foo(@args) */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 			    append_elem(OP_LIST, $3, scalar($2)));
 			  TOKEN_GETMAD($1,$$,'o');
 			}
@@ -1234,9 +1234,9 @@ term	:	termbinop
 			  TOKEN_GETMAD($1,$$,'o');
 			}
 	|	UNIOPSUB
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($1)); }
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED, scalar($1)); }
 	|	UNIOPSUB term                        /* Sub treated as unop */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 			    append_elem(OP_LIST, $2, scalar($1))); }
 	|	FUNC0                                /* Nullary operator */
 			{ $$ = newOP(IVAL($1), 0);
@@ -1249,7 +1249,7 @@ term	:	termbinop
 			  TOKEN_GETMAD($3,$$,')');
 			}
 	|	FUNC0SUB                             /* Sub treated as nullop */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
+			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
 				scalar($1)); }
 	|	FUNC1 '(' ')'                        /* not () */
 			{ $$ = (IVAL($1) == OP_NOT)
