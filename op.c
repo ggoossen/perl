@@ -864,7 +864,7 @@ Perl_scalar(pTHX_ OP *o)
 
     assert(!o->op_context_known);
     o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_SCALAR;
-    o->op_context_known = 1;
+    o->op_context_known = TRUE;
 
     switch (o->op_type) {
     case OP_REPEAT:
@@ -971,7 +971,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     }
 
     assert((!o->op_context_known) || want == OPf_WANT_SCALAR);
-    o->op_context_known = 1;
+    o->op_context_known = TRUE;
     o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
 
     switch (o->op_type) {
@@ -1292,7 +1292,7 @@ Perl_list(pTHX_ OP *o)
 
     assert(!o->op_context_known);
     o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_LIST;
-    o->op_context_known = 1;
+    o->op_context_known = TRUE;
 
     switch (o->op_type) {
     case OP_FLOP:
@@ -1389,7 +1389,7 @@ S_unknown(pTHX_ OP *o)
     }
 
     assert(!o->op_context_known);
-    o->op_context_known = 1;
+    o->op_context_known = TRUE;
 
     if (o->op_flags & OPf_KIDS) {
 	OP *kid;
@@ -1553,7 +1553,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 			newop->op_private |= OPpLVAL_INTRO;
 			newop->op_private &= ~1;
 			newop->op_flags = OPf_WANT_SCALAR;
-			newop->op_context_known = 1;
+			newop->op_context_known = TRUE;
 			break;
 		    }
 
@@ -2090,6 +2090,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 		   append_elem(OP_LIST,
 			       prepend_elem(OP_LIST, pack, list(arg)),
 			       newSVOP(OP_METHOD_NAMED, 0, meth)));
+    imop->op_context_known = TRUE;
     imop->op_private |= OPpENTERSUB_NOMOD;
 
     /* Combine the ops. */
@@ -2640,7 +2641,7 @@ Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
 	o = newLISTOP(OP_LIST, 0, o, NULL);
     else {
 	o->op_flags &= ~OPf_WANT;
-	o->op_context_known = 0;
+	o->op_context_known = FALSE;
     }
 
     /* if (!(PL_opargs[type] & OA_MARK)) */
@@ -4594,7 +4595,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			cUNOPx(tmpop)->op_first = NULL;	/* don't free split */
 			op_free(o);			/* blow off assign */
 			right->op_flags &= ~OPf_WANT;
-			right->op_context_known = 0;
+			right->op_context_known = FALSE;
 				/* "I don't know and I don't care." */
 			return right;
 		    }
@@ -7952,7 +7953,7 @@ Perl_ck_return(pTHX_ OP *o)
     /* return is always in unknown context */
     for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling)
 	S_unknown(kid);
-    o->op_context_known = 1;
+    o->op_context_known = TRUE;
 
     return o;
 }
