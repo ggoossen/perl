@@ -359,12 +359,13 @@ S_bad_type(pTHX_ I32 n, const char *t, const char *name, const OP *kid)
 }
 
 STATIC void
-S_no_bareword_allowed(pTHX_ const OP *o)
+S_no_bareword_allowed(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_NO_BAREWORD_ALLOWED;
 
     if (PL_madskills)
 	return;		/* various ok barewords are hidden in extra OP_NULL */
+    o->op_private &= ~OPpCONST_STRICT;
     qerror(Perl_mess(aTHX_
 		     "Bareword \"%"SVf"\" not allowed while \"strict subs\" in use",
 		     SVfARG(cSVOPo_sv)));
@@ -1415,6 +1416,8 @@ S_finished_op_check(pTHX_ OP* o)
 {
     /* All ops must have a context */
 
+    COP* oldcop = PL_curcop;
+
     if (! (o->op_context_known
 	    || o->op_type == OP_NULL
 	    || o->op_type == OP_LIST
@@ -1440,12 +1443,25 @@ S_finished_op_check(pTHX_ OP* o)
 	|| o->op_type == OP_PADSV
 	|| o->op_type == OP_RV2CV
 	);
+    
+    switch (o->op_type) {
+    case OP_NEXTSTATE:
+    case OP_DBSTATE:
+	PL_curcop = ((COP*)o);		/* for warnings */
+	break;
+    case OP_CONST:
+	if (o->op_private & OPpCONST_STRICT)
+	    no_bareword_allowed(o);
+	break;
+    }
 
     if (o->op_flags & OPf_KIDS) {
 	OP *kid;
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling)
 	    S_finished_op_check(kid);
     }
+
+    PL_curcop = oldcop;
 }
 
 /* Propagate lvalue ("modifiable") context to an op and its children.
@@ -2471,10 +2487,10 @@ Perl_newPROG(pTHX_ OP *o)
 	}
 	PL_main_root = scope(sawparens(scalarvoid(o)));
 	S_unknown(PL_main_root);
-	PL_curcop = &PL_compiling;
 	PL_main_root->op_private |= OPpREFCOUNTED;
 	OpREFCNT_set(PL_main_root, 1);
 	S_finished_op_check(PL_main_root);
+	PL_curcop = &PL_compiling;
 	PL_compcv = 0;
 
 	/* Register with debugger */
