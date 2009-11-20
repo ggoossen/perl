@@ -1292,6 +1292,7 @@
 #if defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
 #define ck_anoncode		Perl_ck_anoncode
+#define ck_negate		Perl_ck_negate
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
 #define ck_defined		Perl_ck_defined
@@ -2148,6 +2149,7 @@
 #define ck_listiob		Perl_ck_listiob
 #define ck_match		Perl_ck_match
 #define ck_method		Perl_ck_method
+#define ck_negate		Perl_ck_negate
 #define ck_null			Perl_ck_null
 #define ck_open			Perl_ck_open
 #define ck_readline		Perl_ck_readline
@@ -3786,6 +3788,7 @@
 #if defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
+#define ck_negate(a)		Perl_ck_negate(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)
 #define ck_defined(a)		Perl_ck_defined(aTHX_ a)
@@ -4667,6 +4670,7 @@
 #define ck_listiob(a)		Perl_ck_listiob(aTHX_ a)
 #define ck_match(a)		Perl_ck_match(aTHX_ a)
 #define ck_method(a)		Perl_ck_method(aTHX_ a)
+#define ck_negate(a)		Perl_ck_negate(aTHX_ a)
 #define ck_null(a)		Perl_ck_null(aTHX_ a)
 #define ck_open(a)		Perl_ck_open(aTHX_ a)
 #define ck_readline(a)		Perl_ck_readline(aTHX_ a)
