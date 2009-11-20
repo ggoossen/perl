@@ -604,7 +604,6 @@ p	|OP*	|jmaybe		|NN OP *o
 pP	|I32	|keyword	|NN const char *name|I32 len|bool all_keywords
 #if defined(PERL_IN_OP_C)
 s	|OP*	|opt_scalarhv	|NN OP* rep_op
-s	|OP*	|is_inplace_av	|NN OP* o|NULLOK OP* oright
 #endif
 Ap	|void	|leave_scope	|I32 base
 : Used in pp_ctl.c, and by Data::Alias
@@ -2404,8 +2403,13 @@ Aanop	|CLONE_PARAMS *|clone_params_new|NN PerlInterpreter *const from \
 Anop	|void	|clone_params_del|NN CLONE_PARAMS *param
 #endif
 
+#if defined(PERL_IN_COMPILE_C) || defined(PERL_DECL_PROT)
+s	|OP*	|is_inplace_sort_av	|NN OP* o
+#endif
+
 p	|INSTRUCTION*	|codeseq_start_instruction|NN const CODESEQ* codeseq
 Ep	|void	|compile_op|NN OP* startop|NN CODESEQ* codeseq
+Ep	|void	|compile_cv|NN CV* cv
 Eap	|CODESEQ*	|new_codeseq
 Ep	|void	|free_codeseq|NULLOK CODESEQ* codeseq
 p	|const char*	|instruction_name|NULLOK const INSTRUCTION* instr

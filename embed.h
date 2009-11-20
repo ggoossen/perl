@@ -425,7 +425,6 @@
 #if defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
 #define opt_scalarhv		S_opt_scalarhv
-#define is_inplace_av		S_is_inplace_av
 #endif
 #endif
 #define leave_scope		Perl_leave_scope
@@ -2097,11 +2096,17 @@
 #endif
 #  endif
 #endif
+#if defined(PERL_IN_COMPILE_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define is_inplace_sort_av	S_is_inplace_sort_av
+#endif
+#endif
 #ifdef PERL_CORE
 #define codeseq_start_instruction	Perl_codeseq_start_instruction
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define compile_op		Perl_compile_op
+#define compile_cv		Perl_compile_cv
 #define new_codeseq		Perl_new_codeseq
 #define free_codeseq		Perl_free_codeseq
 #endif
@@ -2922,7 +2927,6 @@
 #if defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
 #define opt_scalarhv(a)		S_opt_scalarhv(aTHX_ a)
-#define is_inplace_av(a,b)	S_is_inplace_av(aTHX_ a,b)
 #endif
 #endif
 #define leave_scope(a)		Perl_leave_scope(aTHX_ a)
@@ -4610,11 +4614,17 @@
 #endif
 #  endif
 #endif
+#if defined(PERL_IN_COMPILE_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define is_inplace_sort_av(a)	S_is_inplace_sort_av(aTHX_ a)
+#endif
+#endif
 #ifdef PERL_CORE
 #define codeseq_start_instruction(a)	Perl_codeseq_start_instruction(aTHX_ a)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define compile_op(a,b)		Perl_compile_op(aTHX_ a,b)
+#define compile_cv(a)		Perl_compile_cv(aTHX_ a)
 #define new_codeseq()		Perl_new_codeseq(aTHX)
 #define free_codeseq(a)		Perl_free_codeseq(aTHX_ a)
 #endif
