@@ -417,11 +417,6 @@
 #define jmaybe			Perl_jmaybe
 #define keyword			Perl_keyword
 #endif
-#if defined(PERL_IN_OP_C)
-#ifdef PERL_CORE
-#define opt_scalarhv		S_opt_scalarhv
-#endif
-#endif
 #define leave_scope		Perl_leave_scope
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define lex_end			Perl_lex_end
@@ -2918,11 +2913,6 @@
 #define jmaybe(a)		Perl_jmaybe(aTHX_ a)
 #define keyword(a,b,c)		Perl_keyword(aTHX_ a,b,c)
 #endif
-#if defined(PERL_IN_OP_C)
-#ifdef PERL_CORE
-#define opt_scalarhv(a)		S_opt_scalarhv(aTHX_ a)
-#endif
-#endif
 #define leave_scope(a)		Perl_leave_scope(aTHX_ a)
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define lex_end()		Perl_lex_end(aTHX)
@@ -3852,7 +3842,7 @@
 #define too_few_arguments(a,b)	S_too_few_arguments(aTHX_ a,b)
 #define too_many_arguments(a,b)	S_too_many_arguments(aTHX_ a,b)
 #define looks_like_bool(a)	S_looks_like_bool(aTHX_ a)
-#define newGIVWHENOP(a,b,c,d,e)	S_newGIVWHENOP(aTHX_ a,b,c,d,e)
+#define newGIVWHENOP(a,b,c,d)	S_newGIVWHENOP(aTHX_ a,b,c,d)
 #define ref_array_or_hash(a)	S_ref_array_or_hash(aTHX_ a)
 #define process_special_blocks(a,b,c)	S_process_special_blocks(aTHX_ a,b,c)
 #endif
