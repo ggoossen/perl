@@ -13366,7 +13366,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    gv = cGVOPx_gv(cUNOPx(obase)->op_first);
 	    if (!gv)
 		break;
-	    return varname(gv, '$', sv, NULL, 0, FUV_SUBSCRIPT_NONE);
+	    return varname(gv, '$', 0, NULL, 0, FUV_SUBSCRIPT_NONE);
 	}
 	else /* ${expr} */
 	    return find_uninit_var(cUNOPx(obase)->op_first,
@@ -13425,6 +13425,9 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 
     case OP_AELEM:
     case OP_HELEM:
+    {
+	bool negate = FALSE;
+
 	if (PL_op == obase)
 	    /* $a[uninit_expr] or $h{uninit_expr} */
 	    return find_uninit_var(cBINOPx(obase)->op_last, uninit_sv, match);
@@ -13450,6 +13453,11 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	if (!sv)
 	    break;
 
+	if (kid && kid->op_type == OP_NEGATE) {
+	    negate = TRUE;
+	    kid = cUNOPx(kid)->op_first;
+	}
+
 	if (kid && kid->op_type == OP_CONST && SvOK(cSVOPx_sv(kid))) {
 	    /* index is constant */
 	    if (match) {
@@ -13466,12 +13474,21 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 			break;
 		}
 	    }
-	    if (obase->op_type == OP_HELEM)
+	    if (obase->op_type == OP_HELEM) {
+		SV* kidsv;
+		if (negate) {
+		    kidsv = sv_2mortal(newSVpvs("-"));
+		    sv_catsv(kidsv, cSVOPx_sv(kid));
+		}
+		else
+		    kidsv = cSVOPx_sv(kid);
 		return varname(gv, '%', o->op_targ,
-			    cSVOPx_sv(kid), 0, FUV_SUBSCRIPT_HASH);
+			    kidsv, 0, FUV_SUBSCRIPT_HASH);
+	    }
 	    else
 		return varname(gv, '@', o->op_targ, NULL,
-			    SvIV(cSVOPx_sv(kid)), FUV_SUBSCRIPT_ARRAY);
+		    negate ? - SvIV(cSVOPx_sv(kid)) : SvIV(cSVOPx_sv(kid)),
+		    FUV_SUBSCRIPT_ARRAY);
 	}
 	else  {
 	    /* index is an expression;
@@ -13497,6 +13514,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		o->op_targ, NULL, 0, FUV_SUBSCRIPT_WITHIN);
 	}
 	break;
+    }
 
     case OP_AASSIGN:
 	/* only examine RHS */
