@@ -1414,23 +1414,6 @@ S_modkids(pTHX_ OP *o, I32 type)
 static void
 S_finished_op_check(pTHX_ OP* o)
 {
-    /* All ops must have a context */
-
-    COP* oldcop = PL_curcop;
-
-    if (! (o->op_context_known
-	    || o->op_type == OP_NULL
-	    || o->op_type == OP_LIST
-	    || o->op_type == OP_NOTHING
-	    || o->op_type == OP_ENTER
-	    || o->op_type == OP_METHOD
-	    || o->op_type == OP_METHOD_NAMED
-	    || o->op_type == OP_REFGEN
-	    || o->op_type == OP_CONST
-	    || o->op_type == OP_PADSV
-	    || o->op_type == OP_RV2CV
-	    ))
-	Perl_op_dump(o);
     assert(o->op_context_known
 	|| o->op_type == OP_NULL
 	|| o->op_type == OP_LIST
@@ -1442,7 +1425,7 @@ S_finished_op_check(pTHX_ OP* o)
 	|| o->op_type == OP_CONST
 	|| o->op_type == OP_PADSV
 	|| o->op_type == OP_RV2CV
-	);
+	); /* All ops must have a context */
     
     switch (o->op_type) {
     case OP_NEXTSTATE:
@@ -1460,7 +1443,15 @@ S_finished_op_check(pTHX_ OP* o)
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling)
 	    S_finished_op_check(kid);
     }
+}
 
+void
+Perl_finish_optree(pTHX_ OP* o)
+{
+    COP* oldcop = PL_curcop;
+
+    S_finished_op_check(o);
+    
     PL_curcop = oldcop;
 }
 
@@ -2477,6 +2468,8 @@ Perl_newPROG(pTHX_ OP *o)
 				? OPf_SPECIAL : 0), o);
 	PL_eval_root->op_private |= OPpREFCOUNTED;
 	OpREFCNT_set(PL_eval_root, 1);
+	S_unknown(PL_eval_root);
+	finish_optree(PL_eval_root);
     }
     else {
 	if (o->op_type == OP_STUB) {
@@ -2489,7 +2482,7 @@ Perl_newPROG(pTHX_ OP *o)
 	S_unknown(PL_main_root);
 	PL_main_root->op_private |= OPpREFCOUNTED;
 	OpREFCNT_set(PL_main_root, 1);
-	S_finished_op_check(PL_main_root);
+	finish_optree(PL_main_root);
 	PL_curcop = &PL_compiling;
 	PL_compcv = 0;
 
@@ -6181,7 +6174,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     CvROOT(cv) = S_unknown(CvROOT(cv));
     CvROOT(cv)->op_private |= OPpREFCOUNTED;
     OpREFCNT_set(CvROOT(cv), 1);
-    S_finished_op_check(CvROOT(cv));
+    finish_optree(CvROOT(cv));
 
     /* now that optimizer has done its work, adjust pad values */
 
