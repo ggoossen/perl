@@ -404,9 +404,6 @@ s	|OP*	|fold_constants	|NN OP *o
 Afpd	|char*	|form		|NN const char* pat|...
 Ap	|char*	|vform		|NN const char* pat|NULLOK va_list* args
 Ap	|void	|free_tmps
-#if defined(PERL_IN_OP_C)
-s	|OP*	|gen_constant_list|NULLOK OP* o
-#endif
 #if !defined(HAS_GETENV_LEN)
 : Used in hv.c
 p	|char*	|getenv_len	|NN const char *env_elem|NN unsigned long *len

@@ -1312,7 +1312,8 @@ Perl_list(pTHX_ OP *o)
 	    break;
 	if (cUNOPo->op_first->op_type == OP_FLOP) {
 	    list(cBINOPo->op_first);
-	    return gen_constant_list(o);
+	    return o;
+	    /* return gen_constant_list(o); */
 	}
     case OP_LIST:
 	listkids(o);
@@ -1759,7 +1760,6 @@ Perl_mod(pTHX_ OP *o, I32 type)
     case OP_VEC:
 	if (type == OP_LEAVESUBLV)
 	    o->op_private |= OPpMAYBE_LVSUB;
-      lvalue_func:
 	pad_free(o->op_targ);
 	o->op_targ = pad_alloc(o->op_type, SVs_PADMY);
 	assert(SvTYPE(PAD_SV(o->op_targ)) == SVt_NULL);
@@ -2629,47 +2629,47 @@ S_fold_constants(pTHX_ register OP *o)
     return o;
 }
 
-static OP *
-S_gen_constant_list(pTHX_ register OP *o)
-{
-    dVAR;
-    register OP *curop;
-    const I32 oldtmps_floor = PL_tmps_floor;
-    CODESEQ* codeseq;
+/* static OP * */
+/* S_gen_constant_list(pTHX_ register OP *o) */
+/* { */
+/*     dVAR; */
+/*     register OP *curop; */
+/*     const I32 oldtmps_floor = PL_tmps_floor; */
+/*     CODESEQ* codeseq; */
 
-    list(o);
-    if (PL_parser && PL_parser->error_count)
-	return o;		/* Don't attempt to run with errors */
+/*     list(o); */
+/*     if (PL_parser && PL_parser->error_count) */
+/* 	return o;		/\* Don't attempt to run with errors *\/ */
 
-    return o;
+/*     return o; */
 
-    /* curop = LINKLIST(o); */
-    /* CALL_PEEP(curop); */
-    /* codeseq = new_codeseq(); */
-    /* compile_op(curop, codeseq); */
-    /* pp_pushmark(NULL); */
-    /* run_exec_codeseq(codeseq); */
-    /* assert(!(curop->op_flags & OPf_SPECIAL)); */
-    /* assert(curop->op_type == OP_RANGE); */
-    /* PL_op = curop; */
-    /* pp_anonlist(NULL); */
-    /* PL_op = NULL; */
-    /* PL_tmps_floor = oldtmps_floor; */
+/*     curop = LINKLIST(o); */
+/*     CALL_PEEP(curop); */
+/*     codeseq = new_codeseq(); */
+/*     compile_op(curop, codeseq); */
+/*     pp_pushmark(NULL); */
+/*     run_exec_codeseq(codeseq); */
+/*     assert(!(curop->op_flags & OPf_SPECIAL)); */
+/*     assert(curop->op_type == OP_RANGE); */
+/*     PL_op = curop; */
+/*     pp_anonlist(NULL); */
+/*     PL_op = NULL; */
+/*     PL_tmps_floor = oldtmps_floor; */
 
-    o->op_type = OP_RV2AV;
-    o->op_flags &= ~OPf_REF;	/* treat \(1..2) like an ordinary list */
-    o->op_flags |= OPf_PARENS;	/* and flatten \(1..2,3) */
-    o->op_opt = 0;		/* needs to be revisited in rpeep() */
-    curop = ((UNOP*)o)->op_first;
-    ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, SvREFCNT_inc_NN(*PL_stack_sp--));
-#ifdef PERL_MAD
-    op_getmad(curop,o,'O');
-#else
-    op_free(curop);
-#endif
-    linklist(o);
-    return list(o);
-}
+/*     o->op_type = OP_RV2AV; */
+/*     o->op_flags &= ~OPf_REF;	/\* treat \(1..2) like an ordinary list *\/ */
+/*     o->op_flags |= OPf_PARENS;	/\* and flatten \(1..2,3) *\/ */
+/*     o->op_opt = 0;		/\* needs to be revisited in peep() *\/ */
+/*     curop = ((UNOP*)o)->op_first; */
+/*     ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, SvREFCNT_inc_NN(*PL_stack_sp--)); */
+/* #ifdef PERL_MAD */
+/*     op_getmad(curop,o,'O'); */
+/* #else */
+/*     op_free(curop); */
+/* #endif */
+/*     linklist(o); */
+/*     return list(o); */
+/* } */
 
 OP *
 Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
@@ -6776,7 +6776,7 @@ Perl_ck_bitop(pTHX_ OP *o)
 OP *
 Perl_ck_concat(pTHX_ OP *o)
 {
-    const OP * const kid = cUNOPo->op_first;
+    /* const OP * const kid = cUNOPo->op_first; */
 
     PERL_ARGS_ASSERT_CK_CONCAT;
     PERL_UNUSED_CONTEXT;
@@ -7505,7 +7505,6 @@ Perl_ck_grep(pTHX_ OP *o)
     /* don't allocate gwop here, as we may leak it if PL_parser->error_count > 0 */
 
     if (o->op_flags & OPf_STACKED) {
-	OP* k;
 	o = ck_sort(o);
 	kid = cUNOPx(cLISTOPo->op_first->op_sibling)->op_first;
 	if (kid->op_type != OP_SCOPE && kid->op_type != OP_LEAVE)
@@ -7764,7 +7763,7 @@ Perl_ck_sassign(pTHX_ OP *o)
 	       end of Perl_newBINOP(). So need to do it here. */
 	    cBINOPo->op_last = cBINOPo->op_first->op_sibling;
 
-	    return condop;
+	    return (OP*)condop;
 	}
     }
     return o;
@@ -8094,7 +8093,6 @@ Perl_ck_sort(pTHX_ OP *o)
 	simplify_sort(o);
     firstkid = cLISTOPo->op_first;
     if (o->op_flags & OPf_STACKED) {			/* may have been cleared */
-	OP *k = NULL;
 	OP *kid = cUNOPx(firstkid)->op_first;		/* get past null */
 
 	if (kid->op_type == OP_SCOPE || kid->op_type == OP_LEAVE) {
@@ -8924,8 +8922,8 @@ Perl_rpeep(pTHX_ register OP *o)
                      (sop->op_type == OP_PADHV || sop->op_type == OP_RV2HV)
                     )
             ){	
-                OP * nop = o;
-                OP * lop = o;
+                /* OP * nop = o; */
+                /* OP * lop = o; */
                 /* if (!(nop->op_flags && OPf_WANT_VOID)) { */
                 /*     while (nop && nop->op_next) { */
                 /*         switch (nop->op_next->op_type) { */
@@ -8944,12 +8942,12 @@ Perl_rpeep(pTHX_ register OP *o)
                 /*         } */
                 /*     }             */
                 /* } */
-                if ((lop->op_flags & OPf_WANT) == OPf_WANT_VOID) {
-                    if (fop->op_type == OP_PADHV || fop->op_type == OP_RV2HV) 
-                        cLOGOP->op_first = opt_scalarhv(fop);
-                    if (sop && (sop->op_type == OP_PADHV || sop->op_type == OP_RV2HV)) 
-                        cLOGOP->op_first->op_sibling = opt_scalarhv(sop);
-                }                                        
+                /* if ((lop->op_flags & OPf_WANT) == OPf_WANT_VOID) { */
+                /*     if (fop->op_type == OP_PADHV || fop->op_type == OP_RV2HV)  */
+                /*         cLOGOP->op_first = opt_scalarhv(fop); */
+                /*     if (sop && (sop->op_type == OP_PADHV || sop->op_type == OP_RV2HV))  */
+                /*         cLOGOP->op_first->op_sibling = opt_scalarhv(sop); */
+                /* }                                         */
             }                  
             
 	    
@@ -9096,26 +9094,6 @@ Perl_rpeep(pTHX_ register OP *o)
 	    ) {
 		o->op_private |= OPpDEREFed;
 	    }
-
-	case OP_SORT: {
-	    /* will point to RV2AV or PADAV op on LHS/RHS of assign */
-	    OP *oleft;
-	    OP *o2;
-
-	    /* check that RHS of sort is a single plain array */
-	    OP *oright = cUNOPo->op_first;
-	    if (!oright || oright->op_type != OP_PUSHMARK)
-		break;
-
-	    oright = cUNOPx(oright)->op_sibling;
-	    if (!oright)
-		break;
-	    if (oright->op_type == OP_NULL) { /* skip sort block/sub */
-		oright = cUNOPx(oright)->op_sibling;
-	    }
-
-	    break;
-	}
 
 	case OP_QR:
 	case OP_MATCH:
