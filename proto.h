@@ -7006,9 +7006,9 @@ PERL_CALLCONV void	Perl_clone_params_del(CLONE_PARAMS *param)
 #endif
 
 #if defined(PERL_IN_COMPILE_C) || defined(PERL_DECL_PROT)
-STATIC OP*	S_is_inplace_sort_av(pTHX_ OP* o)
+STATIC OP*	S_is_inplace_av(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_IS_INPLACE_SORT_AV	\
+#define PERL_ARGS_ASSERT_IS_INPLACE_AV	\
 	assert(o)
 
 #endif

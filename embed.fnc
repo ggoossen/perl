@@ -2404,7 +2404,7 @@ Anop	|void	|clone_params_del|NN CLONE_PARAMS *param
 #endif
 
 #if defined(PERL_IN_COMPILE_C) || defined(PERL_DECL_PROT)
-s	|OP*	|is_inplace_sort_av	|NN OP* o
+s	|OP*	|is_inplace_av	|NN OP* o
 #endif
 
 p	|INSTRUCTION*	|codeseq_start_instruction|NN const CODESEQ* codeseq
