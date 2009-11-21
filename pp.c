@@ -52,6 +52,7 @@ PP(pp_stub)
 {
     dVAR;
     dSP;
+    PERL_UNUSED_ARG(pparg1);
     if (GIMME_V == G_SCALAR)
 	XPUSHs(&PL_sv_undef);
     RETURN;
@@ -64,6 +65,7 @@ PP(pp_padav)
     dVAR; dSP; dTARGET;
     I32 gimme;
     assert(SvTYPE(TARG) == SVt_PVAV);
+    PERL_UNUSED_ARG(pparg1);
     if (PL_op->op_private & OPpLVAL_INTRO)
 	if (!(PL_op->op_private & OPpPAD_STATE))
 	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
@@ -106,6 +108,7 @@ PP(pp_padhv)
 {
     dVAR; dSP; dTARGET;
     I32 gimme;
+    PERL_UNUSED_ARG(pparg1);
 
     assert(SvTYPE(TARG) == SVt_PVHV);
     XPUSHs(TARG);
@@ -138,6 +141,7 @@ static const char S_no_symref_sv[] =
 PP(pp_rv2gv)
 {
     dVAR; dSP; dTOPss;
+    PERL_UNUSED_ARG(pparg1);
 
     SvGETMAGIC(sv);
     if (SvROK(sv)) {
@@ -271,6 +275,7 @@ PP(pp_rv2sv)
 {
     dVAR; dSP; dTOPss;
     GV *gv = NULL;
+    PERL_UNUSED_ARG(pparg1);
 
     if (!(PL_op->op_private & OPpDEREFed))
 	SvGETMAGIC(sv);
@@ -319,6 +324,7 @@ PP(pp_av2arylen)
     dVAR; dSP;
     AV * const av = MUTABLE_AV(TOPs);
     const I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
+    PERL_UNUSED_ARG(pparg1);
     if (lvalue) {
 	SV ** const sv = Perl_av_arylen_p(aTHX_ MUTABLE_AV(av));
 	if (!*sv) {
@@ -337,6 +343,7 @@ PP(pp_av2arylen)
 PP(pp_pos)
 {
     dVAR; dSP; dPOPss;
+    PERL_UNUSED_ARG(pparg1);
 
     if (PL_op->op_flags & OPf_MOD || LVRET) {
 	SV * const ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
@@ -376,6 +383,7 @@ PP(pp_rv2cv)
     /* (But not in defined().) */
 
     CV *cv = sv_2cv(TOPs, &stash_unused, &gv, flags);
+    PERL_UNUSED_ARG(pparg1);
     if (cv) {
 	if (CvCLONE(cv))
 	    cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
@@ -402,6 +410,7 @@ PP(pp_prototype)
     HV *stash;
     GV *gv;
     SV *ret = &PL_sv_undef;
+    PERL_UNUSED_ARG(pparg1);
 
     if (SvPOK(TOPs) && SvCUR(TOPs) >= 7) {
 	const char * s = SvPVX_const(TOPs);
@@ -487,6 +496,7 @@ PP(pp_anoncode)
 {
     dVAR; dSP;
     CV *cv = MUTABLE_CV(PAD_SV(PL_op->op_targ));
+    PERL_UNUSED_ARG(pparg1);
     if (CvCLONE(cv))
 	cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
     EXTEND(SP,1);
@@ -497,6 +507,7 @@ PP(pp_anoncode)
 PP(pp_srefgen)
 {
     dVAR; dSP;
+    PERL_UNUSED_ARG(pparg1);
     *SP = refto(*SP);
     RETURN;
 }
@@ -504,6 +515,7 @@ PP(pp_srefgen)
 PP(pp_refgen)
 {
     dVAR; dSP; dMARK;
+    PERL_UNUSED_ARG(pparg1);
     if (GIMME != G_ARRAY) {
 	if (++MARK <= SP)
 	    *MARK = *SP;
@@ -560,6 +572,7 @@ PP(pp_ref)
     const char *pv;
     SV * const sv = POPs;
     STRLEN len;
+    PERL_UNUSED_ARG(pparg1);
 
     if (sv)
 	SvGETMAGIC(sv);
@@ -576,6 +589,7 @@ PP(pp_bless)
 {
     dVAR; dSP;
     HV *stash;
+    PERL_UNUSED_ARG(pparg1);
 
     if (MAXARG == 1)
 	stash = CopSTASH(PL_curcop);
@@ -605,6 +619,7 @@ PP(pp_gelem)
     const char * const elem = SvPV_nolen_const(sv);
     GV * const gv = MUTABLE_GV(POPs);
     SV * tmpRef = NULL;
+    PERL_UNUSED_ARG(pparg1);
 
     sv = NULL;
     if (elem) {
@@ -679,6 +694,7 @@ PP(pp_study)
     register I32 *sfirst;
     register I32 *snext;
     STRLEN len;
+    PERL_UNUSED_ARG(pparg1);
 
     if (sv == PL_lastscream) {
 	if (SvSCREAM(sv))
@@ -746,6 +762,7 @@ PP(pp_trans)
 {
     dVAR; dSP; dTARG;
     SV *sv;
+    PERL_UNUSED_ARG(pparg1);
 
     if (PL_op->op_flags & OPf_STACKED)
 	sv = POPs;
@@ -765,6 +782,7 @@ PP(pp_trans)
 PP(pp_schop)
 {
     dVAR; dSP; dTARGET;
+    PERL_UNUSED_ARG(pparg1);
     do_chop(TARG, TOPs);
     SETTARG;
     RETURN;
@@ -773,6 +791,7 @@ PP(pp_schop)
 PP(pp_chop)
 {
     dVAR; dSP; dMARK; dTARGET; dORIGMARK;
+    PERL_UNUSED_ARG(pparg1);
     while (MARK < SP)
 	do_chop(TARG, *++MARK);
     SP = ORIGMARK;
@@ -783,6 +802,7 @@ PP(pp_chop)
 PP(pp_schomp)
 {
     dVAR; dSP; dTARGET;
+    PERL_UNUSED_ARG(pparg1);
     SETi(do_chomp(TOPs));
     RETURN;
 }
@@ -791,6 +811,7 @@ PP(pp_chomp)
 {
     dVAR; dSP; dMARK; dTARGET;
     register I32 count = 0;
+    PERL_UNUSED_ARG(pparg1);
 
     while (SP > MARK)
 	count += do_chomp(POPs);
@@ -802,6 +823,7 @@ PP(pp_undef)
 {
     dVAR; dSP;
     SV *sv;
+    PERL_UNUSED_ARG(pparg1);
 
     if (!PL_op->op_private) {
 	EXTEND(SP, 1);
@@ -880,6 +902,7 @@ PP(pp_undef)
 PP(pp_predec)
 {
     dVAR; dSP;
+    PERL_UNUSED_ARG(pparg1);
     if (SvTYPE(TOPs) >= SVt_PVAV || isGV_with_GP(TOPs))
 	Perl_croak_no_modify(aTHX);
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
@@ -897,6 +920,7 @@ PP(pp_predec)
 PP(pp_postinc)
 {
     dVAR; dSP; dTARGET;
+    PERL_UNUSED_ARG(pparg1);
     if (SvTYPE(TOPs) >= SVt_PVAV || isGV_with_GP(TOPs))
 	Perl_croak_no_modify(aTHX);
     sv_setsv(TARG, TOPs);
@@ -919,6 +943,7 @@ PP(pp_postinc)
 PP(pp_postdec)
 {
     dVAR; dSP; dTARGET;
+    PERL_UNUSED_ARG(pparg1);
     if (SvTYPE(TOPs) >= SVt_PVAV || isGV_with_GP(TOPs))
 	Perl_croak_no_modify(aTHX);
     sv_setsv(TARG, TOPs);
@@ -943,6 +968,7 @@ PP(pp_pow)
 #ifdef PERL_PRESERVE_IVUV
     bool is_int = 0;
 #endif
+    PERL_UNUSED_ARG(pparg1);
     tryAMAGICbin_MG(pow_amg, AMGf_assign|AMGf_numeric);
     svr = TOPs;
     svl = TOPm1s;
@@ -1113,6 +1139,7 @@ PP(pp_pow)
 PP(pp_multiply)
 {
     dVAR; dSP; dATARGET; SV *svl, *svr;
+    PERL_UNUSED_ARG(pparg1);
     tryAMAGICbin_MG(mult_amg, AMGf_assign|AMGf_numeric);
     svr = TOPs;
     svl = TOPm1s;
@@ -1238,6 +1265,7 @@ PP(pp_divide)
 {
     dVAR; dSP; dATARGET; SV *svl, *svr;
     tryAMAGICbin_MG(div_amg, AMGf_assign|AMGf_numeric);
+    PERL_UNUSED_ARG(pparg1);
     svr = TOPs;
     svl = TOPm1s;
     /* Only try to do UV divide first
@@ -1362,6 +1390,7 @@ PP(pp_modulo)
 {
     dVAR; dSP; dATARGET;
     tryAMAGICbin_MG(modulo_amg, AMGf_assign|AMGf_numeric);
+    PERL_UNUSED_ARG(pparg1);
     {
 	UV left  = 0;
 	UV right = 0;
@@ -1492,6 +1521,7 @@ PP(pp_modulo)
 PP(pp_repeat)
 {
     dVAR; dSP; dATARGET;
+    PERL_UNUSED_ARG(pparg1);
     register IV count;
     SV *sv;
 
@@ -1627,6 +1657,7 @@ PP(pp_repeat)
 PP(pp_subtract)
 {
     dVAR; dSP; dATARGET; bool useleft; SV *svl, *svr;
+    PERL_UNUSED_ARG(pparg1);
     tryAMAGICbin_MG(subtr_amg, AMGf_assign|AMGf_numeric);
     svr = TOPs;
     svl = TOPm1s;
@@ -1749,6 +1780,7 @@ PP(pp_left_shift)
 {
     dVAR; dSP; dATARGET; SV *svl, *svr;
     tryAMAGICbin_MG(lshift_amg, AMGf_assign);
+    PERL_UNUSED_ARG(pparg1);
     svr = POPs;
     svl = TOPs;
     {
@@ -1769,6 +1801,7 @@ PP(pp_right_shift)
 {
     dVAR; dSP; dATARGET; SV *svl, *svr;
     tryAMAGICbin_MG(rshift_amg, AMGf_assign);
+    PERL_UNUSED_ARG(pparg1);
     svr = POPs;
     svl = TOPs;
     {
@@ -1789,6 +1822,7 @@ PP(pp_lt)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(lt_amg, AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please_nomg(TOPs);
     if (SvIOK(TOPs)) {
@@ -1872,6 +1906,7 @@ PP(pp_gt)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(gt_amg, AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please_nomg(TOPs);
     if (SvIOK(TOPs)) {
@@ -1956,6 +1991,7 @@ PP(pp_le)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(le_amg, AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please_nomg(TOPs);
     if (SvIOK(TOPs)) {
@@ -2040,6 +2076,7 @@ PP(pp_ge)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(ge_amg,AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please_nomg(TOPs);
     if (SvIOK(TOPs)) {
@@ -2124,6 +2161,7 @@ PP(pp_ne)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(ne_amg,AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
 #ifndef NV_PRESERVES_UV
     if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
         SP--;
@@ -2201,6 +2239,7 @@ PP(pp_ncmp)
 {
     dVAR; dSP; dTARGET;
     tryAMAGICbin_MG(ncmp_amg, 0);
+    PERL_UNUSED_ARG(pparg1);
 #ifndef NV_PRESERVES_UV
     if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
 	const UV right = PTR2UV(SvRV(POPs));
@@ -2309,6 +2348,7 @@ PP(pp_sle)
     int amg_type = sle_amg;
     int multiplier = 1;
     int rhs = 1;
+    PERL_UNUSED_ARG(pparg1);
 
     switch (PL_op->op_type) {
     case OP_SLT:
@@ -2344,6 +2384,7 @@ PP(pp_seq)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(seq_amg, AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPssrl;
       SETs(boolSV(sv_eq(left, right)));
@@ -2355,6 +2396,7 @@ PP(pp_sne)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(sne_amg, AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPssrl;
       SETs(boolSV(!sv_eq(left, right)));
@@ -2366,6 +2408,7 @@ PP(pp_scmp)
 {
     dVAR; dSP; dTARGET;
     tryAMAGICbin_MG(scmp_amg, 0);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPssrl;
       const int cmp = (IN_LOCALE_RUNTIME
@@ -2380,6 +2423,7 @@ PP(pp_bit_and)
 {
     dVAR; dSP; dATARGET;
     tryAMAGICbin_MG(band_amg, AMGf_assign);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
@@ -2404,6 +2448,7 @@ PP(pp_bit_or)
 {
     dVAR; dSP; dATARGET;
     const int op_type = PL_op->op_type;
+    PERL_UNUSED_ARG(pparg1);
 
     tryAMAGICbin_MG((op_type == OP_BIT_OR ? bor_amg : bxor_amg), AMGf_assign);
     {
@@ -2434,6 +2479,7 @@ PP(pp_negate)
 {
     dVAR; dSP; dTARGET;
     tryAMAGICun_MG(neg_amg, AMGf_numeric);
+    PERL_UNUSED_ARG(pparg1);
     {
 	SV * const sv = TOPs;
 	const int flags = SvFLAGS(sv);
@@ -2504,6 +2550,7 @@ PP(pp_not)
 {
     dVAR; dSP;
     tryAMAGICun_MG(not_amg, AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
     *PL_stack_sp = boolSV(!SvTRUE(*PL_stack_sp));
     return NORMAL;
 }
@@ -2512,6 +2559,7 @@ PP(pp_complement)
 {
     dVAR; dSP; dTARGET;
     tryAMAGICun_MG(compl_amg, 0);
+    PERL_UNUSED_ARG(pparg1);
     {
       dTOPss;
       if (SvNIOKp(sv)) {
@@ -2614,6 +2662,7 @@ PP(pp_i_multiply)
 {
     dVAR; dSP; dATARGET;
     tryAMAGICbin_MG(mult_amg, AMGf_assign);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPiirl_nomg;
       SETi( left * right );
@@ -2626,6 +2675,7 @@ PP(pp_i_divide)
     IV num;
     dVAR; dSP; dATARGET;
     tryAMAGICbin_MG(div_amg, AMGf_assign);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPssrl;
       IV value = SvIV_nomg(right);
@@ -2653,6 +2703,7 @@ PP(pp_i_modulo)
      /* This is the vanilla old i_modulo. */
      dVAR; dSP; dATARGET;
      tryAMAGICbin_MG(modulo_amg, AMGf_assign);
+     PERL_UNUSED_ARG(pparg1);
      {
 	  dPOPTOPiirl_nomg;
 	  if (!right)
@@ -2738,6 +2789,7 @@ PP(pp_i_add)
 {
     dVAR; dSP; dATARGET;
     tryAMAGICbin_MG(add_amg, AMGf_assign);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPiirl_ul_nomg;
       SETi( left + right );
@@ -2749,6 +2801,7 @@ PP(pp_i_subtract)
 {
     dVAR; dSP; dATARGET;
     tryAMAGICbin_MG(subtr_amg, AMGf_assign);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPiirl_ul_nomg;
       SETi( left - right );
@@ -2760,6 +2813,7 @@ PP(pp_i_lt)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(lt_amg, AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left < right));
@@ -2771,6 +2825,7 @@ PP(pp_i_gt)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(gt_amg, AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left > right));
@@ -2782,6 +2837,7 @@ PP(pp_i_le)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(le_amg, AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left <= right));
@@ -2793,6 +2849,7 @@ PP(pp_i_ge)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(ge_amg, AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left >= right));
@@ -2804,6 +2861,7 @@ PP(pp_i_eq)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(eq_amg, AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left == right));
@@ -2815,6 +2873,7 @@ PP(pp_i_ne)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(ne_amg, AMGf_set);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPiirl_nomg;
       SETs(boolSV(left != right));
@@ -2826,6 +2885,7 @@ PP(pp_i_ncmp)
 {
     dVAR; dSP; dTARGET;
     tryAMAGICbin_MG(ncmp_amg, 0);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPiirl_nomg;
       I32 value;
@@ -2845,6 +2905,7 @@ PP(pp_i_negate)
 {
     dVAR; dSP; dTARGET;
     tryAMAGICun_MG(neg_amg, 0);
+    PERL_UNUSED_ARG(pparg1);
     {
 	SV * const sv = TOPs;
 	IV const i = SvIV_nomg(sv);
@@ -2859,6 +2920,7 @@ PP(pp_atan2)
 {
     dVAR; dSP; dTARGET;
     tryAMAGICbin_MG(atan2_amg, 0);
+    PERL_UNUSED_ARG(pparg1);
     {
       dPOPTOPnnrl_nomg;
       SETn(Perl_atan2(left, right));
@@ -2873,6 +2935,7 @@ PP(pp_sin)
     const char *neg_report = NULL;
     NV (*func)(NV) = Perl_sin;
     const int op_type = PL_op->op_type;
+    PERL_UNUSED_ARG(pparg1);
 
     switch (op_type) {
     case OP_COS:
@@ -2930,6 +2993,7 @@ PP(pp_rand)
 {
     dVAR; dSP; dTARGET;
     NV value;
+    PERL_UNUSED_ARG(pparg1);
     if (MAXARG < 1)
 	value = 1.0;
     else
@@ -2949,6 +3013,7 @@ PP(pp_srand)
 {
     dVAR; dSP; dTARGET;
     const UV anum = (MAXARG < 1) ? seed() : POPu;
+    PERL_UNUSED_ARG(pparg1);
     (void)seedDrand01((Rand_seed_t)anum);
     PL_srand_called = TRUE;
     if (anum)
@@ -2966,6 +3031,7 @@ PP(pp_int)
 {
     dVAR; dSP; dTARGET;
     tryAMAGICun_MG(int_amg, AMGf_numeric);
+    PERL_UNUSED_ARG(pparg1);
     {
       SV * const sv = TOPs;
       const IV iv = SvIV_nomg(sv);
@@ -3008,6 +3074,7 @@ PP(pp_abs)
 {
     dVAR; dSP; dTARGET;
     tryAMAGICun_MG(abs_amg, AMGf_numeric);
+    PERL_UNUSED_ARG(pparg1);
     {
       SV * const sv = TOPs;
       /* This will cache the NV value if string isn't actually integer  */
@@ -3053,6 +3120,7 @@ PP(pp_oct)
     NV result_nv;
     UV result_uv;
     SV* const sv = POPs;
+    PERL_UNUSED_ARG(pparg1);
 
     tmps = (SvPV_const(sv, len));
     if (DO_UTF8(sv)) {
@@ -3095,6 +3163,7 @@ PP(pp_length)
 {
     dVAR; dSP; dTARGET;
     SV * const sv = TOPs;
+    PERL_UNUSED_ARG(pparg1);
 
     if (SvGAMAGIC(sv)) {
 	/* For an overloaded or magic scalar, we can't know in advance if
@@ -3152,6 +3221,7 @@ PP(pp_substr)
     const int num_args = PL_op->op_private & 7;
     bool repl_need_utf8_upgrade = FALSE;
     bool repl_is_utf8 = FALSE;
+    PERL_UNUSED_ARG(pparg1);
 
     if (num_args > 2) {
 	if (num_args > 3) {
@@ -3336,6 +3406,7 @@ PP(pp_vec)
     register SV * const src = POPs;
     const I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
     SV * ret;
+    PERL_UNUSED_ARG(pparg1);
 
     if (lvalue) {			/* it's an lvalue! */
 	ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
@@ -3372,6 +3443,7 @@ PP(pp_index)
     bool big_utf8;
     bool little_utf8;
     const bool is_index = PL_op->op_type == OP_INDEX;
+    PERL_UNUSED_ARG(pparg1);
 
     if (MAXARG >= 3) {
 	/* arybase is in characters, like offset, so combine prior to the
@@ -3479,6 +3551,7 @@ PP(pp_index)
 PP(pp_sprintf)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
+    PERL_UNUSED_ARG(pparg1);
     if (SvTAINTED(MARK[1]))
 	TAINT_PROPER("sprintf");
     SvTAINTED_off(TARG);
@@ -3496,6 +3569,7 @@ PP(pp_ord)
     SV *argsv = POPs;
     STRLEN len;
     const U8 *s = (U8*)SvPV_const(argsv, len);
+    PERL_UNUSED_ARG(pparg1);
 
     if (PL_encoding && SvPOK(argsv) && !DO_UTF8(argsv)) {
         SV * const tmpsv = sv_2mortal(newSVsv(argsv));
@@ -3515,6 +3589,7 @@ PP(pp_chr)
     dVAR; dSP; dTARGET;
     char *tmps;
     UV value;
+    PERL_UNUSED_ARG(pparg1);
 
     if (((SvIOK_notUV(TOPs) && SvIV(TOPs) < 0)
 	 ||
@@ -3574,6 +3649,7 @@ PP(pp_crypt)
     dPOPTOPssrl;
     STRLEN len;
     const char *tmps = SvPV_const(left, len);
+    PERL_UNUSED_ARG(pparg1);
 
     if (DO_UTF8(left)) {
          /* If Unicode, try to downgrade.
@@ -3707,6 +3783,7 @@ PP(pp_ucfirst)
     STRLEN tculen;  /* tculen is the byte length of the freshly titlecased (or
 		     * lowercased) character stored in tmpbuf.  May be either
 		     * UTF-8 or not, but in either case is the number of bytes */
+    PERL_UNUSED_ARG(pparg1);
 
     SvGETMAGIC(source);
     if (SvOK(source)) {
@@ -4005,6 +4082,7 @@ PP(pp_uc)
     SV *dest;
     const U8 *s;
     U8 *d;
+    PERL_UNUSED_ARG(pparg1);
 
     SvGETMAGIC(source);
 
@@ -4272,6 +4350,7 @@ PP(pp_lc)
     SV *dest;
     const U8 *s;
     U8 *d;
+    PERL_UNUSED_ARG(pparg1);
 
     SvGETMAGIC(source);
 
@@ -4490,6 +4569,7 @@ PP(pp_quotemeta)
     SV * const sv = TOPs;
     STRLEN len;
     register const char *s = SvPV_const(sv,len);
+    PERL_UNUSED_ARG(pparg1);
 
     SvUTF8_off(TARG);				/* decontaminate */
     if (len) {
@@ -4540,6 +4620,7 @@ PP(pp_aslice)
     dVAR; dSP; dMARK; dORIGMARK;
     register AV *const av = MUTABLE_AV(POPs);
     register const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
+    PERL_UNUSED_ARG(pparg1);
 
     if (SvTYPE(av) == SVt_PVAV) {
 	const I32 arybase = CopARYBASE_get(PL_curcop);
@@ -4610,6 +4691,7 @@ PP(pp_aeach)
     const I32 gimme = GIMME_V;
     IV *iterp = Perl_av_iter_p(aTHX_ array);
     const IV current = (*iterp)++;
+    PERL_UNUSED_ARG(pparg1);
 
     if (current > av_len(array)) {
 	*iterp = 0;
@@ -4634,6 +4716,7 @@ PP(pp_akeys)
     dSP;
     AV *array = MUTABLE_AV(POPs);
     const I32 gimme = GIMME_V;
+    PERL_UNUSED_ARG(pparg1);
 
     *Perl_av_iter_p(aTHX_ array) = 0;
 
@@ -4672,6 +4755,7 @@ PP(pp_each)
     HV * hash = MUTABLE_HV(POPs);
     HE *entry;
     const I32 gimme = GIMME_V;
+    PERL_UNUSED_ARG(pparg1);
 
     PUTBACK;
     /* might clobber stack_sp */
@@ -4880,6 +4964,7 @@ PP(pp_delete)
     dSP;
     I32 gimme;
     I32 discard;
+    PERL_UNUSED_ARG(pparg1);
 
     if (PL_op->op_private & OPpLVAL_INTRO)
 	return do_delete_local();
@@ -4946,6 +5031,7 @@ PP(pp_exists)
     dSP;
     SV *tmpsv;
     HV *hv;
+    PERL_UNUSED_ARG(pparg1);
 
     if (PL_op->op_private & OPpEXISTS_SUB) {
 	GV *gv;
@@ -4982,6 +5068,7 @@ PP(pp_hslice)
     register const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
     bool can_preserve = FALSE;
+    PERL_UNUSED_ARG(pparg1);
 
     if (localizing) {
         MAGIC *mg;
@@ -5037,6 +5124,7 @@ PP(pp_hslice)
 PP(pp_list)
 {
     dVAR; dSP; dMARK;
+    PERL_UNUSED_ARG(pparg1);
     if (GIMME != G_ARRAY) {
 	if (++MARK <= SP)
 	    *MARK = *SP;		/* unwanted list, return last item */
@@ -5060,6 +5148,7 @@ PP(pp_lslice)
 
     register const I32 max = lastrelem - lastlelem;
     register SV **lelem;
+    PERL_UNUSED_ARG(pparg1);
 
     if (GIMME != G_ARRAY) {
 	I32 ix = SvIV(*lastlelem);
@@ -5106,6 +5195,7 @@ PP(pp_anonlist)
     dVAR; dSP; dMARK; dORIGMARK;
     const I32 items = SP - MARK;
     SV * const av = MUTABLE_SV(av_make(items, MARK+1));
+    PERL_UNUSED_ARG(pparg1);
     SP = ORIGMARK;		/* av_make() might realloc stack_sp */
     mXPUSHs((PL_op->op_flags & OPf_SPECIAL)
 	    ? newRV_noinc(av) : av);
@@ -5116,6 +5206,7 @@ PP(pp_anonhash)
 {
     dVAR; dSP; dMARK; dORIGMARK;
     HV* const hv = newHV();
+    PERL_UNUSED_ARG(pparg1);
 
     while (MARK < SP) {
 	SV * const key = *++MARK;
@@ -5145,6 +5236,7 @@ PP(pp_splice)
     I32 after;
     I32 diff;
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
+    PERL_UNUSED_ARG(pparg1);
 
     if (mg) {
 	*MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
@@ -5341,6 +5433,7 @@ PP(pp_push)
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     register AV * const ary = MUTABLE_AV(*++MARK);
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
+    PERL_UNUSED_ARG(pparg1);
 
     if (mg) {
 	*MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
@@ -5378,6 +5471,7 @@ PP(pp_shift)
     AV * const av = PL_op->op_flags & OPf_SPECIAL
 	? MUTABLE_AV(GvAV(PL_defgv)) : MUTABLE_AV(POPs);
     SV * const sv = PL_op->op_type == OP_SHIFT ? av_shift(av) : av_pop(av);
+    PERL_UNUSED_ARG(pparg1);
     EXTEND(SP, 1);
     assert (sv);
     if (AvREAL(av))
@@ -5391,6 +5485,7 @@ PP(pp_unshift)
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     register AV *ary = MUTABLE_AV(*++MARK);
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
+    PERL_UNUSED_ARG(pparg1);
 
     if (mg) {
 	*MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
@@ -5419,6 +5514,7 @@ PP(pp_unshift)
 PP(pp_reverse)
 {
     dVAR; dSP; dMARK;
+    PERL_UNUSED_ARG(pparg1);
 
     if (GIMME == G_ARRAY) {
 	if (PL_op->op_private & OPpREVERSE_INPLACE) {
@@ -5577,6 +5673,7 @@ PP(pp_split)
     U32 make_mortal = SVs_TEMP;
     bool multiline = 0;
     MAGIC *mg = NULL;
+    PERL_UNUSED_ARG(pparg1);
 
 #ifdef DEBUGGING
     Copy(&LvTARGOFF(POPs), &pm, 1, PMOP*);
@@ -5983,6 +6080,7 @@ PP(pp_split)
 PP(pp_once)
 {
     SV *const sv = PAD_SVl(PL_op->op_targ);
+    PERL_UNUSED_ARG(pparg1);
 
     if (SvPADSTALE(sv)) {
 	/* First time. */
@@ -5999,6 +6097,7 @@ PP(pp_lock)
     dSP;
     dTOPss;
     SV *retsv = sv;
+    PERL_UNUSED_ARG(pparg1);
     assert(SvTYPE(retsv) != SVt_PVCV);
     SvLOCK(sv);
     if (SvTYPE(retsv) == SVt_PVAV || SvTYPE(retsv) == SVt_PVHV) {
@@ -6012,6 +6111,7 @@ PP(pp_lock)
 PP(unimplemented_op)
 {
     dVAR;
+    PERL_UNUSED_ARG(pparg1);
     DIE(aTHX_ "panic: unimplemented op %s (#%d) called", OP_NAME(PL_op),
 	PL_op->op_type);
 }
@@ -6021,6 +6121,7 @@ PP(pp_boolkeys)
     dVAR;
     dSP;
     HV * const hv = (HV*)POPs;
+    PERL_UNUSED_ARG(pparg1);
     
     if (SvRMAGICAL(hv)) {
 	MAGIC * const mg = mg_find((SV*)hv, PERL_MAGIC_tied);

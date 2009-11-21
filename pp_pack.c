@@ -2275,6 +2275,7 @@ PP(pp_unpack)
     const char *strend = s + rlen;
     const char *patend = pat + llen;
     I32 cnt;
+    PERL_UNUSED_ARG(pparg1);
 
     PUTBACK;
     cnt = unpackstring(pat, patend, s, strend,
@@ -3605,6 +3606,7 @@ PP(pp_pack)
     SV *pat_sv = *++MARK;
     register const char *pat = SvPV_const(pat_sv, fromlen);
     register const char *patend = pat + fromlen;
+    PERL_UNUSED_ARG(pparg1);
 
     MARK++;
     sv_setpvs(cat, "");
