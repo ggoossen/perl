@@ -698,11 +698,12 @@ PP(pp_add)
 PP(pp_aelemfast)
 {
     dVAR; dSP;
-    IV array_index = PTR2IV(pparg1);
+    IV elem = PTR2IV(pparg1);
     AV * const av = PL_op->op_type == OP_PADAV
 	? MUTABLE_AV(PAD_SV(PL_op->op_targ)) : GvAV(cGVOP_gv);
     const U32 lval = PL_op->op_flags & OPf_MOD;
-    SV** const svp = av_fetch(av, array_index, lval);
+    const U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > av_len(av));
+    SV** const svp = av_fetch(av, elem, lval && !defer);
     SV *sv = (svp ? *svp : &PL_sv_undef);
     EXTEND(SP, 1);
     if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
