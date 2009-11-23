@@ -6165,6 +6165,12 @@ PP(pp_instr_const)
     RETURN;
 }
 
+PP(pp_instr_end)
+{
+    RUN_SET_NEXT_INSTRUCTION( NULL );
+    return NORMAL;
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd
