@@ -8817,8 +8817,6 @@ Perl_rpeep(pTHX_ register OP *o)
 	    break;
 
 	case OP_CONST:
-	    if (cSVOPo->op_private & OPpCONST_STRICT)
-		no_bareword_allowed(o);
 #ifdef USE_ITHREADS
 	case OP_HINTSEVAL:
 	case OP_METHOD_NAMED:
@@ -8859,21 +8857,6 @@ Perl_rpeep(pTHX_ register OP *o)
 #endif
 	    break;
 
-	case OP_CONCAT:
-	    /* if (o->op_next && o->op_next->op_type == OP_STRINGIFY) { */
-	    /* 	if (o->op_next->op_private & OPpTARGET_MY) { */
-	    /* 	    if (o->op_flags & OPf_STACKED) /\* chained concats *\/ */
-	    /* 		break; /\* ignore_optimization *\/ */
-	    /* 	    else { */
-	    /* 		/\* assert(PL_opargs[o->op_type] & OA_TARGLEX); *\/ */
-	    /* 		o->op_targ = o->op_next->op_targ; */
-	    /* 		o->op_next->op_targ = 0; */
-	    /* 		o->op_private |= OPpTARGET_MY; */
-	    /* 	    } */
-	    /* 	} */
-	    /* 	op_null(o->op_next); */
-	    /* } */
-	    break;
 	case OP_STUB:
 	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
 		break; /* Scalar stub must produce undef.  List stub is noop */
