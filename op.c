@@ -8857,11 +8857,6 @@ Perl_rpeep(pTHX_ register OP *o)
 #endif
 	    break;
 
-	case OP_STUB:
-	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
-		break; /* Scalar stub must produce undef.  List stub is noop */
-	    }
-	    goto nothin;
 	case OP_NULL:
 	    if (o->op_targ == OP_NEXTSTATE
 		|| o->op_targ == OP_DBSTATE)
