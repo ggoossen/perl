@@ -1199,6 +1199,8 @@ Perl_codeseq_dump(pTHX_ const CODESEQ *codeseq)
 	}
 	else if (instr->instr_ppaddr == PL_ppaddr[OP_COND_EXPR]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_OR]
+	    || instr->instr_ppaddr == PL_ppaddr[OP_AND]
+	    || instr->instr_ppaddr == PL_ppaddr[OP_DOR]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ONCE]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ENTERTRY]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_RANGE]
@@ -1231,6 +1233,8 @@ Perl_codeseq_dump(pTHX_ const CODESEQ *codeseq)
 	}
 	else if (instr->instr_ppaddr == PL_ppaddr[OP_COND_EXPR]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_OR]
+	    || instr->instr_ppaddr == PL_ppaddr[OP_AND]
+	    || instr->instr_ppaddr == PL_ppaddr[OP_DOR]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ONCE]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ENTERTRY]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_RANGE]
