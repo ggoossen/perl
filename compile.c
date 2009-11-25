@@ -894,6 +894,18 @@ S_add_op(CODESEQ* codeseq, BRANCH_POINT_PAD* bpp, OP* o, bool *may_constant_fold
 	break;
     }
     case OP_NEXTSTATE:
+    {
+	/* Two NEXTSTATEs in a row serve no purpose. Except if they happen
+	   to carry two labels. For now, take the easier option, and skip
+	   this optimisation if the first NEXTSTATE has a label.  */
+	if (o->op_next && o->op_next->op_type == OP_NEXTSTATE
+	     && !CopLABEL((COP*)o)
+	    )
+	    break;
+	S_append_instruction(codeseq, bpp, o, o->op_type);
+	PL_curcop = ((COP*)o);
+	break;
+    }
     case OP_DBSTATE:
     {
 	S_append_instruction(codeseq, bpp, o, o->op_type);

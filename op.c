@@ -1468,6 +1468,45 @@ S_finished_op_check(pTHX_ OP* o)
     case OP_CONST:
 	if (o->op_private & OPpCONST_STRICT)
 	    no_bareword_allowed(o);
+	/* FALL THROUGH */
+#ifdef USE_ITHREADS
+    case OP_HINTSEVAL:
+    case OP_METHOD_NAMED:
+	/* Relocate sv to the pad for thread safety.
+	 * Despite being a "constant", the SV is written to,
+	 * for reference counts, sv_upgrade() etc. */
+	if (cSVOP->op_sv) {
+	    const PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
+	    if (o->op_type != OP_METHOD_NAMED && SvPADTMP(cSVOPo->op_sv)) {
+		/* If op_sv is already a PADTMP then it is being used by
+		 * some pad, so make a copy. */
+		sv_setsv(PAD_SVl(ix),cSVOPo->op_sv);
+		SvREADONLY_on(PAD_SVl(ix));
+		SvREFCNT_dec(cSVOPo->op_sv);
+	    }
+	    else if (o->op_type != OP_METHOD_NAMED
+		&& cSVOPo->op_sv == &PL_sv_undef) {
+		/* PL_sv_undef is hack - it's unsafe to store it in the
+		   AV that is the pad, because av_fetch treats values of
+		   PL_sv_undef as a "free" AV entry and will merrily
+		   replace them with a new SV, causing pad_alloc to think
+		   that this pad slot is free. (When, clearly, it is not)
+		*/
+		SvOK_off(PAD_SVl(ix));
+		SvPADTMP_on(PAD_SVl(ix));
+		SvREADONLY_on(PAD_SVl(ix));
+	    }
+	    else {
+		SvREFCNT_dec(PAD_SVl(ix));
+		SvPADTMP_on(cSVOPo->op_sv);
+		PAD_SETSV(ix, cSVOPo->op_sv);
+		/* XXX I don't know how this isn't readonly already. */
+		SvREADONLY_on(PAD_SVl(ix));
+	    }
+	    cSVOPo->op_sv = NULL;
+	    o->op_targ = ix;
+	}
+#endif
 	break;
 
     case OP_HELEM:
@@ -8762,100 +8801,7 @@ Perl_rpeep(pTHX_ register OP *o)
 	case OP_DBSTATE:
 	    PL_curcop = ((COP*)o);		/* for warnings */
 	    break;
-	case OP_NEXTSTATE:
-	    PL_curcop = ((COP*)o);		/* for warnings */
-
-	    /* Two NEXTSTATEs in a row serve no purpose. Except if they happen
-	       to carry two labels. For now, take the easier option, and skip
-	       this optimisation if the first NEXTSTATE has a label.  */
-	    if (!CopLABEL((COP*)o)) {
-		OP *nextop = o->op_next;
-		while (nextop && nextop->op_type == OP_NULL)
-		    nextop = nextop->op_next;
-
-		if (nextop && (nextop->op_type == OP_NEXTSTATE)) {
-		    COP *firstcop = (COP *)o;
-		    COP *secondcop = (COP *)nextop;
-		    /* We want the COP pointed to by o (and anything else) to
-		       become the next COP down the line.  */
-		    cop_free(firstcop);
-
-		    firstcop->op_next = secondcop->op_next;
-
-		    /* Now steal all its pointers, and duplicate the other
-		       data.  */
-		    firstcop->cop_line = secondcop->cop_line;
-#ifdef USE_ITHREADS
-		    firstcop->cop_stashpv = secondcop->cop_stashpv;
-		    firstcop->cop_file = secondcop->cop_file;
-#else
-		    firstcop->cop_stash = secondcop->cop_stash;
-		    firstcop->cop_filegv = secondcop->cop_filegv;
-#endif
-		    firstcop->cop_hints = secondcop->cop_hints;
-		    firstcop->cop_seq = secondcop->cop_seq;
-		    firstcop->cop_warnings = secondcop->cop_warnings;
-		    firstcop->cop_hints_hash = secondcop->cop_hints_hash;
-
-#ifdef USE_ITHREADS
-		    secondcop->cop_stashpv = NULL;
-		    secondcop->cop_file = NULL;
-#else
-		    secondcop->cop_stash = NULL;
-		    secondcop->cop_filegv = NULL;
-#endif
-		    secondcop->cop_warnings = NULL;
-		    secondcop->cop_hints_hash = NULL;
-
-		    /* If we use op_null(), and hence leave an ex-COP, some
-		       warnings are misreported. For example, the compile-time
-		       error in 'use strict; no strict refs;'  */
-		    secondcop->op_type = OP_NULL;
-		    secondcop->op_ppaddr = PL_ppaddr[OP_NULL];
-		}
-	    }
-	    break;
-
-	case OP_CONST:
-#ifdef USE_ITHREADS
-	case OP_HINTSEVAL:
-	case OP_METHOD_NAMED:
-	    /* Relocate sv to the pad for thread safety.
-	     * Despite being a "constant", the SV is written to,
-	     * for reference counts, sv_upgrade() etc. */
-	    if (cSVOP->op_sv) {
-		const PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
-		if (o->op_type != OP_METHOD_NAMED && SvPADTMP(cSVOPo->op_sv)) {
-		    /* If op_sv is already a PADTMP then it is being used by
-		     * some pad, so make a copy. */
-		    sv_setsv(PAD_SVl(ix),cSVOPo->op_sv);
-		    SvREADONLY_on(PAD_SVl(ix));
-		    SvREFCNT_dec(cSVOPo->op_sv);
-		}
-		else if (o->op_type != OP_METHOD_NAMED
-			 && cSVOPo->op_sv == &PL_sv_undef) {
-		    /* PL_sv_undef is hack - it's unsafe to store it in the
-		       AV that is the pad, because av_fetch treats values of
-		       PL_sv_undef as a "free" AV entry and will merrily
-		       replace them with a new SV, causing pad_alloc to think
-		       that this pad slot is free. (When, clearly, it is not)
-		    */
-		    SvOK_off(PAD_SVl(ix));
-		    SvPADTMP_on(PAD_SVl(ix));
-		    SvREADONLY_on(PAD_SVl(ix));
-		}
-		else {
-		    SvREFCNT_dec(PAD_SVl(ix));
-		    SvPADTMP_on(cSVOPo->op_sv);
-		    PAD_SETSV(ix, cSVOPo->op_sv);
-		    /* XXX I don't know how this isn't readonly already. */
-		    SvREADONLY_on(PAD_SVl(ix));
-		}
-		cSVOPo->op_sv = NULL;
-		o->op_targ = ix;
-	    }
-#endif
-	    break;
+	}
 
 	oldop = o;
     }
