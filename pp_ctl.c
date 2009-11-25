@@ -1024,8 +1024,8 @@ PP(pp_grepstart)
 	RETURN;
     }
     PL_stack_sp = PL_stack_base + *PL_markstack_ptr + 1;
-    pp_pushmark(NULL);				/* push dst */
-    pp_pushmark(NULL);				/* push src */
+    pp_pushmark(NULL, NULL);				/* push dst */
+    pp_pushmark(NULL, NULL);				/* push src */
     ENTER_with_name("grep");					/* enter outer scope */
 
     SAVETMPS;
@@ -1045,7 +1045,7 @@ PP(pp_grepstart)
 
     PUTBACK;
     if (PL_op->op_type == OP_MAPSTART)
-	pp_pushmark(NULL);			/* push top */
+	pp_pushmark(NULL, NULL);			/* push top */
     /* RUN_SET_NEXT_INSTRUCTION(cLOGOPx(PL_op)->op_other_instr); */
     return NORMAL;
 }
@@ -2822,7 +2822,7 @@ PP(pp_goto)
 		 * for each op.  For now, we punt on the hard ones. */
 		if (PL_op->op_type == OP_FOREACH)
 		    DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop");
-		CALL_FPTR(PL_ppaddr[PL_op->op_type])(aTHX_ NULL);
+		CALL_FPTR(PL_ppaddr[PL_op->op_type])(aTHX_ NULL, NULL);
 	    }
 	    PL_op = oldop;
 	}
@@ -4233,7 +4233,7 @@ S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
     PL_op = (OP *) matcher;
     XPUSHs(sv);
     PUTBACK;
-    pp_match(NULL);
+    pp_match(NULL, NULL);
     SPAGAIN;
     return (SvTRUEx(POPs));
 }
@@ -4717,9 +4717,9 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	PUSHs(d); PUSHs(e);
 	PUTBACK;
 	if (CopHINTS_get(PL_curcop) & HINT_INTEGER)
-	    pp_i_eq(NULL);
+	    pp_i_eq(NULL, NULL);
 	else
-	    pp_eq(NULL);
+	    pp_eq(NULL, NULL);
 	SPAGAIN;
 	if (SvTRUEx(POPs))
 	    RETPUSHYES;
@@ -4731,7 +4731,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Any\n"));
     PUSHs(d); PUSHs(e);
     PUTBACK;
-    pp_seq(NULL);
+    pp_seq(NULL, NULL);
     return NORMAL;
 }
 

@@ -2460,7 +2460,7 @@ typedef struct ptr_tbl_ent PTR_TBL_ENT_t;
 typedef struct ptr_tbl PTR_TBL_t;
 typedef struct clone_params CLONE_PARAMS;
 
-typedef INSTRUCTION* (CPERLscope(*Perl_ppaddr_t))(pTHX_ void* pparg1);
+typedef INSTRUCTION* (CPERLscope(*Perl_ppaddr_t))(pTHX_ void* pparg1, void* pparg2);
 
 #include "handy.h"
 
@@ -4240,7 +4240,7 @@ struct perl_memory_debug_header {
 typedef int (*runops_proc_t)(pTHX);
 typedef void (*share_proc_t) (pTHX_ SV *sv);
 typedef int  (*thrhook_proc_t) (pTHX);
-typedef int (*PPADDR_t[]) (pTHX_ void *pparg1);
+typedef int (*PPADDR_t[]) (pTHX_ void *pparg1, void *pparg2);
 typedef bool (*destroyable_proc_t) (pTHX_ SV *sv);
 typedef void (*despatch_signals_proc_t) (pTHX);
 
@@ -4995,7 +4995,7 @@ struct tempsym; /* defined in pp_pack.c */
 #undef PERL_CKDEF
 #undef PERL_PPDEF
 #define PERL_CKDEF(s)	PERL_CALLCONV OP *s (pTHX_ OP *o);
-#define PERL_PPDEF(s)	PERL_CALLCONV INSTRUCTION *s (pTHX_ void* pparg1);
+#define PERL_PPDEF(s)	PERL_CALLCONV INSTRUCTION *s (pTHX_ void* pparg1, void *pparg2);
 
 #include "proto.h"
 
