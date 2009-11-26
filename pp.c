@@ -108,7 +108,6 @@ PP(pp_padhv)
 {
     dVAR; dSP; dTARGET;
     I32 gimme;
-    PERL_UNUSED_ARG(pparg1);
 
     assert(SvTYPE(TARG) == SVt_PVHV);
     XPUSHs(TARG);
@@ -124,7 +123,7 @@ PP(pp_padhv)
     }
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
-	RETURNOP(do_kv());
+	RETURNOP(do_kv(pparg1, pparg2));
     }
     else if (gimme == G_SCALAR) {
 	SV* const sv = Perl_hv_scalar(aTHX_ MUTABLE_HV(TARG));
@@ -5433,7 +5432,6 @@ PP(pp_push)
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     register AV * const ary = MUTABLE_AV(*++MARK);
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
-    PERL_UNUSED_ARG(pparg1);
 
     if (mg) {
 	*MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
