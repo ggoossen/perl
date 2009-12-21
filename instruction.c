@@ -22,7 +22,7 @@ void
 Perl_codeseq_refcnt_inc(pTHX_ CODESEQ* codeseq)
 {
     PERL_ARGS_ASSERT_CODESEQ_REFCNT_INC;
-    codeseq->xcodeseq_refcnt++;
+    ++codeseq->xcodeseq_refcnt;
 }
 
 void
@@ -30,7 +30,7 @@ Perl_codeseq_refcnt_dec(pTHX_ CODESEQ* codeseq)
 {
     if (!codeseq)
 	return;
-    if (! codeseq->xcodeseq_refcnt--)
+    if (--codeseq->xcodeseq_refcnt == 0)
 	free_codeseq(codeseq);
 }
 

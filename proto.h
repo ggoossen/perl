@@ -3008,6 +3008,7 @@ PERL_CALLCONV void	Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void* p);
 /* PERL_CALLCONV void	Perl_save_freesv(pTHX_ SV* sv); */
 /* PERL_CALLCONV void	Perl_save_freeop(pTHX_ OP* o); */
 /* PERL_CALLCONV void	Perl_save_freepv(pTHX_ char* pv); */
+/* PERL_CALLCONV void	Perl_save_freecodeseq(pTHX_ CODESEQ* codeseq); */
 PERL_CALLCONV void	Perl_save_generic_svref(pTHX_ SV** sptr)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SAVE_GENERIC_SVREF	\

@@ -486,6 +486,7 @@ Perl_save_destructor_x
 Perl_save_freesv
 Perl_save_freeop
 Perl_save_freepv
+Perl_save_freecodeseq
 Perl_save_generic_svref
 Perl_save_generic_pvref
 Perl_save_shared_pvref

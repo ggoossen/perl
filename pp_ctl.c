@@ -3941,7 +3941,8 @@ PP(pp_entereval)
 	    char *const safestr = savepvn(tmpbuf, len);
 	    SAVEDELETE(PL_defstash, safestr, len);
 	}
-	CODESEQ* codeseq = new_codeseq(); /* FIXME memory leak */
+	CODESEQ* codeseq = new_codeseq();
+	save_freecodeseq(codeseq);
 	compile_op(PL_eval_root, codeseq);
 	DOCATCH(codeseq_start_instruction(codeseq));
 	return NORMAL;
