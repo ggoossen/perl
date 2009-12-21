@@ -7528,7 +7528,7 @@ Perl_ck_grep(pTHX_ OP *o)
 
     if (o->op_flags & OPf_STACKED) {
 	o = ck_sort(o);
-	kid = cUNOPx(cLISTOPo->op_first->op_sibling)->op_first;
+	kid = cUNOPx(cLISTOPo->op_first)->op_first;
 	if (kid->op_type != OP_SCOPE && kid->op_type != OP_LEAVE)
 	    return no_fh_allowed(o);
 	o->op_flags &= ~OPf_STACKED;
