@@ -153,21 +153,21 @@ PP(pp_regcomp)
 	   exp (as is sometimes the case with $';  see bug 70764).  So we
 	   must call get-magic now before we replace the regexp. Hopeful-
 	   ly this hack can be replaced with the approach described at
-	   http://www.nntp.perl.org/group/perl.perl5.porters/2007/03
-	   /msg122415.html some day. */
+	   http://www.nntp.perl.org/group/perl.perl5.porters/2007/03/msg122415.html some day. */
 	if(pm->op_type == OP_MATCH) {
-	 SV *lhs;
-	 const bool was_tainted = PL_tainted;
-	 if (pm->op_flags & OPf_STACKED)
-	    lhs = TOPs;
-	 else if (pm->op_private & OPpTARGET_MY)
-	    lhs = PAD_SV(pm->op_targ);
-	 else lhs = DEFSV;
-	 SvGETMAGIC(lhs);
-	 /* Restore the previous value of PL_tainted (which may have been
-	    modified by get-magic), to avoid incorrectly setting the
-	    RXf_TAINTED flag further down. */
-	 PL_tainted = was_tainted;
+	    /* OP *matchop = pm->op_next; */
+	    /* SV *lhs; */
+	    const bool was_tainted = PL_tainted;
+	    /* if (matchop->op_flags & OPf_STACKED) */
+	    /*     lhs = TOPs; */
+	    /* else if (matchop->op_private & OPpTARGET_MY) */
+	    /*     lhs = PAD_SV(matchop->op_targ); */
+	    /* else lhs = DEFSV; */
+	    /* SvGETMAGIC(lhs); */
+	    /* Restore the previous value of PL_tainted (which may have been
+	       modified by get-magic), to avoid incorrectly setting the
+	       RXf_TAINTED flag further down. */
+	    PL_tainted = was_tainted;
 	}
 
 	re = reg_temp_copy(NULL, re);
