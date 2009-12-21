@@ -3804,7 +3804,8 @@ PP(pp_require)
 
     PL_op = NULL;
     if (doeval(gimme, NULL, NULL, PL_curcop->cop_seq)) {
-	CODESEQ* codeseq = new_codeseq(); /* FIXME memory leak */
+	CODESEQ* codeseq = new_codeseq();
+	save_freecodeseq(codeseq);
 	compile_op(PL_eval_root, codeseq);
 	DOCATCH(codeseq_start_instruction(codeseq));
     }
