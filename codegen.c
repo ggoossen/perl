@@ -78,7 +78,6 @@ trace the code generation process.
 #include "perl.h"
 
 struct op_instrpp {
-    OP* op;
     INSTRUCTION** instrpp;
     int instr_idx;
 };
@@ -132,7 +131,6 @@ S_save_branch_point(pTHX_ CODEGEN_PAD* bpp, INSTRUCTION** instrp)
 	bpp->op_instrpp_append = bpp->op_instrpp_list + (bpp->op_instrpp_append - old_lp);
     }
     assert(bpp->op_instrpp_append < bpp->op_instrpp_end);
-    bpp->op_instrpp_append->op = NULL;
     bpp->op_instrpp_append->instrpp = instrp;
     bpp->op_instrpp_append->instr_idx = bpp->idx;
     bpp->op_instrpp_append++;
