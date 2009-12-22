@@ -1166,11 +1166,11 @@ PP(pp_mapwhile)
 PP(pp_range)
 {
     dVAR;
-    PERL_UNUSED_ARG(pparg1);
+    const INSTRUCTION const *flop_instr = (const INSTRUCTION const *)pparg1;
     if (GIMME == G_ARRAY)
 	return NORMAL;
     if (SvTRUEx(PAD_SV(PL_op->op_targ))) {
-	RUN_SET_NEXT_INSTRUCTION( cLOGOP->op_other_instr );
+	RUN_SET_NEXT_INSTRUCTION( flop_instr );
 	return NORMAL;
     }
     return NORMAL;

@@ -681,24 +681,25 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 
 	/*
 	      ...
-	      pp_range       label2
-	  label1:
+	      pp_range       label1
 	      <o->op_first->op_first>
-	      flip           label3
-	  label2:
+	      flip           label2
+	  label1:
 	      <o->op_first->op_first->op_sibling>
-	      flop           label1
-	  label3:
+	      flop
+	  label2:
 	      ...
 	*/
 		  
 	{
-	    int flip_instr_idx;
+	    int flip_instr_idx, range_instr_idx;
+	    range_instr_idx = bpp->idx;
 	    append_instruction(bpp, o, o->op_type);
 	    add_op(bpp, flip->op_first, &kid_may_constant_fold, 0);
 	    flip_instr_idx = bpp->idx;
 	    append_instruction(bpp, o, OP_FLIP);
-	    save_branch_point(bpp, &(cLOGOPo->op_other_instr));
+
+	    save_instr_from_to_pparg(bpp, range_instr_idx, bpp->idx);
 	    add_op(bpp, flip->op_first->op_sibling, &kid_may_constant_fold, 0);
 	    append_instruction(bpp, o, OP_FLOP);
 	    save_instr_from_to_pparg(bpp, flip_instr_idx, bpp->idx);
