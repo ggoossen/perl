@@ -2407,6 +2407,7 @@ s	|void	|append_instruction_x	|NN CODEGEN_PAD *bpp|NULLOK OP* o|Optype optype|NU
 s	|void	|save_branch_point	|NN CODEGEN_PAD *bpp|NN INSTRUCTION **instrp
 s	|void	|save_instr_from_to_pparg	|NN CODEGEN_PAD *codegen_pad|int instr_from_index|int instr_to_index
 s	|SV*	|instr_fold_constants	|NN INSTRUCTION* instr|NN OP* o|bool list
+s	|void	|append_allocated_data	|NN CODEGEN_PAD *bpp|NN void *data
 #endif
 
 p	|INSTRUCTION*	|codeseq_start_instruction|NN const CODESEQ* codeseq

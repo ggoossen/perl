@@ -66,6 +66,8 @@ struct codeseq {
     int xcodeseq_size;                   /* Number of items in xcodeseq_instructions    */
     INSTRUCTION* xcodeseq_instructions;  /* List of xcodeseq_size items of INSTRUCTIONs */
     AV* xcodeseq_svs;                    /* Array with SVs to be freed with the codeseq */
+    void** xcodeseq_allocated_data_list;               /* Misc allocated data which should be freed with the codeseq */
+    int xcodeseq_allocated_data_size;               /* Number of items in xcodeseq_allocated_data_list */
     int xcodeseq_refcnt;                 /* Reference count */
 };
 
@@ -81,6 +83,12 @@ struct codeseq {
 /* #define OPpDEREF_SV		(32|64)	/\*   Want ref to SV. *\/ */
 #define INSTRf_HELEM_SPECIAL     0x80
 #define INSTRf_PAD_STATE        0x100
+
+struct loop_instructions {
+    INSTRUCTION* next_instr;
+    INSTRUCTION* last_instr;
+    INSTRUCTION* redo_instr;
+};
 
 /*
  * Local variables:

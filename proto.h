@@ -7055,6 +7055,12 @@ STATIC SV*	S_instr_fold_constants(pTHX_ INSTRUCTION* instr, OP* o, bool list)
 #define PERL_ARGS_ASSERT_INSTR_FOLD_CONSTANTS	\
 	assert(instr); assert(o)
 
+STATIC void	S_append_allocated_data(pTHX_ CODEGEN_PAD *bpp, void *data)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_APPEND_ALLOCATED_DATA	\
+	assert(bpp); assert(data)
+
 #endif
 
 PERL_CALLCONV INSTRUCTION*	Perl_codeseq_start_instruction(pTHX_ const CODESEQ* codeseq)

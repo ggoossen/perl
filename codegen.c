@@ -98,6 +98,9 @@ struct codegen_pad {
     BRANCH_POINT_TO_PPARG* branch_point_to_pparg_list;
     BRANCH_POINT_TO_PPARG* branch_point_to_pparg_end;
     BRANCH_POINT_TO_PPARG* branch_point_to_pparg_append;
+    void** allocated_data_list;
+    void** allocated_data_end;
+    void** allocated_data_append;
     int recursion;
 };
 
@@ -124,6 +127,21 @@ S_append_instruction(pTHX_ CODEGEN_PAD* bpp, OP* o, Optype optype)
 {
     PERL_ARGS_ASSERT_APPEND_INSTRUCTION;
     append_instruction_x(bpp, o, optype, NULL, NULL);
+}
+
+void
+S_append_allocated_data(pTHX_ CODEGEN_PAD* bpp, void* data)
+{
+    PERL_ARGS_ASSERT_APPEND_INSTRUCTION;
+    if (bpp->allocated_data_append >= bpp->allocated_data_end) {
+	void** old_lp = bpp->allocated_data_list;
+	int new_size = 128 + (bpp->allocated_data_end - bpp->allocated_data_list);
+	Renew(bpp->allocated_data_list, new_size, void*);
+	bpp->allocated_data_end = bpp->allocated_data_list + new_size;
+	bpp->allocated_data_append = bpp->allocated_data_list + (bpp->allocated_data_append - old_lp);
+    }
+    *bpp->allocated_data_append = data;
+    bpp->allocated_data_append++;
 }
 
 void
@@ -384,7 +402,11 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	OP* op_block = op_start->op_sibling;
 	OP* op_cont = op_block->op_sibling;
 	bool has_condition = op_start->op_type != OP_NOTHING;
-	append_instruction(bpp, o, o->op_type);
+	LOOP_INSTRUCTIONS* loop_instrs;
+	Newx(loop_instrs, 1, LOOP_INSTRUCTIONS);
+	append_allocated_data(bpp, loop_instrs);
+
+	append_instruction_x(bpp, o, o->op_type, loop_instrs, NULL);
 
 	/* evaluate condition */
 	start_idx = bpp->idx;
@@ -394,10 +416,10 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	    append_instruction_x(bpp, NULL, OP_INSTR_COND_JUMP, NULL, NULL);
 	}
 
-	save_branch_point(bpp, &(cLOOPo->op_redo_instr));
+	save_branch_point(bpp, &(loop_instrs->redo_instr));
 	add_op(bpp, op_block, &kid_may_constant_fold, 0);
 
-	save_branch_point(bpp, &(cLOOPo->op_next_instr));
+	save_branch_point(bpp, &(loop_instrs->next_instr));
 	if (op_cont)
 	    add_op(bpp, op_cont, &kid_may_constant_fold, 0);
 
@@ -411,7 +433,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 		
 	append_instruction(bpp, o, OP_LEAVELOOP);
 
-	save_branch_point(bpp, &(cLOOPo->op_last_instr));
+	save_branch_point(bpp, &(loop_instrs->last_instr));
 	break;
     }
     case OP_FOREACH: {
@@ -441,6 +463,9 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	OP* op_sv = op_expr->op_sibling;
 	OP* op_block = op_sv->op_sibling;
 	OP* op_cont = op_block->op_sibling;
+	LOOP_INSTRUCTIONS* loop_instrs;
+	Newx(loop_instrs, 1, LOOP_INSTRUCTIONS);
+	append_allocated_data(bpp, loop_instrs);
 
 	append_instruction(bpp, NULL, OP_PUSHMARK);
 	{
@@ -463,7 +488,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	    if (op_sv->op_type != OP_NOTHING)
 		add_op(bpp, op_sv, &kid_may_constant_fold, 0);
 	}
-	append_instruction(bpp, o, OP_ENTERITER);
+	append_instruction_x(bpp, o, OP_ENTERITER, loop_instrs, NULL);
 
 	start_idx = bpp->idx;
 	append_instruction(bpp, o, OP_ITER);
@@ -471,10 +496,10 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	cond_jump_idx = bpp->idx;
 	append_instruction_x(bpp, NULL, OP_INSTR_COND_JUMP, NULL, NULL);
 
-	save_branch_point(bpp, &(cLOOPo->op_redo_instr));
+	save_branch_point(bpp, &(loop_instrs->redo_instr));
 	add_op(bpp, op_block, &kid_may_constant_fold, 0);
 
-	save_branch_point(bpp, &(cLOOPo->op_next_instr));
+	save_branch_point(bpp, &(loop_instrs->next_instr));
 	append_instruction_x(bpp, NULL, OP_UNSTACK, NULL, NULL);
 	if (op_cont)
 	    add_op(bpp, op_cont, &kid_may_constant_fold, 0);
@@ -486,7 +511,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	save_instr_from_to_pparg(bpp, cond_jump_idx, bpp->idx);
 	append_instruction_x(bpp, NULL, OP_LEAVELOOP, NULL, NULL);
 
-	save_branch_point(bpp, &(cLOOPo->op_last_instr));
+	save_branch_point(bpp, &(loop_instrs->last_instr));
 		
 	break;
     }
@@ -1235,6 +1260,9 @@ Perl_compile_op(pTHX_ OP* startop, CODESEQ* codeseq)
     bpp.branch_point_to_pparg_list = NULL;
     bpp.branch_point_to_pparg_end = NULL;
     bpp.branch_point_to_pparg_append = NULL;
+    bpp.allocated_data_list = NULL;
+    bpp.allocated_data_end = NULL;
+    bpp.allocated_data_append = NULL;
 
     PERL_ARGS_ASSERT_COMPILE_OP;
 
@@ -1251,6 +1279,8 @@ Perl_compile_op(pTHX_ OP* startop, CODESEQ* codeseq)
     Renew(codeseq->xcodeseq_instructions, codeseq->xcodeseq_size, INSTRUCTION);
     Copy(bpp.codeseq.xcodeseq_instructions, codeseq->xcodeseq_instructions, codeseq->xcodeseq_size, INSTRUCTION);
     codeseq->xcodeseq_svs = bpp.codeseq.xcodeseq_svs;
+    codeseq->xcodeseq_allocated_data_list = bpp.allocated_data_list;
+    codeseq->xcodeseq_allocated_data_size = bpp.allocated_data_append - bpp.allocated_data_list;
     
     /* Final NULL instruction */
     codeseq->xcodeseq_instructions[bpp.idx].instr_ppaddr = NULL;

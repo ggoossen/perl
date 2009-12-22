@@ -46,8 +46,12 @@ Perl_new_codeseq(pTHX)
 STATIC void
 S_free_codeseq(pTHX_ CODESEQ* codeseq)
 {
+    int i;
     SvREFCNT_dec(codeseq->xcodeseq_svs);
     Safefree(codeseq->xcodeseq_instructions);
+    for (i=0; i<codeseq->xcodeseq_allocated_data_size; i++)
+	Safefree(codeseq->xcodeseq_allocated_data_list[i]);
+    Safefree(codeseq->xcodeseq_allocated_data_list);
     Safefree(codeseq);
 }
 

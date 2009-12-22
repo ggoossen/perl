@@ -447,6 +447,7 @@ struct block_eval {
 struct block_loop {
     I32		resetsp;
     LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */
+    LOOP_INSTRUCTIONS* loop_instrs;
     /* (except for non_ithreads we need to modify next_op in pp_ctl.c, hence
 	why next_op is conditionally defined below.)  */
 #ifdef USE_ITHREADS
@@ -494,28 +495,22 @@ struct block_loop {
 #define CxHASARGS(c)	(((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
 #define CxLVAL(c)	(0 + (c)->blk_u16)
 
-#ifdef USE_ITHREADS
-#  define PUSHLOOP_OP_NEXT		/* No need to do anything.  */
-#  define CX_LOOP_NEXTOP_GET(cx)	((cx)->blk_loop.my_op->op_next_instr + 0)
-#else
-#  define PUSHLOOP_OP_NEXT		cx->blk_loop.next_instr = cLOOP->op_next_instr
-#  define CX_LOOP_NEXTOP_GET(cx)	((cx)->blk_loop.next_instr + 0)
-#endif
+#define CX_LOOP_NEXTOP_GET(cx)	((cx)->blk_loop.loop_instrs->next_instr)
 
-#define PUSHLOOP_PLAIN(cx, s)						\
+#define PUSHLOOP_PLAIN(cx, s, loop_instrs)						\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
-	PUSHLOOP_OP_NEXT;						\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
+	cx->blk_loop.loop_instrs = loop_instrs;				\
 	CX_ITERDATA_SET(cx, NULL, 0);
 
-#define PUSHLOOP_FOR(cx, dat, s, offset)				\
+#define PUSHLOOP_FOR(cx, dat, s, offset, loop_instrs)				\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
-	PUSHLOOP_OP_NEXT;						\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
+	cx->blk_loop.loop_instrs = loop_instrs;				\
 	CX_ITERDATA_SET(cx, dat, offset);
 
 #define POPLOOP(cx)							\

@@ -1934,7 +1934,7 @@ PP(pp_enteriter)
 #ifdef USE_ITHREADS
     PAD *iterdata;
 #endif
-    PERL_UNUSED_ARG(pparg1);
+    const LOOP_INSTRUCTIONS* loop_instrs = (const LOOP_INSTRUCTIONS*)pparg1;
 
     ENTER_with_name("loop1");
     SAVETMPS;
@@ -1969,9 +1969,9 @@ PP(pp_enteriter)
 
     PUSHBLOCK(cx, cxtype, SP);
 #ifdef USE_ITHREADS
-    PUSHLOOP_FOR(cx, iterdata, MARK, PL_op->op_targ);
+    PUSHLOOP_FOR(cx, iterdata, MARK, PL_op->op_targ, loop_instrs);
 #else
-    PUSHLOOP_FOR(cx, svp, MARK, 0);
+    PUSHLOOP_FOR(cx, svp, MARK, 0, loop_instrs);
 #endif
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *maybe_ary = POPs;
@@ -2061,14 +2061,14 @@ PP(pp_enterloop)
     dVAR; dSP;
     register PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
-    PERL_UNUSED_ARG(pparg1);
+    const LOOP_INSTRUCTIONS* loop_instrs = (const LOOP_INSTRUCTIONS*)pparg1;
 
     ENTER_with_name("loop1");
     SAVETMPS;
     ENTER_with_name("loop2");
 
     PUSHBLOCK(cx, CXt_LOOP_PLAIN, SP);
-    PUSHLOOP_PLAIN(cx, SP);
+    PUSHLOOP_PLAIN(cx, SP, loop_instrs);
 
     RETURN;
 }
@@ -2286,7 +2286,7 @@ PP(pp_last)
     case CXt_LOOP_PLAIN:
 	pop2 = CxTYPE(cx);
 	newsp = PL_stack_base + cx->blk_loop.resetsp;
-	next_instr = cx->blk_loop.my_op->op_last_instr;
+	next_instr = cx->blk_loop.loop_instrs->last_instr;
 	break;
     case CXt_SUB:
 	pop2 = CXt_SUB;
@@ -2400,7 +2400,7 @@ PP(pp_redo)
     if (cxix < cxstack_ix)
 	dounwind(cxix);
 
-    redo_instr = cxstack[cxix].blk_loop.my_op->op_redo_instr;
+    redo_instr = cxstack[cxix].blk_loop.loop_instrs->redo_instr;
     if (redo_instr->instr_op->op_type == OP_ENTER) {
 	/* pop one less context to avoid $x being freed in while (my $x..) */
 	cxstack_ix++;
