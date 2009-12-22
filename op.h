@@ -46,7 +46,6 @@ typedef PERL_BITFIELD16 Optype;
 #define BASEOP BASEOP_DEFINITION
 #else
 #define BASEOP				\
-    OP*		op_start;		\
     OP*		op_sibling;		\
     MADPROP_IN_BASEOP			\
     PADOFFSET	op_targ;		\

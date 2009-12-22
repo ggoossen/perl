@@ -284,7 +284,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	/*
 	      ...
 	      pushmark
-	      <o->op_start>
+	      <op_items>
 	      grepstart         label2
 	  label1:
 	      <op_block>
