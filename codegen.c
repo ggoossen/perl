@@ -736,12 +736,14 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	      leavegiven
 	      ...
 	*/
+	int entergiven_instr_idx;
 	OP* op_cond = cLOGOPo->op_first;
 	OP* op_block = op_cond->op_sibling;
 	add_op(bpp, op_cond, &kid_may_constant_fold, 0);
+	entergiven_instr_idx = bpp->idx;
 	append_instruction(bpp, o, o->op_type);
 	add_op(bpp, op_block, &kid_may_constant_fold, 0);
-	save_branch_point(bpp, &(cLOGOPo->op_other_instr));
+	save_instr_from_to_pparg(bpp, entergiven_instr_idx, bpp->idx);
 	append_instruction(bpp, o, OP_LEAVEGIVEN);
 
 	break;
@@ -757,10 +759,12 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	          leavewhen
 	          ...
 	    */
+	    int enterwhen_instr_idx;
 	    OP* op_block = cLOGOPo->op_first;
+	    enterwhen_instr_idx = bpp->idx;
 	    append_instruction(bpp, o, o->op_type);
 	    add_op(bpp, op_block, &kid_may_constant_fold, 0);
-	    save_branch_point(bpp, &(cLOGOPo->op_other_instr));
+	    save_instr_from_to_pparg(bpp, enterwhen_instr_idx, bpp->idx);
 	    append_instruction(bpp, o, OP_LEAVEWHEN);
 	}
 	else {
@@ -773,12 +777,14 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	          leavewhen
 	          ...
 	    */
+	    int enterwhen_instr_idx;
 	    OP* op_cond = cLOGOPo->op_first;
 	    OP* op_block = op_cond->op_sibling;
 	    add_op(bpp, op_cond, &kid_may_constant_fold, 0);
+	    enterwhen_instr_idx = bpp->idx;
 	    append_instruction(bpp, o, o->op_type);
 	    add_op(bpp, op_block, &kid_may_constant_fold, 0);
-	    save_branch_point(bpp, &(cLOGOPo->op_other_instr));
+	    save_instr_from_to_pparg(bpp, enterwhen_instr_idx, bpp->idx);
 	    append_instruction(bpp, o, OP_LEAVEWHEN);
 	}
 

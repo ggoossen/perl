@@ -4147,7 +4147,7 @@ PP(pp_entergiven)
     dVAR; dSP;
     register PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
-    PERL_UNUSED_ARG(pparg1);
+    const INSTRUCTION const * leave_instr = (const INSTRUCTION const*) pparg1;
     
     ENTER_with_name("given");
     SAVETMPS;
@@ -4155,7 +4155,7 @@ PP(pp_entergiven)
     sv_setsv(PAD_SV(PL_op->op_targ), POPs);
 
     PUSHBLOCK(cx, CXt_GIVEN, SP);
-    PUSHGIVEN(cx);
+    PUSHGIVEN(cx, leave_instr);
 
     RETURN;
 }
@@ -4742,7 +4742,7 @@ PP(pp_enterwhen)
     dVAR; dSP;
     register PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
-    PERL_UNUSED_ARG(pparg1);
+    const INSTRUCTION const * leave_instr = (const INSTRUCTION const*) pparg1;
 
     /* This is essentially an optimization: if the match
        fails, we don't want to push a context and then
@@ -4751,7 +4751,7 @@ PP(pp_enterwhen)
        RETURNOP calls PUTBACK which restores the stack pointer after the POPs.
     */
     if ((0 == (PL_op->op_flags & OPf_SPECIAL)) && !SvTRUEx(POPs)) {
-	RUN_SET_NEXT_INSTRUCTION( cLOGOP->op_other_instr + 1);
+	RUN_SET_NEXT_INSTRUCTION( leave_instr + 1);
 	return NORMAL;
     }
 
@@ -4759,7 +4759,7 @@ PP(pp_enterwhen)
     SAVETMPS;
 
     PUSHBLOCK(cx, CXt_WHEN, SP);
-    PUSHWHEN(cx);
+    PUSHWHEN(cx, leave_instr);
 
     RETURN;
 }

@@ -531,8 +531,8 @@ struct block_givwhen {
 	INSTRUCTION *leave_op_instr;
 };
 
-#define PUSHGIVEN(cx)							\
-	cx->blk_givwhen.leave_op_instr = cLOGOP->op_other_instr;
+#define PUSHGIVEN(cx, instr)							\
+	cx->blk_givwhen.leave_op_instr = instr;
 
 #define PUSHWHEN PUSHGIVEN
 
