@@ -107,10 +107,10 @@ PP(pp_gv)
 PP(pp_and)
 {
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    const INSTRUCTION const * false_branch_instr = (const INSTRUCTION const*) pparg1;
     PERL_ASYNC_CHECK();
     if (!SvTRUE(TOPs)) {
-	RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
+	RUN_SET_NEXT_INSTRUCTION(false_branch_instr);
 	RETURN;
     }
     else {
@@ -456,10 +456,10 @@ PP(pp_preinc)
 PP(pp_or)
 {
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    const INSTRUCTION const * true_branch_instr = (const INSTRUCTION const*) pparg1;
     PERL_ASYNC_CHECK();
     if (SvTRUE(TOPs)) {
-	RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
+	RUN_SET_NEXT_INSTRUCTION(true_branch_instr);
 	RETURN;
     }
     else {
@@ -476,7 +476,7 @@ PP(pp_defined)
     bool defined;
     const int op_type = PL_op->op_type;
     const bool is_dor = (op_type == OP_DOR || op_type == OP_DORASSIGN);
-    PERL_UNUSED_VAR(pparg1);
+    const INSTRUCTION const * true_branch_instr = (const INSTRUCTION const*) pparg1;
 
     if (is_dor) {
 	PERL_ASYNC_CHECK();
@@ -517,7 +517,7 @@ PP(pp_defined)
 
     if (is_dor) {
         if(defined) {
-	    RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
+	    RUN_SET_NEXT_INSTRUCTION(true_branch_instr);
             RETURN; 
 	}
         if(op_type == OP_DOR)

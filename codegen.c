@@ -501,10 +501,11 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	          or                   label1
 	          ...
 	    */
-	    save_branch_point(bpp, &(cLOGOPo->op_other_instr));
+	    int restart_instr_idx = bpp->idx;
 	    add_op(bpp, op_other, &kid_may_constant_fold, 0);
 	    add_op(bpp, op_first, &kid_may_constant_fold, 0);
 	    append_instruction(bpp, o, OP_OR);
+	    save_instr_from_to_pparg(bpp, bpp->idx-1, restart_instr_idx);
 	}
 	else {
 	    /*
@@ -517,17 +518,18 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	          or                   label1
 	          ...
 	    */
-	    int start_idx;
+	    int start_idx, restart_instr_idx;
 	    start_idx = bpp->idx;
 	    append_instruction_x(bpp, NULL, OP_INSTR_JUMP, NULL, NULL);
 
-	    save_branch_point(bpp, &(cLOGOPo->op_other_instr));
+	    restart_instr_idx = bpp->idx;
 	    add_op(bpp, op_other, &kid_may_constant_fold, 0);
 
 	    save_instr_from_to_pparg(bpp, start_idx, bpp->idx);
 	    add_op(bpp, op_first, &kid_may_constant_fold, 0);
 
 	    append_instruction(bpp, o, OP_OR);
+	    save_instr_from_to_pparg(bpp, bpp->idx-1, restart_instr_idx);
 	}
 
 	break;
@@ -547,6 +549,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	OP* op_other = op_first->op_sibling;
 	bool cond_may_constant_fold = TRUE;
 	int addop_cond_flags = 0;
+	int or_instr_idx;
 	assert((PL_opargs[o->op_type] & OA_CLASS_MASK) == OA_LOGOP);
 
 	if ((o->op_flags & OPf_WANT) == OPf_WANT_VOID)
@@ -565,9 +568,10 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	    break;
 	}
 		
+	or_instr_idx = bpp->idx;
 	append_instruction(bpp, o, o->op_type);
 	add_op(bpp, op_other, &kid_may_constant_fold, 0);
-	save_branch_point(bpp, &(cLOGOPo->op_other_instr));
+	save_instr_from_to_pparg(bpp, or_instr_idx, bpp->idx);
 	break;
     }
     case OP_ANDASSIGN:
@@ -583,12 +587,14 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	*/
 	OP* op_first = cLOGOPo->op_first;
 	OP* op_other = op_first->op_sibling;
+	int optype_instr_idx;
 	assert((PL_opargs[o->op_type] & OA_CLASS_MASK) == OA_LOGOP);
 
 	add_op(bpp, op_first, &kid_may_constant_fold, 0);
+	optype_instr_idx = bpp->idx;
 	append_instruction(bpp, o, o->op_type);
 	add_op(bpp, op_other, &kid_may_constant_fold, 0);
-	save_branch_point(bpp, &(cLOGOPo->op_other_instr));
+	save_instr_from_to_pparg(bpp, optype_instr_idx, bpp->idx);
 	break;
     }
     case OP_ONCE:
