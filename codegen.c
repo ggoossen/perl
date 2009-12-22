@@ -132,7 +132,7 @@ S_append_instruction(pTHX_ CODEGEN_PAD* bpp, OP* o, Optype optype)
 void
 S_append_allocated_data(pTHX_ CODEGEN_PAD* bpp, void* data)
 {
-    PERL_ARGS_ASSERT_APPEND_INSTRUCTION;
+    PERL_ARGS_ASSERT_APPEND_ALLOCATED_DATA;
     if (bpp->allocated_data_append >= bpp->allocated_data_end) {
 	void** old_lp = bpp->allocated_data_list;
 	int new_size = 128 + (bpp->allocated_data_end - bpp->allocated_data_list);
