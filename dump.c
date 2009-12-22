@@ -1192,7 +1192,7 @@ Perl_codeseq_dump(pTHX_ const CODESEQ *codeseq)
 	OP* o = instr->instr_op;
 	if (instr->instr_ppaddr == Perl_pp_instr_jump
 	    || instr->instr_ppaddr == Perl_pp_instr_cond_jump) {
-	    const INSTRUCTION* target = instr + ((int)instr->instr_arg1) + 1;
+	    const INSTRUCTION* target = (const INSTRUCTION*)instr->instr_arg1;
 	    S_add_label(aTHX_ jump_points, target, &jump_point_idx);
 	}
 	else if (instr->instr_ppaddr == PL_ppaddr[OP_COND_EXPR]
@@ -1226,7 +1226,7 @@ Perl_codeseq_dump(pTHX_ const CODESEQ *codeseq)
 
 	if (instr->instr_ppaddr == Perl_pp_instr_jump
 	    || instr->instr_ppaddr == Perl_pp_instr_cond_jump) {
-	    const INSTRUCTION* target = instr + ((int)instr->instr_arg1) + 1;
+	    const INSTRUCTION* target = (const INSTRUCTION *)instr->instr_arg1;
 	    PerlIO_printf(Perl_debug_log, "label%"UVuf"\t", S_instr_label(aTHX_ jump_points, target));
 	}
 	else if (instr->instr_ppaddr == PL_ppaddr[OP_COND_EXPR]
