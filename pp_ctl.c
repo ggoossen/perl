@@ -4086,8 +4086,8 @@ PP(pp_entertry)
 {
     dVAR;
     PERL_CONTEXT * const cx = create_eval_scope(0);
-    PERL_UNUSED_ARG(pparg1);
-    cx->blk_eval.ret_instr = cLOGOP->op_other_instr;
+    const INSTRUCTION const * other_instr = (const INSTRUCTION const*)pparg1;
+    cx->blk_eval.ret_instr = other_instr;
     assert(cx->blk_eval.ret_instr);
     DOCATCH(run_get_next_instruction());
     return NORMAL;

@@ -637,10 +637,11 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	  label1:
 	      ...
 	*/
+	int entertry_instr_idx = bpp->idx;
 	append_instruction(bpp, o, OP_ENTERTRY);
 	add_op(bpp, cLOGOPo->op_first, &kid_may_constant_fold, 0);
 	append_instruction(bpp, o, OP_LEAVETRY);
-	save_branch_point(bpp, &(cLOGOPo->op_other_instr));
+	save_instr_from_to_pparg(bpp, entertry_instr_idx, bpp->idx);
 	break;
     }
     case OP_RANGE: {
