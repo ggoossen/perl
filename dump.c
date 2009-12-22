@@ -1191,16 +1191,13 @@ Perl_codeseq_dump(pTHX_ const CODESEQ *codeseq)
 	    || instr->instr_ppaddr == PL_ppaddr[OP_OR]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_AND]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_DOR]
-	    ) {
-	    const INSTRUCTION* target = (const INSTRUCTION*)instr->instr_arg1;
-	    S_add_label(aTHX_ jump_points, target, &jump_point_idx);
-	}
-	else if (instr->instr_ppaddr == PL_ppaddr[OP_COND_EXPR]
+	    || instr->instr_ppaddr == PL_ppaddr[OP_COND_EXPR]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ONCE]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ENTERTRY]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_RANGE]
 	    ) {
-	    S_add_label(aTHX_ jump_points, cLOGOPx(o)->op_other_instr, &jump_point_idx);
+	    const INSTRUCTION* target = (const INSTRUCTION*)instr->instr_arg1;
+	    S_add_label(aTHX_ jump_points, target, &jump_point_idx);
 	}
 	else if (instr->instr_ppaddr == PL_ppaddr[OP_ENTERLOOP]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ENTERITER]) {
@@ -1226,17 +1223,13 @@ Perl_codeseq_dump(pTHX_ const CODESEQ *codeseq)
 	    || instr->instr_ppaddr == PL_ppaddr[OP_OR]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_AND]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_DOR]
-	    ) {
-	    const INSTRUCTION* target = (const INSTRUCTION *)instr->instr_arg1;
-	    PerlIO_printf(Perl_debug_log, "label%"UVuf"\t", S_instr_label(aTHX_ jump_points, target));
-	}
-	else if (instr->instr_ppaddr == PL_ppaddr[OP_COND_EXPR]
+	    || instr->instr_ppaddr == PL_ppaddr[OP_COND_EXPR]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ONCE]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ENTERTRY]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_RANGE]
 	    ) {
-	    PerlIO_printf(Perl_debug_log, "label%"UVuf"\t", 
-		S_instr_label(aTHX_ jump_points, cLOGOPx(o)->op_other_instr));
+	    const INSTRUCTION* target = (const INSTRUCTION *)instr->instr_arg1;
+	    PerlIO_printf(Perl_debug_log, "label%"UVuf"\t", S_instr_label(aTHX_ jump_points, target));
 	}
 	else if (instr->instr_ppaddr == PL_ppaddr[OP_ENTERLOOP]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ENTERITER]) {

@@ -299,7 +299,6 @@ struct logop {
     BASEOP
     OP *	op_first;
     OP *	op_other;
-    INSTRUCTION * op_other_instr;
 };
 
 struct listop {
