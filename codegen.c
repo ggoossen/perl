@@ -684,13 +684,17 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	      ...
 	*/
 		  
-	append_instruction(bpp, o, o->op_type);
-	add_op(bpp, flip->op_first, &kid_may_constant_fold, 0);
-	append_instruction(bpp, o, OP_FLIP);
-	save_branch_point(bpp, &(cLOGOPo->op_other_instr));
-	add_op(bpp, flip->op_first->op_sibling, &kid_may_constant_fold, 0);
-	append_instruction(bpp, o, OP_FLOP);
-	save_branch_point(bpp, &(cLOGOPo->op_first->op_unstack_instr));
+	{
+	    int flip_instr_idx;
+	    append_instruction(bpp, o, o->op_type);
+	    add_op(bpp, flip->op_first, &kid_may_constant_fold, 0);
+	    flip_instr_idx = bpp->idx;
+	    append_instruction(bpp, o, OP_FLIP);
+	    save_branch_point(bpp, &(cLOGOPo->op_other_instr));
+	    add_op(bpp, flip->op_first->op_sibling, &kid_may_constant_fold, 0);
+	    append_instruction(bpp, o, OP_FLOP);
+	    save_instr_from_to_pparg(bpp, flip_instr_idx, bpp->idx);
+	}
 		
 	break;
     }
