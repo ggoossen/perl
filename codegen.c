@@ -81,8 +81,13 @@ struct op_instrpp {
     INSTRUCTION** instrpp;
     int instr_idx;
 };
-
 typedef struct op_instrpp OP_INSTRPP;
+
+struct branch_point_to_pparg {
+    int instr_from_index;
+    int instr_to_index;
+};
+typedef struct branch_point_to_pparg BRANCH_POINT_TO_PPARG;
 
 struct codegen_pad {
     CODESEQ codeseq;
@@ -90,6 +95,9 @@ struct codegen_pad {
     OP_INSTRPP* op_instrpp_list;
     OP_INSTRPP* op_instrpp_end;
     OP_INSTRPP* op_instrpp_append;
+    BRANCH_POINT_TO_PPARG* branch_point_to_pparg_list;
+    BRANCH_POINT_TO_PPARG* branch_point_to_pparg_end;
+    BRANCH_POINT_TO_PPARG* branch_point_to_pparg_append;
     int recursion;
 };
 
@@ -141,7 +149,17 @@ void
 S_save_instr_from_to_pparg(pTHX_ CODEGEN_PAD* codegen_pad, int instr_from_index, int instr_to_index)
 {
     PERL_ARGS_ASSERT_SAVE_INSTR_FROM_TO_PPARG;
-    codegen_pad->codeseq.xcodeseq_instructions[instr_from_index].instr_arg1 = (void*)(instr_to_index - instr_from_index - 1);
+    if (codegen_pad->branch_point_to_pparg_append >= codegen_pad->branch_point_to_pparg_end) {
+	BRANCH_POINT_TO_PPARG* old_lp = codegen_pad->branch_point_to_pparg_list;
+	int new_size = 128 + (codegen_pad->branch_point_to_pparg_end - codegen_pad->branch_point_to_pparg_list);
+	Renew(codegen_pad->branch_point_to_pparg_list, new_size, BRANCH_POINT_TO_PPARG);
+	codegen_pad->branch_point_to_pparg_end = codegen_pad->branch_point_to_pparg_list + new_size;
+	codegen_pad->branch_point_to_pparg_append = codegen_pad->branch_point_to_pparg_list + (codegen_pad->branch_point_to_pparg_append - old_lp);
+    }
+    assert(codegen_pad->branch_point_to_pparg_append < codegen_pad->branch_point_to_pparg_end);
+    codegen_pad->branch_point_to_pparg_append->instr_from_index = instr_from_index;
+    codegen_pad->branch_point_to_pparg_append->instr_to_index = instr_to_index;
+    codegen_pad->branch_point_to_pparg_append++;
 }
 
 /* executes the instruction given to it, and returns the SV pushed on the stack by it.
@@ -383,7 +401,8 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 
 	/* loop */
 	if (has_condition) {
-	    append_instruction_x(bpp, NULL, OP_INSTR_JUMP, (void*)(start_idx - bpp->idx - 1), NULL);
+	    append_instruction_x(bpp, NULL, OP_INSTR_JUMP, NULL, NULL);
+	    save_instr_from_to_pparg(bpp, bpp->idx-1, start_idx);
 
 	    save_instr_from_to_pparg(bpp, cond_jump_idx, bpp->idx);
 	}
@@ -1190,6 +1209,9 @@ Perl_compile_op(pTHX_ OP* startop, CODESEQ* codeseq)
     bpp.idx = 0;
     bpp.op_instrpp_append = bpp.op_instrpp_list;
     bpp.op_instrpp_end = bpp.op_instrpp_list + 128;
+    bpp.branch_point_to_pparg_list = NULL;
+    bpp.branch_point_to_pparg_end = NULL;
+    bpp.branch_point_to_pparg_append = NULL;
 
     PERL_ARGS_ASSERT_COMPILE_OP;
 
@@ -1219,10 +1241,18 @@ Perl_compile_op(pTHX_ OP* startop, CODESEQ* codeseq)
 		*(i->instrpp) = &(codeseq->xcodeseq_instructions[i->instr_idx]);
 	}
     }
+    
+    {
+	BRANCH_POINT_TO_PPARG* i;
+	for (i=bpp.branch_point_to_pparg_list; i<bpp.branch_point_to_pparg_append; i++) {
+	    codeseq->xcodeseq_instructions[i->instr_from_index].instr_arg1 = &codeseq->xcodeseq_instructions[i->instr_to_index];
+	}
+    }
 
     DEBUG_G(codeseq_dump(codeseq));
 
     Safefree(bpp.op_instrpp_list);
+    Safefree(bpp.branch_point_to_pparg_list);
     Safefree(bpp.codeseq.xcodeseq_instructions);
 
     /* restore original state */

@@ -1014,13 +1014,13 @@ PP(pp_grepstart)
 {
     dVAR; dSP;
     SV *src;
-    const int ref_offset = (const int)pparg1; 
+    const INSTRUCTION* cont_instruction = (const INSTRUCTION*)pparg1; 
 
     if (PL_stack_base + *PL_markstack_ptr == SP) {
 	(void)POPMARK;
 	if (GIMME_V == G_SCALAR)
 	    mXPUSHi(0);
-	RUN_SET_NEXT_INSTRUCTION(run_get_next_instruction() + ref_offset);
+	RUN_SET_NEXT_INSTRUCTION(cont_instruction);
 	RETURN;
     }
     PL_stack_sp = PL_stack_base + *PL_markstack_ptr + 1;

@@ -6135,17 +6135,17 @@ PP(pp_boolkeys)
 
 PP(pp_instr_jump)
 {
-    int instr_offset = (int)pparg1;
-    RUN_SET_NEXT_INSTRUCTION( run_get_next_instruction() + instr_offset );
+    const INSTRUCTION* target = (const INSTRUCTION*)pparg1;
+    RUN_SET_NEXT_INSTRUCTION( target );
     return NORMAL;
 }
 
 PP(pp_instr_cond_jump)
 {
     dSP;
-    int instr_offset = (int)pparg1;
+    const INSTRUCTION* target = (const INSTRUCTION*)pparg1;
     if (!SvTRUE(TOPs)) {
-	RUN_SET_NEXT_INSTRUCTION( run_get_next_instruction() + instr_offset );
+	RUN_SET_NEXT_INSTRUCTION( target );
 	RETURN;
     }
     else {
