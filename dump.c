@@ -843,7 +843,7 @@ S_op_private_to_names(pTHX_ SV *tmpsv, U32 optype, U32 op_private) {
 }
 
 void
-Perl_dump_op_short(const OP *o)
+Perl_dump_op_short(pTHX_ const OP *o)
 {
     PERL_ARGS_ASSERT_DUMP_OP_SHORT;
     sequence(o);
@@ -1195,7 +1195,7 @@ Perl_codeseq_dump(pTHX_ const CODESEQ *codeseq)
 	if (instr->instr_ppaddr == Perl_pp_instr_jump
 	    || instr->instr_ppaddr == Perl_pp_instr_cond_jump) {
 	    const INSTRUCTION* target = instr + ((int)instr->instr_arg1) + 1;
-	    S_add_label(jump_points, target, &jump_point_idx);
+	    S_add_label(aTHX_ jump_points, target, &jump_point_idx);
 	}
 	else if (instr->instr_ppaddr == PL_ppaddr[OP_COND_EXPR]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_OR]
@@ -1205,13 +1205,13 @@ Perl_codeseq_dump(pTHX_ const CODESEQ *codeseq)
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ENTERTRY]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_RANGE]
 	    ) {
-	    S_add_label(jump_points, cLOGOPx(o)->op_other_instr, &jump_point_idx);
+	    S_add_label(aTHX_ jump_points, cLOGOPx(o)->op_other_instr, &jump_point_idx);
 	}
 	else if (instr->instr_ppaddr == PL_ppaddr[OP_ENTERLOOP]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ENTERITER]) {
-	    S_add_label(jump_points, cLOOPx(o)->op_redo_instr, &jump_point_idx);
-	    S_add_label(jump_points, cLOOPx(o)->op_next_instr, &jump_point_idx);
-	    S_add_label(jump_points, cLOOPx(o)->op_last_instr, &jump_point_idx);
+	    S_add_label(aTHX_ jump_points, cLOOPx(o)->op_redo_instr, &jump_point_idx);
+	    S_add_label(aTHX_ jump_points, cLOOPx(o)->op_next_instr, &jump_point_idx);
+	    S_add_label(aTHX_ jump_points, cLOOPx(o)->op_last_instr, &jump_point_idx);
 	}
     }
 
@@ -1229,7 +1229,7 @@ Perl_codeseq_dump(pTHX_ const CODESEQ *codeseq)
 	if (instr->instr_ppaddr == Perl_pp_instr_jump
 	    || instr->instr_ppaddr == Perl_pp_instr_cond_jump) {
 	    const INSTRUCTION* target = instr + ((int)instr->instr_arg1) + 1;
-	    PerlIO_printf(Perl_debug_log, "label%"UVuf"\t", S_instr_label(jump_points, target));
+	    PerlIO_printf(Perl_debug_log, "label%"UVuf"\t", S_instr_label(aTHX_ jump_points, target));
 	}
 	else if (instr->instr_ppaddr == PL_ppaddr[OP_COND_EXPR]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_OR]
@@ -1240,16 +1240,16 @@ Perl_codeseq_dump(pTHX_ const CODESEQ *codeseq)
 	    || instr->instr_ppaddr == PL_ppaddr[OP_RANGE]
 	    ) {
 	    PerlIO_printf(Perl_debug_log, "label%"UVuf"\t", 
-		S_instr_label(jump_points, cLOGOPx(o)->op_other_instr));
+		S_instr_label(aTHX_ jump_points, cLOGOPx(o)->op_other_instr));
 	}
 	else if (instr->instr_ppaddr == PL_ppaddr[OP_ENTERLOOP]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ENTERITER]) {
 	    PerlIO_printf(Perl_debug_log, "redo=label%"UVuf"\t", 
-		S_instr_label(jump_points, cLOOPx(o)->op_redo_instr));
+		S_instr_label(aTHX_ jump_points, cLOOPx(o)->op_redo_instr));
 	    PerlIO_printf(Perl_debug_log, "next=label%"UVuf"\t", 
-		S_instr_label(jump_points, cLOOPx(o)->op_next_instr));
+		S_instr_label(aTHX_ jump_points, cLOOPx(o)->op_next_instr));
 	    PerlIO_printf(Perl_debug_log, "last=label%"UVuf"\t", 
-		S_instr_label(jump_points, cLOOPx(o)->op_last_instr));
+		S_instr_label(aTHX_ jump_points, cLOOPx(o)->op_last_instr));
 	}
 
 	PerlIO_printf(Perl_debug_log, "\n");

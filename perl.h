@@ -2460,8 +2460,6 @@ typedef struct ptr_tbl_ent PTR_TBL_ENT_t;
 typedef struct ptr_tbl PTR_TBL_t;
 typedef struct clone_params CLONE_PARAMS;
 
-typedef INSTRUCTION* (CPERLscope(*Perl_ppaddr_t))(pTHX_ void* pparg1, void* pparg2);
-
 #include "handy.h"
 
 #if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_RAWIO)
@@ -3453,7 +3451,6 @@ struct nexttoken {
 #include "cv.h"
 #include "opnames.h"
 #include "op.h"
-#include "instruction.h"
 #include "hv.h"
 #include "cop.h"
 #include "av.h"
@@ -4984,6 +4981,9 @@ struct tempsym; /* defined in pp_pack.c */
 
 #include "thread.h"
 #include "pp.h"
+
+typedef INSTRUCTION* (CPERLscope(*Perl_ppaddr_t))(pTHX_ void* pparg1, void* pparg2);
+#include "instruction.h"
 
 #ifndef PERL_CALLCONV
 #  ifdef __cplusplus

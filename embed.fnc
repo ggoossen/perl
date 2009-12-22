@@ -2400,6 +2400,13 @@ Anop	|void	|clone_params_del|NN CLONE_PARAMS *param
 #if defined(PERL_IN_COMPILE_C) || defined(PERL_DECL_PROT)
 s	|OP*	|is_inplace_av	|NN OP* o
 s	|SV**	|svp_const_instruction	|NN CODEGEN_PAD *bpp|int instr_index
+s	|void	|add_op	|NN CODEGEN_PAD *bpp|NN OP* o|NN bool *may_constant_fold|int flags
+s	|void	|add_kids	|NN CODEGEN_PAD *bpp|NN OP* o|NN bool *may_constant_fold
+s	|void	|append_instruction	|NN CODEGEN_PAD *bpp|NULLOK OP* o|Optype optype
+s	|void	|append_instruction_x	|NN CODEGEN_PAD *bpp|NULLOK OP* o|Optype optype|NULLOK void* instr_arg1|NULLOK void* instr_arg2
+s	|void	|save_branch_point	|NN CODEGEN_PAD *bpp|NN INSTRUCTION **instrp
+s	|void	|save_instr_from_to_pparg	|NN CODEGEN_PAD *codegen_pad|int instr_from_index|int instr_to_index
+s	|SV*	|instr_fold_constants	|NN INSTRUCTION* instr|NN OP* o|bool list
 #endif
 
 p	|INSTRUCTION*	|codeseq_start_instruction|NN const CODESEQ* codeseq

@@ -570,7 +570,7 @@ for $sym (sort keys %ppsym) {
 	print $em hide("$sym(a)", "Perl_$sym(aTHX_ a)");
     }
     elsif ($sym =~ /^pp_/) {
-	print $em hide("$sym()", "Perl_$sym(aTHX)");
+	print $em hide("$sym(a, b)", "Perl_$sym(aTHX_ a, b)");
     }
     else {
 	warn "Illegal symbol '$sym' in pp.sym";

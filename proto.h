@@ -7014,6 +7014,47 @@ STATIC SV**	S_svp_const_instruction(pTHX_ CODEGEN_PAD *bpp, int instr_index)
 #define PERL_ARGS_ASSERT_SVP_CONST_INSTRUCTION	\
 	assert(bpp)
 
+STATIC void	S_add_op(pTHX_ CODEGEN_PAD *bpp, OP* o, bool *may_constant_fold, int flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_ADD_OP	\
+	assert(bpp); assert(o); assert(may_constant_fold)
+
+STATIC void	S_add_kids(pTHX_ CODEGEN_PAD *bpp, OP* o, bool *may_constant_fold)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_ADD_KIDS	\
+	assert(bpp); assert(o); assert(may_constant_fold)
+
+STATIC void	S_append_instruction(pTHX_ CODEGEN_PAD *bpp, OP* o, Optype optype)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_APPEND_INSTRUCTION	\
+	assert(bpp)
+
+STATIC void	S_append_instruction_x(pTHX_ CODEGEN_PAD *bpp, OP* o, Optype optype, void* instr_arg1, void* instr_arg2)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_APPEND_INSTRUCTION_X	\
+	assert(bpp)
+
+STATIC void	S_save_branch_point(pTHX_ CODEGEN_PAD *bpp, INSTRUCTION **instrp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SAVE_BRANCH_POINT	\
+	assert(bpp); assert(instrp)
+
+STATIC void	S_save_instr_from_to_pparg(pTHX_ CODEGEN_PAD *codegen_pad, int instr_from_index, int instr_to_index)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SAVE_INSTR_FROM_TO_PPARG	\
+	assert(codegen_pad)
+
+STATIC SV*	S_instr_fold_constants(pTHX_ INSTRUCTION* instr, OP* o, bool list)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_INSTR_FOLD_CONSTANTS	\
+	assert(instr); assert(o)
+
 #endif
 
 PERL_CALLCONV INSTRUCTION*	Perl_codeseq_start_instruction(pTHX_ const CODESEQ* codeseq)

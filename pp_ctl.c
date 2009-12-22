@@ -1592,7 +1592,7 @@ Perl_die_unwind(pTHX_ SV *msv)
     U8 in_eval = PL_in_eval;
     PERL_ARGS_ASSERT_DIE_UNWIND;
 
-    DEBUG_l(Perl_deb("processing die"));
+    DEBUG_l(Perl_deb(aTHX_ "processing die"));
 
     if (in_eval) {
 	I32 cxix;
@@ -2769,7 +2769,7 @@ PP(pp_goto)
 		break;
 	    }
 	    if (gotoprobe) {
-		ret_instr = S_dofindinstruction(
+		ret_instr = S_dofindinstruction(aTHX_ 
 		    dofindlabel(gotoprobe, label,
 			enterops, enterops + GOTO_DEPTH)
 		    );

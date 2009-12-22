@@ -971,7 +971,7 @@ See L<perlcall/Lightweight Callbacks>.
 
 #define MULTICALL \
     STMT_START {							\
-        Perl_run_set_next_instruction(multicall_instr);			\
+        Perl_run_set_next_instruction(aTHX_ multicall_instr);			\
 	CALLRUNOPS(aTHX);						\
     } STMT_END
 
