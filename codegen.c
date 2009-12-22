@@ -329,7 +329,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	  label2:
 	      ...
 	*/
-	int jump_idx;
+	int jump_idx, cond_expr_instr_idx;
 	OP* op_first = cLOGOPo->op_first;
 	OP* op_true = op_first->op_sibling;
 	OP* op_false = op_true->op_sibling;
@@ -344,6 +344,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	    break;
 	}
 
+	cond_expr_instr_idx = bpp->idx;
 	append_instruction(bpp, o, o->op_type);
 
 	/* true branch */
@@ -353,7 +354,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	append_instruction_x(bpp, NULL, OP_INSTR_JUMP, NULL, NULL);
 
 	/* false branch */
-	save_branch_point(bpp, &(cLOGOPo->op_other_instr));
+	save_instr_from_to_pparg(bpp, cond_expr_instr_idx, bpp->idx);
 	add_op(bpp, op_false, &kid_may_constant_fold, 0);
 
 	save_instr_from_to_pparg(bpp, jump_idx, bpp->idx);

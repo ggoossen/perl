@@ -225,13 +225,13 @@ PP(pp_sassign)
 PP(pp_cond_expr)
 {
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    const INSTRUCTION const * false_branch_instr = (const INSTRUCTION const*) pparg1;
     PERL_ASYNC_CHECK();
     if (SvTRUEx(POPs)) {
 	RETURN;
     }
     else {
-	RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
+	RUN_SET_NEXT_INSTRUCTION(false_branch_instr);
 	RETURN;
     }
 }
