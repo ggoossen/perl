@@ -837,14 +837,15 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 
       compile_sort_without_kids:
 	{
-	    int start_idx;
+	    int start_idx, sort_instr_idx;
 	    bool has_block = (o->op_flags & OPf_STACKED && o->op_flags & OPf_SPECIAL);
 
+	    sort_instr_idx = bpp->idx;
 	    append_instruction(bpp, o, OP_SORT);
 	    start_idx = bpp->idx;
 	    append_instruction_x(bpp, NULL, OP_INSTR_JUMP, NULL, NULL);
 	    if (has_block) {
-		save_branch_point(bpp, &(o->op_unstack_instr));
+		save_instr_from_to_pparg(bpp, sort_instr_idx, bpp->idx);
 		add_op(bpp, cUNOPo->op_first, &kid_may_constant_fold, 0);
 		append_instruction_x(bpp, NULL, OP_INSTR_END, NULL, NULL);
 	    }

@@ -1490,7 +1490,7 @@ PP(pp_sort)
     void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
       = Perl_sortsv_flags;
     I32 all_SIVs = 1;
-    PERL_UNUSED_ARG(pparg1);
+    const INSTRUCTION const *sortcop_instr = (const INSTRUCTION const *)pparg1;
 
     if ((priv & OPpSORT_DESCEND) != 0)
 	sort_flags |= SORTf_DESC;
@@ -1511,7 +1511,7 @@ PP(pp_sort)
 
     if (flags & OPf_STACKED) {
 	if (flags & OPf_SPECIAL) {
-	    PL_sortcop = PL_op->op_unstack_instr;
+	    PL_sortcop = (OP*)sortcop_instr;
 	    stash = CopSTASH(PL_curcop);
 	}
 	else {
@@ -1543,7 +1543,7 @@ PP(pp_sort)
 		if (! CvCODESEQ(cv)) {
 		    compile_cv(cv);
 		}
-		PL_sortcop = codeseq_start_instruction(CvCODESEQ(cv));
+		PL_sortcop = (OP*)codeseq_start_instruction(CvCODESEQ(cv));
 	    }
 	}
     }
@@ -1752,7 +1752,7 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     GvSV(PL_secondgv) = b;
     PL_stack_sp = PL_stack_base;
 
-    RUN_SET_NEXT_INSTRUCTION(PL_sortcop);
+    RUN_SET_NEXT_INSTRUCTION((const INSTRUCTION*)PL_sortcop);
     CALLRUNOPS(aTHX);
 
     if (PL_stack_sp != PL_stack_base + 1)
@@ -1800,7 +1800,7 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     AvARRAY(av)[1] = b;
     PL_stack_sp = PL_stack_base;
 
-    RUN_SET_NEXT_INSTRUCTION(PL_sortcop);
+    RUN_SET_NEXT_INSTRUCTION((const INSTRUCTION *)PL_sortcop);
     CALLRUNOPS(aTHX);
 
     if (PL_stack_sp != PL_stack_base + 1)
