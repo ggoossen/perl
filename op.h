@@ -56,8 +56,7 @@ typedef PERL_BITFIELD16 Optype;
     PERL_BITFIELD16 op_attached:1;	\
     PERL_BITFIELD16 op_spare:3;		\
     U8		op_flags;		\
-    U8		op_private;		\
-    bool        op_context_known;
+    U8		op_private;
 #endif
 
 /* If op_type:9 is changed to :10, also change PUSHEVAL in cop.h.
