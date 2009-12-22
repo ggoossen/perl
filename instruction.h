@@ -90,6 +90,11 @@ struct loop_instructions {
     INSTRUCTION* redo_instr;
 };
 
+struct substcont_instructions {
+    INSTRUCTION* pmreplstart_instr;
+    INSTRUCTION* subst_next_instr;
+};
+
 /*
  * Local variables:
  * c-indentation-style: bsd

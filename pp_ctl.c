@@ -261,7 +261,7 @@ PP(pp_substcont)
     register REGEXP * const rx = cx->sb_rx;
     SV *nsv = NULL;
     REGEXP *old = PM_GETRE(pm);
-    PERL_UNUSED_ARG(pparg1);
+    SUBSTCONT_INSTRUCTIONS *substcont_instrs = (SUBSTCONT_INSTRUCTIONS*)pparg1;
 
     PERL_ASYNC_CHECK();
 
@@ -334,7 +334,7 @@ PP(pp_substcont)
 
 	    LEAVE_SCOPE(cx->sb_oldsave);
 	    POPSUBST(cx);
-	    RUN_SET_NEXT_INSTRUCTION(pm->op_subst_next_instr);
+	    RUN_SET_NEXT_INSTRUCTION(substcont_instrs->subst_next_instr);
 	    RETURN;
 	}
 	cx->sb_iters = saviters;
@@ -372,7 +372,7 @@ PP(pp_substcont)
 	(void)ReREFCNT_inc(rx);
     cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
     rxres_save(&cx->sb_rxres, rx);
-    RUN_SET_NEXT_INSTRUCTION(pm->op_pmreplstart_instr);
+    RUN_SET_NEXT_INSTRUCTION(substcont_instrs->pmreplstart_instr);
     RETURN;
 }
 

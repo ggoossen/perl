@@ -2419,6 +2419,7 @@ typedef struct instruction INSTRUCTION;
 typedef struct codeseq CODESEQ;
 typedef struct codegen_pad CODEGEN_PAD;
 typedef struct loop_instructions LOOP_INSTRUCTIONS;
+typedef struct substcont_instructions SUBSTCONT_INSTRUCTIONS;
 
 typedef struct interpreter PerlInterpreter;
 

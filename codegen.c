@@ -830,25 +830,31 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	      ...
 	*/
 		  
-	int start_idx;
+	int start_idx, subst_instr_idx;
 	OP* kid;
+	SUBSTCONT_INSTRUCTIONS* substcont_instrs;
+	Newx(substcont_instrs, 1, SUBSTCONT_INSTRUCTIONS);
+	append_allocated_data(bpp, substcont_instrs);
 
 	for (kid=cUNOPo->op_first; kid; kid=kid->op_sibling)
 	    add_op(bpp, kid, &kid_may_constant_fold, 0);
 
-	append_instruction(bpp, o, o->op_type);
+	subst_instr_idx = bpp->idx;
+	append_instruction_x(bpp, o, o->op_type, substcont_instrs, NULL);
 
 	start_idx = bpp->idx;
 	append_instruction_x(bpp, NULL, OP_INSTR_JUMP, NULL, NULL);
 		    
-	save_branch_point(bpp, &(cPMOPo->op_pmreplroot_instr));
-	append_instruction(bpp, cPMOPo->op_pmreplrootu.op_pmreplroot, OP_SUBSTCONT);
+	save_instr_from_to_pparg(bpp, subst_instr_idx, bpp->idx);
+	append_instruction_x(bpp, cPMOPo->op_pmreplrootu.op_pmreplroot, OP_SUBSTCONT, substcont_instrs, NULL);
 
-	save_branch_point(bpp, &(cPMOPo->op_pmreplstart_instr));
-	if (cPMOPo->op_pmreplrootu.op_pmreplroot)
-	    add_op(bpp, cPMOPo->op_pmreplrootu.op_pmreplroot, &kid_may_constant_fold, 0);
+	save_branch_point(bpp, &(substcont_instrs->pmreplstart_instr));
+	if (cPMOPo->op_pmreplrootu.op_pmreplroot) {
+	    add_kids(bpp, cPMOPo->op_pmreplrootu.op_pmreplroot, &kid_may_constant_fold);
+	    append_instruction_x(bpp, cPMOPo->op_pmreplrootu.op_pmreplroot, cPMOPo->op_pmreplrootu.op_pmreplroot->op_type, substcont_instrs, NULL);
+	}
 
-	save_branch_point(bpp, &(cPMOPo->op_subst_next_instr));
+	save_branch_point(bpp, &(substcont_instrs->subst_next_instr));
 
 	save_instr_from_to_pparg(bpp, start_idx, bpp->idx);
 
