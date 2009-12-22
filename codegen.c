@@ -293,7 +293,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	      ...
 	*/
 	bool is_grep = o->op_type == OP_GREPSTART;
-	int grepstart_idx;
+	int grepstart_idx, grepitem_idx;
 	OP* op_block;
 	OP* kid;
 
@@ -307,10 +307,11 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 
 	grepstart_idx = bpp->idx-1;
 
-	save_branch_point(bpp, &(o->op_unstack_instr));
+	grepitem_idx = bpp->idx;
 	add_op(bpp, cUNOPx(op_block)->op_first, &kid_may_constant_fold, 0);
 
 	append_instruction(bpp, o, is_grep ? OP_GREPWHILE : OP_MAPWHILE );
+	save_instr_from_to_pparg(bpp, bpp->idx-1, grepitem_idx);
 
 	save_instr_from_to_pparg(bpp, grepstart_idx, bpp->idx);
 

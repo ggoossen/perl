@@ -1059,7 +1059,7 @@ PP(pp_mapwhile)
     I32 shift;
     SV** src;
     SV** dst;
-    PERL_UNUSED_ARG(pparg1);
+    const INSTRUCTION const *map_item_instr = (const INSTRUCTION const *)pparg1;
 
     /* first, move source pointer to the next item in the source list */
     ++PL_markstack_ptr[-1];
@@ -1156,7 +1156,7 @@ PP(pp_mapwhile)
 	else
 	    DEFSV_set(src);
 
-	RUN_SET_NEXT_INSTRUCTION(PL_op->op_unstack_instr);
+	RUN_SET_NEXT_INSTRUCTION(map_item_instr);
 	RETURN;
     }
 }

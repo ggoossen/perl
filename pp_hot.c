@@ -2492,7 +2492,7 @@ ret_no:
 PP(pp_grepwhile)
 {
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    const INSTRUCTION const *grep_item_instr = (const INSTRUCTION const *)pparg1;
 
     if (SvTRUEx(POPs))
 	PL_stack_base[PL_markstack_ptr[-1]++] = PL_stack_base[*PL_markstack_ptr];
@@ -2537,7 +2537,7 @@ PP(pp_grepwhile)
 	else
 	    DEFSV_set(src);
 
-	RUN_SET_NEXT_INSTRUCTION(PL_op->op_unstack_instr);
+	RUN_SET_NEXT_INSTRUCTION(grep_item_instr);
 	RETURN;
     }
 }
