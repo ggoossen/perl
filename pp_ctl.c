@@ -498,7 +498,7 @@ PP(pp_formline)
     bool targ_is_utf8 = FALSE;
     SV * nsv = NULL;
     const char *fmt;
-    PERL_UNUSED_ARG(pparg1);
+    const INSTRUCTION const * restart_instr = (const INSTRUCTION const *)pparg1;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
 	if (SvREADONLY(tmpForm)) {
@@ -961,7 +961,7 @@ PP(pp_formline)
 			SvUTF8_on(PL_formtarget);
 		    FmLINES(PL_formtarget) = lines;
 		    SP = ORIGMARK;
-		    RUN_SET_NEXT_INSTRUCTION(cLISTOP->op_unstack_instr);
+		    RUN_SET_NEXT_INSTRUCTION(restart_instr);
 		    RETURN;
 		}
 	    }

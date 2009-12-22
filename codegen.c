@@ -863,10 +863,11 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	      o->op_type          label1
 	      ...
 	*/
-	save_branch_point(bpp, &(o->op_unstack_instr));
+	int restart_idx = bpp->idx;
 	append_instruction(bpp, NULL, OP_PUSHMARK);
 	add_kids(bpp, o, &kid_may_constant_fold);
 	append_instruction(bpp, o, o->op_type);
+	save_instr_from_to_pparg(bpp, bpp->idx -1, restart_idx);
 	break;
     }
     case OP_RV2SV:
