@@ -287,7 +287,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	      <o->op_start>
 	      grepstart         label2
 	  label1:
-	      <o->op_more_op>
+	      <op_block>
 	      grepwhile         label1
 	  label2:
 	      ...
@@ -1033,8 +1033,8 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	break;
     }
     case OP_SASSIGN: {
-	OP* op_right = cBINOPo->op_first;
-	OP* op_left = cBINOPo->op_last;
+	OP* op_right = cUNOPo->op_first;
+	OP* op_left = op_right->op_sibling;
     	if (op_left && op_left->op_type == OP_PADSV
     	    && !(op_left->op_private & OPpLVAL_INTRO)
 	    && (PL_opargs[op_right->op_type] & OA_TARGLEX)
