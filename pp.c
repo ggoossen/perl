@@ -6078,14 +6078,14 @@ PP(pp_split)
 PP(pp_once)
 {
     SV *const sv = PAD_SVl(PL_op->op_targ);
-    PERL_UNUSED_ARG(pparg1);
+    const INSTRUCTION const * other_instr = (const INSTRUCTION const*)pparg1;
 
     if (SvPADSTALE(sv)) {
 	/* First time. */
 	SvPADSTALE_off(sv);
 	return NORMAL;
     }
-    RUN_SET_NEXT_INSTRUCTION(cLOGOP->op_other_instr);
+    RUN_SET_NEXT_INSTRUCTION(other_instr);
     return NORMAL;
 }
 
