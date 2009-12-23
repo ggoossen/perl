@@ -9868,6 +9868,9 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 	    case 'n':
 		d->data[i] = ri->data->data[i];
 		break;
+	    case 'g':
+		d->data[i] = NULL;
+		break;
             default:
 		Perl_croak(aTHX_ "panic: re_dup unknown data code '%c'", ri->data->what[i]);
 	    }
