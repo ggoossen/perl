@@ -12798,6 +12798,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_top_env		= &PL_start_env;
 
     PL_op		= proto_perl->Iop;
+    PL_run_next_instruction = NULL;
 
     PL_Sv		= NULL;
     PL_Xpv		= (XPV*)NULL;
