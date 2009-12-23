@@ -1553,7 +1553,11 @@ S_finished_op_check(pTHX_ OP* o)
 	}
 	break;
     }
-
+    case OP_SUBST: {
+	if (cPMOPo->op_pmreplrootu.op_pmreplroot)
+	    S_finished_op_check(aTHX_ cPMOPo->op_pmreplrootu.op_pmreplroot);
+	break;
+    }
     default:
 	break;
     }
