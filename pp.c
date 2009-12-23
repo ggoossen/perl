@@ -552,8 +552,12 @@ S_refto(pTHX_ SV *sv)
 	SvTEMP_off(sv);
 	SvREFCNT_inc_void_NN(sv);
     }
-    else if (SvPADTMP(sv) && !IS_PADGV(sv))
+    else if (SvPADTMP(sv) && !IS_PADGV(sv)) {
+	SV* org_sv = sv;
         sv = newSVsv(sv);
+	if (SvREADONLY(org_sv))
+	    SvREADONLY_on(sv);
+    }
     else {
 	SvTEMP_off(sv);
 	SvREFCNT_inc_void_NN(sv);

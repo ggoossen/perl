@@ -229,7 +229,10 @@ S_instr_fold_constants(pTHX_ INSTRUCTION* instr, OP* o, bool list)
 	    if (PL_stack_sp - 1 == PL_stack_base + oldsp) {
 		sv = *(PL_stack_sp--);
 		if (o->op_targ && sv == PAD_SV(o->op_targ)) {
-		    sv = newSVsv(sv);
+		    SV* org_sv = sv;
+		    sv = newSVsv(org_sv);
+		    if (SvREADONLY(org_sv))
+			SvREADONLY_on(sv);
 		}
 		else if (SvTEMP(sv)) {			/* grab mortal temp */
 		    SvREFCNT_inc_simple_void(sv);
