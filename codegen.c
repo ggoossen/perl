@@ -228,15 +228,15 @@ S_instr_fold_constants(pTHX_ INSTRUCTION* instr, OP* o, bool list)
 	else {
 	    if (PL_stack_sp - 1 == PL_stack_base + oldsp) {
 		sv = *(PL_stack_sp--);
-		if (o->op_targ && sv == PAD_SV(o->op_targ)) {	/* grab pad temp? */
-		    pad_swipe(o->op_targ,  FALSE);
+		if (o->op_targ && sv == PAD_SV(o->op_targ)) {
+		    sv = newSVsv(sv);
 		}
-		else if (SvTEMP(sv)) {			/* grab mortal temp? */
+		else if (SvTEMP(sv)) {			/* grab mortal temp */
 		    SvREFCNT_inc_simple_void(sv);
 		    SvTEMP_off(sv);
 		}
 		else {
-		    SvREFCNT_inc_simple_void(sv);       /* immortal ? */
+		    SvREFCNT_inc_simple_void(sv);       /* immortal */
 		}
 	    }
 	}
