@@ -1,4 +1,4 @@
-/*    compile.h
+/*    instruction.h
  *
  *    Copyright (C) 2009 by Larry Wall and others
  *
@@ -8,47 +8,23 @@
  */
 
 /*
-
-=head1 Code-Generation
-
-Code-Generation is the step of converting an optree to an code sequence.
-
-=cut
-
-*/
-
-/*
 =head2 C<INSTRUCTION>
 
-C<INSTRUCTION> is a single instruction, it holds a pointer to a pp function and
-a pointer to the C<OP> containing more information.
+C<INSTRUCTION> is a single instruction, it holds a pointer to a pp
+function, some flags, a pointer to a C<OP> and a customizable pointer.
 
-Executing an instruction consist of setting C<PL_op> to the C<instr_op> field and
-then calling the C<instr_ppaddr> function.
-
-C<instr_ppaddr> can be C<NULL> indicating the end of the instructions.
+Executing an instruction consist of setting C<PL_op> to the
+C<instr_op> field and then calling the C<instr_ppaddr> function.
 
 =cut
 */
-
-#define INSTR_ARG_NULL {NULL}
 
 struct instruction {
     Perl_ppaddr_t	instr_ppaddr;
-    OP*         instr_op;
-    void*   instr_arg1;
-    void*   instr_arg2;
+    OP*                 instr_op;
+    void*               instr_arg1;
+    void*               instr_arg2;
 };
-
-#define RUN_SET_NEXT_INSTRUCTION(instr)		\
-    STMT_START {							\
-	DEBUG_t(PerlIO_printf(Perl_debug_log,				\
-		"Instruction jump to 0x%p %s, was 0x%p %s at %s:%d\n",	\
-		(void*)instr, instruction_name(instr),			\
-		(void*)PL_run_next_instruction, instruction_name(PL_run_next_instruction), \
-		__FILE__, __LINE__));					\
-	run_set_next_instruction(instr);				\
-    } STMT_END								\
 
 /*
 =head2 C<CODESEQ>
@@ -57,18 +33,20 @@ Represent a list of C<INSTRUCTION>
 
 C<compile_op> can be used to compile an optree into a C<CODESEQ>.
 
-Allocating/freeing must be done using C<new_codeseq> and C<free_codeseq>.
+C<CODESEQ>s are reference counted. Initialy C<new_codeseq> the
+reference count is one, and can be manipulated using
+C<codeseq_refcnt_inc> and C<codeseq_refcnt_dec>.
 
 =cut
 */
 
 struct codeseq {
-    int xcodeseq_size;                   /* Number of items in xcodeseq_instructions    */
-    INSTRUCTION* xcodeseq_instructions;  /* List of xcodeseq_size items of INSTRUCTIONs */
-    AV* xcodeseq_svs;                    /* Array with SVs to be freed with the codeseq */
-    void** xcodeseq_allocated_data_list;               /* Misc allocated data which should be freed with the codeseq */
-    int xcodeseq_allocated_data_size;               /* Number of items in xcodeseq_allocated_data_list */
-    int xcodeseq_refcnt;                 /* Reference count */
+    int           xcodeseq_size;                   /* Number of items in xcodeseq_instructions    */
+    INSTRUCTION*  xcodeseq_instructions;           /* List of xcodeseq_size items of INSTRUCTIONs */
+    AV*           xcodeseq_svs;                    /* Array with SVs to be freed with the codeseq */
+    void**        xcodeseq_allocated_data_list;    /* Misc allocated data which should be freed with the codeseq */
+    int           xcodeseq_allocated_data_size;    /* Number of items in xcodeseq_allocated_data_list */
+    int           xcodeseq_refcnt;                 /* Reference count */
 };
 
 #define INSTRf_TARG_IN_ARG2       0x1
@@ -83,17 +61,6 @@ struct codeseq {
 /* #define OPpDEREF_SV		(32|64)	/\*   Want ref to SV. *\/ */
 #define INSTRf_HELEM_SPECIAL     0x80
 #define INSTRf_PAD_STATE        0x100
-
-struct loop_instructions {
-    INSTRUCTION* next_instr;
-    INSTRUCTION* last_instr;
-    INSTRUCTION* redo_instr;
-};
-
-struct substcont_instructions {
-    INSTRUCTION* pmreplstart_instr;
-    INSTRUCTION* subst_next_instr;
-};
 
 /*
  * Local variables:
