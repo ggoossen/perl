@@ -22,8 +22,8 @@ C<instr_op> field and then calling the C<instr_ppaddr> function.
 struct instruction {
     Perl_ppaddr_t	instr_ppaddr;
     OP*                 instr_op;
-    void*               instr_arg1;
-    void*               instr_arg2;
+    INSTR_FLAGS         instr_flags;
+    void*               instr_arg;
 };
 
 /*

@@ -300,7 +300,6 @@ PP(pp_backtick)
     const char * const tmps = POPpconstx;
     const I32 gimme = GIMME_V;
     const char *mode = "r";
-    PERL_UNUSED_VAR(pparg1);
 
     TAINT_PROPER("``");
     if (PL_op->op_private & OPpOPEN_IN_RAW)
@@ -358,7 +357,8 @@ PP(pp_backtick)
 PP(pp_glob)
 {
     dVAR;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     tryAMAGICunTARGET(iter, -1);
 
     /* Note that we only ever get here if File::Glob fails to load
@@ -398,7 +398,8 @@ PP(pp_rcatline)
 {
     dSP;
     dVAR;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     PL_last_in_gv = (GV*)POPs;
     PUTBACK;
     do_readline();
@@ -411,7 +412,8 @@ PP(pp_warn)
     SV *exsv;
     const char *pv;
     STRLEN len;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     if (SP - MARK > 1) {
 	dTARGET;
 	do_join(TARG, &PL_sv_no, MARK, SP);
@@ -450,7 +452,7 @@ PP(pp_die)
     SV *exsv;
     const char *pv;
     STRLEN len;
-    PERL_UNUSED_VAR(pparg1);
+    bool multiarg = 0;
 #ifdef VMS
     VMSISH_HUSHED  = VMSISH_HUSHED || (PL_op->op_private & OPpHUSH_VMSISH);
 #endif
@@ -511,7 +513,6 @@ PP(pp_open)
     bool  ok;
 
     GV * const gv = MUTABLE_GV(*++MARK);
-    PERL_UNUSED_VAR(pparg1);
 
     if (!isGV(gv))
 	DIE(aTHX_ PL_no_usym, "filehandle");
@@ -611,7 +612,8 @@ PP(pp_close)
 {
     dVAR; dSP;
     GV * const gv = (MAXARG == 0) ? PL_defoutgv : MUTABLE_GV(POPs);
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (MAXARG == 0)
 	EXTEND(SP, 1);
@@ -640,7 +642,8 @@ PP(pp_pipe_op)
 
     GV * const wgv = MUTABLE_GV(POPs);
     GV * const rgv = MUTABLE_GV(POPs);
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!rgv || !wgv)
 	goto badexit;
@@ -696,7 +699,6 @@ PP(pp_fileno)
     IO *io;
     PerlIO *fp;
     MAGIC  *mg;
-    PERL_UNUSED_VAR(pparg1);
 
     if (MAXARG < 1)
 	RETPUSHUNDEF;
@@ -728,7 +730,8 @@ PP(pp_umask)
 #ifdef HAS_UMASK
     dTARGET;
     Mode_t anum;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (MAXARG < 1) {
 	anum = PerlLIO_umask(022);
@@ -760,7 +763,8 @@ PP(pp_binmode)
     IO *io;
     PerlIO *fp;
     SV *discp = NULL;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (MAXARG < 1)
 	RETPUSHUNDEF;
@@ -828,7 +832,8 @@ PP(pp_tie)
     int how = PERL_MAGIC_tied;
     U32 items;
     SV *varsv = *++MARK;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     switch(SvTYPE(varsv)) {
 	case SVt_PVHV:
@@ -915,7 +920,8 @@ PP(pp_untie)
     SV *sv = POPs;
     const char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
 		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (isGV_with_GP(sv) && !(sv = MUTABLE_SV(GvIOp(sv))))
 	RETPUSHYES;
@@ -954,7 +960,8 @@ PP(pp_tied)
     SV *sv = POPs;
     const char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
 		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (isGV_with_GP(sv) && !(sv = MUTABLE_SV(GvIOp(sv))))
 	RETPUSHUNDEF;
@@ -978,7 +985,8 @@ PP(pp_dbmopen)
 
     HV * const hv = MUTABLE_HV(POPs);
     SV * const sv = newSVpvs_flags("AnyDBM_File", SVs_TEMP);
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     stash = gv_stashsv(sv, 0);
     if (!stash || !(gv = gv_fetchmethod(stash, "TIEHASH"))) {
 	PUTBACK;
@@ -1050,8 +1058,6 @@ PP(pp_sselect)
 #   endif
 
 #endif
-
-    PERL_UNUSED_VAR(pparg1);
 
     SP -= 4;
     for (i = 1; i <= 3; i++) {
@@ -1214,7 +1220,6 @@ PP(pp_select)
     HV *hv;
     GV * const newdefout = (PL_op->op_private > 0) ? (MUTABLE_GV(POPs)) : NULL;
     GV * egv = GvEGVx(PL_defoutgv);
-    PERL_UNUSED_VAR(pparg1);
 
     if (!egv)
 	egv = PL_defoutgv;
@@ -1246,7 +1251,6 @@ PP(pp_getc)
     dVAR; dSP; dTARGET;
     IO *io = NULL;
     GV * const gv = (MAXARG==0) ? PL_stdingv : MUTABLE_GV(POPs);
-    PERL_UNUSED_VAR(pparg1);
 
     if (MAXARG == 0)
 	EXTEND(SP, 1);
@@ -1326,7 +1330,8 @@ PP(pp_enterwrite)
     GV *fgv;
     CV *cv = NULL;
     SV *tmpsv = NULL;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (MAXARG == 0) {
 	gv = PL_defoutgv;
@@ -1376,7 +1381,8 @@ PP(pp_leavewrite)
     SV **newsp;
     I32 gimme;
     register PERL_CONTEXT *cx;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!io || !(ofp = IoOFP(io)))
         goto forget_top;
@@ -1504,7 +1510,8 @@ PP(pp_prtf)
     GV * const gv
 	= (PL_op->op_flags & OPf_STACKED) ? MUTABLE_GV(*++MARK) : PL_defoutgv;
 
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (gv && (io = GvIO(gv))) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
@@ -1581,7 +1588,8 @@ PP(pp_sysopen)
 
     /* Need TIEHANDLE method ? */
     const char * const tmps = SvPV_const(sv, len);
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     /* FIXME? do_open should do const  */
     if (do_open(gv, tmps, len, TRUE, mode, perm, NULL)) {
 	IoLINES(GvIOp(gv)) = 0;
@@ -1614,7 +1622,6 @@ PP(pp_sysread)
     STRLEN skip = 0;
 
     GV * const gv = MUTABLE_GV(*++MARK);
-    PERL_UNUSED_VAR(pparg1);
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD)
 	&& gv && (io = GvIO(gv)) )
     {
@@ -1861,7 +1868,6 @@ PP(pp_send)
     U8 *tmpbuf = NULL;
     
     GV *const gv = MUTABLE_GV(*++MARK);
-    PERL_UNUSED_VAR(pparg1);
     if (PL_op->op_type == OP_SYSWRITE
 	&& gv && (io = GvIO(gv))) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
@@ -2083,7 +2089,8 @@ PP(pp_eof)
      * used. Doing it out here is DRY on the condition logic.
      */
     unsigned int which;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (MAXARG) {
 	gv = PL_last_in_gv = MUTABLE_GV(POPs);	/* eof(FH) */
@@ -2135,7 +2142,6 @@ PP(pp_tell)
     dVAR; dSP; dTARGET;
     GV *gv;
     IO *io;
-    PERL_UNUSED_VAR(pparg1);
 
     if (MAXARG != 0)
 	PL_last_in_gv = MUTABLE_GV(POPs);
@@ -2176,7 +2182,8 @@ PP(pp_sysseek)
 
     GV * const gv = PL_last_in_gv = MUTABLE_GV(POPs);
     IO *io;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(ppflags);
+    PERL_UNUSED_VAR(pparg);
 
     if (gv && (io = GvIO(gv))) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
@@ -2222,7 +2229,8 @@ PP(pp_truncate)
      * at least as wide as size_t, so using an off_t should be okay. */
     /* XXX Configure probe for the length type of *truncate() needed XXX */
     Off_t len;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
 #if Off_t_size > IVSIZE
     len = (Off_t)POPn;
@@ -2318,7 +2326,6 @@ PP(pp_ioctl)
     IO * const io = gv ? GvIOn(gv) : NULL;
     char *s;
     IV retval;
-    PERL_UNUSED_VAR(pparg1);
 
     if (!io || !argsv || !IoIFP(io)) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
@@ -2393,7 +2400,6 @@ PP(pp_flock)
     PerlIO *fp;
     const int argtype = POPi;
     GV * const gv = (MAXARG == 0) ? PL_last_in_gv : MUTABLE_GV(POPs);
-    PERL_UNUSED_VAR(pparg1);
 
     if (gv && (io = GvIO(gv)))
 	fp = IoIFP(io);
@@ -2431,7 +2437,8 @@ PP(pp_socket)
     GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = gv ? GvIOn(gv) : NULL;
     int fd;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!gv || !io) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
@@ -2484,7 +2491,8 @@ PP(pp_sockpair)
     register IO * const io1 = gv1 ? GvIOn(gv1) : NULL;
     register IO * const io2 = gv2 ? GvIOn(gv2) : NULL;
     int fd[2];
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!gv1 || !gv2 || !io1 || !io2) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
@@ -2544,7 +2552,8 @@ PP(pp_bind)
     GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
     STRLEN len;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!io || !IoIFP(io))
 	goto nuts;
@@ -2575,7 +2584,8 @@ PP(pp_connect)
     register IO * const io = GvIOn(gv);
     const char *addr;
     STRLEN len;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!io || !IoIFP(io))
 	goto nuts;
@@ -2604,7 +2614,8 @@ PP(pp_listen)
     const int backlog = POPi;
     GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = gv ? GvIOn(gv) : NULL;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!gv || !io || !IoIFP(io))
 	goto nuts;
@@ -2639,7 +2650,6 @@ PP(pp_accept)
     GV * const ggv = MUTABLE_GV(POPs);
     GV * const ngv = MUTABLE_GV(POPs);
     int fd;
-    PERL_UNUSED_VAR(pparg1);
 
     if (!ngv)
 	goto badexit;
@@ -2711,7 +2721,6 @@ PP(pp_shutdown)
     const int how = POPi;
     GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
-    PERL_UNUSED_VAR(pparg1);
 
     if (!io || !IoIFP(io))
 	goto nuts;
@@ -2741,7 +2750,8 @@ PP(pp_ssockopt)
     register IO * const io = GvIOn(gv);
     int fd;
     Sock_size_t len;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!io || !IoIFP(io))
 	goto nuts;
@@ -2817,7 +2827,8 @@ PP(pp_getpeername)
     Sock_size_t len;
     SV *sv;
     int fd;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!io || !IoIFP(io))
 	goto nuts;
@@ -2882,7 +2893,8 @@ PP(pp_stat)
     IO *io;
     I32 gimme;
     I32 max = 13;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (PL_op->op_flags & OPf_REF) {
 	gv = cGVOP_gv;
@@ -3095,7 +3107,8 @@ PP(pp_ftrread)
     bool effective = FALSE;
     char opchar = '?';
     dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     switch (PL_op->op_type) {
     case OP_FTRREAD:	opchar = 'R'; break;
@@ -3201,7 +3214,8 @@ PP(pp_ftis)
     const int op_type = PL_op->op_type;
     char opchar = '?';
     dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     switch (op_type) {
     case OP_FTIS:	opchar = 'e'; break;
@@ -3252,7 +3266,8 @@ PP(pp_ftrowned)
     I32 result;
     char opchar = '?';
     dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     switch (PL_op->op_type) {
     case OP_FTROWNED:	opchar = 'O'; break;
@@ -3364,7 +3379,8 @@ PP(pp_ftlink)
     dVAR;
     dSP;
     I32 result;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     tryAMAGICftest_MG('l');
     result = my_lstat_flags(0);
@@ -3386,7 +3402,8 @@ PP(pp_fttty)
     SV *tmpsv = NULL;
     char *name = NULL;
     STRLEN namelen;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     tryAMAGICftest_MG('t');
 
@@ -3440,7 +3457,8 @@ PP(pp_fttext)
     register SV *sv;
     GV *gv;
     PerlIO *fp;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     tryAMAGICftest_MG(PL_op->op_type == OP_FTTEXT ? 'T' : 'B');
 
@@ -3594,7 +3612,6 @@ PP(pp_chdir)
     dVAR; dSP; dTARGET;
     const char *tmps = NULL;
     GV *gv = NULL;
-    PERL_UNUSED_VAR(pparg1);
 
     if( MAXARG == 1 ) {
 	SV * const sv = POPs;
@@ -3675,7 +3692,6 @@ PP(pp_chown)
 {
     dVAR; dSP; dMARK; dTARGET;
     const I32 value = (I32)apply(PL_op->op_type, MARK, SP);
-    PERL_UNUSED_VAR(pparg1);
 
     SP = MARK;
     XPUSHi(value);
@@ -3687,7 +3703,6 @@ PP(pp_chroot)
 #ifdef HAS_CHROOT
     dVAR; dSP; dTARGET;
     char * const tmps = POPpx;
-    PERL_UNUSED_VAR(pparg1);
     TAINT_PROPER("chroot");
     PUSHi( chroot(tmps) >= 0 );
     RETURN;
@@ -3702,7 +3717,6 @@ PP(pp_rename)
     int anum;
     const char * const tmps2 = POPpconstx;
     const char * const tmps = SvPV_nolen_const(TOPs);
-    PERL_UNUSED_VAR(pparg1);
     TAINT_PROPER("rename");
 #ifdef HAS_RENAME
     anum = PerlLIO_rename(tmps, tmps2);
@@ -3728,7 +3742,6 @@ PP(pp_link)
     dVAR; dSP; dTARGET;
     const int op_type = PL_op->op_type;
     int result;
-    PERL_UNUSED_VAR(pparg1);
 
 #  ifndef HAS_LINK
     if (op_type == OP_LINK)
@@ -3781,7 +3794,8 @@ PP(pp_readlink)
     const char *tmps;
     char buf[MAXPATHLEN];
     int len;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
 #ifndef INCOMPLETE_TAINTS
     TAINT;
@@ -3916,7 +3930,6 @@ PP(pp_mkdir)
     const char *tmps;
     bool copy = FALSE;
     const int mode = (MAXARG > 1) ? POPi : 0777;
-    PERL_UNUSED_VAR(pparg1);
 
     TRIMSLASHES(tmps,len,copy);
 
@@ -3943,7 +3956,6 @@ PP(pp_rmdir)
     STRLEN len;
     const char *tmps;
     bool copy = FALSE;
-    PERL_UNUSED_VAR(pparg1);
 
     TRIMSLASHES(tmps,len,copy);
     TAINT_PROPER("rmdir");
@@ -3966,7 +3978,8 @@ PP(pp_open_dir)
     const char * const dirname = POPpconstx;
     GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!io)
 	goto nope;
@@ -4006,7 +4019,8 @@ PP(pp_readdir)
     GV * const gv = MUTABLE_GV(POPs);
     register const Direntry_t *dp;
     register IO * const io = GvIOn(gv);
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
@@ -4058,7 +4072,8 @@ PP(pp_telldir)
 # endif
     GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
@@ -4084,7 +4099,8 @@ PP(pp_seekdir)
     const long along = POPl;
     GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
@@ -4109,7 +4125,8 @@ PP(pp_rewinddir)
     dVAR; dSP;
     GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
@@ -4133,7 +4150,8 @@ PP(pp_closedir)
     dVAR; dSP;
     GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
@@ -4167,7 +4185,6 @@ PP(pp_fork)
 #ifdef HAS_FORK
     dVAR; dSP; dTARGET;
     Pid_t childpid;
-    PERL_UNUSED_VAR(pparg1);
 
     EXTEND(SP, 1);
     PERL_FLUSHALL_FOR_CHILD;
@@ -4214,7 +4231,6 @@ PP(pp_wait)
     dVAR; dSP; dTARGET;
     Pid_t childpid;
     int argflags;
-    PERL_UNUSED_VAR(pparg1);
 
     if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
         childpid = wait4pid(-1, &argflags, 0);
@@ -4245,7 +4261,6 @@ PP(pp_waitpid)
     const Pid_t pid = TOPi;
     Pid_t result;
     int argflags;
-    PERL_UNUSED_VAR(pparg1);
 
     if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
         result = wait4pid(pid, &argflags, optype);
@@ -4278,7 +4293,6 @@ PP(pp_system)
 #else
     I32 value;
     int result;
-    PERL_UNUSED_VAR(pparg1);
 
     if (PL_tainting) {
 	TAINT_ENV();
@@ -4409,7 +4423,6 @@ PP(pp_exec)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
-    PERL_UNUSED_VAR(pparg1);
 
     if (PL_tainting) {
 	TAINT_ENV();
@@ -4461,7 +4474,6 @@ PP(pp_getppid)
 {
 #ifdef HAS_GETPPID
     dVAR; dSP; dTARGET;
-    PERL_UNUSED_VAR(pparg1);
 #   ifdef THREADS_HAVE_PIDS
     if (PL_ppid != 1 && getppid() == 1)
 	/* maybe the parent process has died. Refresh ppid cache */
@@ -4482,7 +4494,6 @@ PP(pp_getpgrp)
     dVAR; dSP; dTARGET;
     Pid_t pgrp;
     const Pid_t pid = (MAXARG < 1) ? 0 : SvIVx(POPs);
-    PERL_UNUSED_VAR(pparg1);
 
 #ifdef BSD_GETPGRP
     pgrp = (I32)BSD_GETPGRP(pid);
@@ -4504,7 +4515,6 @@ PP(pp_setpgrp)
     dVAR; dSP; dTARGET;
     Pid_t pgrp;
     Pid_t pid;
-    PERL_UNUSED_VAR(pparg1);
     if (MAXARG < 2) {
 	pgrp = 0;
 	pid = 0;
@@ -4544,7 +4554,6 @@ PP(pp_getpriority)
     dVAR; dSP; dTARGET;
     const int who = POPi;
     const int which = TOPi;
-    PERL_UNUSED_VAR(pparg1);
     SETi( getpriority(PRIORITY_WHICH_T(which), who) );
     RETURN;
 #else
@@ -4559,7 +4568,6 @@ PP(pp_setpriority)
     const int niceval = POPi;
     const int who = POPi;
     const int which = TOPi;
-    PERL_UNUSED_VAR(pparg1);
     TAINT_PROPER("setpriority");
     SETi( setpriority(PRIORITY_WHICH_T(which), who, niceval) >= 0 );
     RETURN;
@@ -4575,7 +4583,6 @@ PP(pp_setpriority)
 PP(pp_time)
 {
     dVAR; dSP; dTARGET;
-    PERL_UNUSED_VAR(pparg1);
 #ifdef BIG_TIME
     XPUSHn( time(NULL) );
 #else
@@ -4589,7 +4596,8 @@ PP(pp_tms)
 #ifdef HAS_TIMES
     dVAR;
     dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     EXTEND(SP, 4);
 #ifndef VMS
     (void)PerlProc_times(&PL_timesbuf);
@@ -4645,7 +4653,8 @@ PP(pp_gmtime)
     static const char * const monname[] =
 	{"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (MAXARG < 1) {
 	time_t now;
@@ -4728,7 +4737,6 @@ PP(pp_alarm)
 #ifdef HAS_ALARM
     dVAR; dSP; dTARGET;
     int anum;
-    PERL_UNUSED_VAR(pparg1);
     anum = POPi;
     anum = alarm((unsigned int)anum);
     if (anum < 0)
@@ -4746,7 +4754,6 @@ PP(pp_sleep)
     I32 duration;
     Time_t lasttime;
     Time_t when;
-    PERL_UNUSED_VAR(pparg1);
 
     (void)time(&lasttime);
     if (MAXARG < 1)
@@ -4769,7 +4776,6 @@ PP(pp_shmwrite)
     dVAR; dSP; dMARK; dTARGET;
     const int op_type = PL_op->op_type;
     I32 value;
-    PERL_UNUSED_VAR(pparg1);
 
     switch (op_type) {
     case OP_MSGSND:
@@ -4801,7 +4807,6 @@ PP(pp_semget)
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     dVAR; dSP; dMARK; dTARGET;
     const int anum = do_ipcget(PL_op->op_type, MARK, SP);
-    PERL_UNUSED_VAR(pparg1);
     SP = MARK;
     if (anum == -1)
 	RETPUSHUNDEF;
@@ -4817,7 +4822,6 @@ PP(pp_semctl)
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     dVAR; dSP; dMARK; dTARGET;
     const int anum = do_ipcctl(PL_op->op_type, MARK, SP);
-    PERL_UNUSED_VAR(pparg1);
     SP = MARK;
     if (anum == -1)
 	RETSETUNDEF;
@@ -4872,7 +4876,8 @@ PP(pp_ghostent)
 #endif
     struct hostent *hent = NULL;
     unsigned long len;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     EXTEND(SP, 10);
     if (which == OP_GHBYNAME) {
@@ -4961,7 +4966,8 @@ PP(pp_gnetent)
     struct netent *getnetent(void);
 #endif
     struct netent *nent;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (which == OP_GNBYNAME){
 #ifdef HAS_GETNETBYNAME
@@ -5035,7 +5041,8 @@ PP(pp_gprotoent)
     struct protoent *getprotoent(void);
 #endif
     struct protoent *pent;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (which == OP_GPBYNAME) {
 #ifdef HAS_GETPROTOBYNAME
@@ -5096,7 +5103,8 @@ PP(pp_gservent)
     struct servent *getservent(void);
 #endif
     struct servent *sent;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (which == OP_GSBYNAME) {
 #ifdef HAS_GETSERVBYNAME
@@ -5164,7 +5172,8 @@ PP(pp_shostent)
 {
 #ifdef HAS_SETHOSTENT
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     PerlSock_sethostent(TOPi);
     RETSETYES;
 #else
@@ -5176,7 +5185,8 @@ PP(pp_snetent)
 {
 #ifdef HAS_SETNETENT
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     (void)PerlSock_setnetent(TOPi);
     RETSETYES;
 #else
@@ -5188,7 +5198,8 @@ PP(pp_sprotoent)
 {
 #ifdef HAS_SETPROTOENT
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     (void)PerlSock_setprotoent(TOPi);
     RETSETYES;
 #else
@@ -5200,7 +5211,8 @@ PP(pp_sservent)
 {
 #ifdef HAS_SETSERVENT
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     (void)PerlSock_setservent(TOPi);
     RETSETYES;
 #else
@@ -5212,7 +5224,8 @@ PP(pp_ehostent)
 {
 #ifdef HAS_ENDHOSTENT
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     PerlSock_endhostent();
     EXTEND(SP,1);
     RETPUSHYES;
@@ -5225,7 +5238,8 @@ PP(pp_enetent)
 {
 #ifdef HAS_ENDNETENT
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     PerlSock_endnetent();
     EXTEND(SP,1);
     RETPUSHYES;
@@ -5238,7 +5252,8 @@ PP(pp_eprotoent)
 {
 #ifdef HAS_ENDPROTOENT
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     PerlSock_endprotoent();
     EXTEND(SP,1);
     RETPUSHYES;
@@ -5251,7 +5266,8 @@ PP(pp_eservent)
 {
 #ifdef HAS_ENDSERVENT
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     PerlSock_endservent();
     EXTEND(SP,1);
     RETPUSHYES;
@@ -5267,7 +5283,8 @@ PP(pp_gpwent)
     I32 which = PL_op->op_type;
     register SV *sv;
     struct passwd *pwent  = NULL;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     /*
      * We currently support only the SysV getsp* shadow password interface.
      * The interface is declared in <shadow.h> and often one needs to link
@@ -5498,7 +5515,8 @@ PP(pp_spwent)
 {
 #if defined(HAS_PASSWD) && defined(HAS_SETPWENT)
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     setpwent();
     RETPUSHYES;
 #else
@@ -5510,7 +5528,8 @@ PP(pp_epwent)
 {
 #if defined(HAS_PASSWD) && defined(HAS_ENDPWENT)
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     endpwent();
     RETPUSHYES;
 #else
@@ -5524,7 +5543,8 @@ PP(pp_ggrent)
     dVAR; dSP;
     const I32 which = PL_op->op_type;
     const struct group *grent;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
 
     if (which == OP_GGRNAM) {
 	const char* const name = POPpbytex;
@@ -5597,7 +5617,8 @@ PP(pp_sgrent)
 {
 #if defined(HAS_GROUP) && defined(HAS_SETGRENT)
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     setgrent();
     RETPUSHYES;
 #else
@@ -5609,7 +5630,8 @@ PP(pp_egrent)
 {
 #if defined(HAS_GROUP) && defined(HAS_ENDGRENT)
     dVAR; dSP;
-    PERL_UNUSED_VAR(pparg1);
+    PERL_UNUSED_VAR(pparg);
+    PERL_UNUSED_VAR(ppflags);
     endgrent();
     RETPUSHYES;
 #else
@@ -5622,7 +5644,6 @@ PP(pp_getlogin)
 #ifdef HAS_GETLOGIN
     dVAR; dSP; dTARGET;
     char *tmps;
-    PERL_UNUSED_VAR(pparg1);
     EXTEND(SP, 1);
     if (!(tmps = PerlProc_getlogin()))
 	RETPUSHUNDEF;
@@ -5643,7 +5664,6 @@ PP(pp_syscall)
     unsigned long a[20];
     register I32 i = 0;
     I32 retval = -1;
-    PERL_UNUSED_VAR(pparg1);
 
     if (PL_tainting) {
 	while (++MARK <= SP) {

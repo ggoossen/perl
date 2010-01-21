@@ -677,7 +677,7 @@ PERL_CALLCONV void	Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 #define PERL_ARGS_ASSERT_DO_JOIN	\
 	assert(sv); assert(delim); assert(mark); assert(sp)
 
-PERL_CALLCONV int	Perl_do_kv(pTHX_ void *pparg1, void *pparg2);
+PERL_CALLCONV int	Perl_do_kv(pTHX_ INSTR_FLAGS ppflags, void *pparg);
 /* PERL_CALLCONV bool	Perl_do_open(pTHX_ GV* gv, const char* name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO* supplied_fp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2); */
@@ -5288,7 +5288,7 @@ STATIC void	S_destroy_matcher(pTHX_ PMOP* matcher)
 #define PERL_ARGS_ASSERT_DESTROY_MATCHER	\
 	assert(matcher)
 
-STATIC INSTRUCTION*	S_do_smartmatch(pTHX_ HV* seen_this, HV* seen_other);
+STATIC int	S_do_smartmatch(pTHX_ HV* seen_this, HV* seen_other);
 #endif
 
 #if defined(PERL_IN_PP_HOT_C)
@@ -7033,12 +7033,12 @@ STATIC void	S_append_instruction(pTHX_ CODEGEN_PAD *bpp, OP* o, Optype optype)
 #define PERL_ARGS_ASSERT_APPEND_INSTRUCTION	\
 	assert(bpp)
 
-STATIC void	S_append_instruction_x(pTHX_ CODEGEN_PAD *bpp, OP* o, Optype optype, void* instr_arg1, void* instr_arg2)
+STATIC void	S_append_instruction_x(pTHX_ CODEGEN_PAD *bpp, OP* o, Optype optype, INSTR_FLAGS instr_flags, void* instr_arg)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_APPEND_INSTRUCTION_X	\
 	assert(bpp)
 
-STATIC void	S_save_branch_point(pTHX_ CODEGEN_PAD *bpp, INSTRUCTION **instrp)
+STATIC void	S_save_branch_point(pTHX_ CODEGEN_PAD *bpp, const INSTRUCTION **instrp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SAVE_BRANCH_POINT	\

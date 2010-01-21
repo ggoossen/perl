@@ -456,15 +456,15 @@ struct block_eval {
 /* loop context */
 
 struct loop_instructions {
-    INSTRUCTION* next_instr;
-    INSTRUCTION* last_instr;
-    INSTRUCTION* redo_instr;
+    const INSTRUCTION* next_instr;
+    const INSTRUCTION* last_instr;
+    const INSTRUCTION* redo_instr;
 };
 
 struct block_loop {
     I32		resetsp;
     LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */
-    LOOP_INSTRUCTIONS* loop_instrs;
+    const LOOP_INSTRUCTIONS* loop_instrs;
     /* (except for non_ithreads we need to modify next_op in pp_ctl.c, hence
 	why next_op is conditionally defined below.)  */
 #ifdef USE_ITHREADS
@@ -540,7 +540,7 @@ struct block_loop {
 
 /* given/when context */
 struct block_givwhen {
-	INSTRUCTION *leave_op_instr;
+	const INSTRUCTION *leave_op_instr;
 };
 
 #define PUSHGIVEN(cx, instr)							\
@@ -648,8 +648,8 @@ struct block {
 /* substitution context */
 
 struct substcont_instructions {
-    INSTRUCTION* pmreplstart_instr;
-    INSTRUCTION* subst_next_instr;
+    const INSTRUCTION* pmreplstart_instr;
+    const INSTRUCTION* subst_next_instr;
 };
 
 struct subst {

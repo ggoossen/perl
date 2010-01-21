@@ -4239,7 +4239,7 @@ struct perl_memory_debug_header {
 typedef int (*runops_proc_t)(pTHX);
 typedef void (*share_proc_t) (pTHX_ SV *sv);
 typedef int  (*thrhook_proc_t) (pTHX);
-typedef int (*PPADDR_t[]) (pTHX_ void *pparg1, void *pparg2);
+typedef int (*PPADDR_t[]) (pTHX_ INSTR_FLAGS ppflags, void *pparg1, void *pparg2);
 typedef bool (*destroyable_proc_t) (pTHX_ SV *sv);
 typedef void (*despatch_signals_proc_t) (pTHX);
 
@@ -4984,7 +4984,7 @@ struct tempsym; /* defined in pp_pack.c */
 #include "thread.h"
 #include "pp.h"
 
-typedef INSTRUCTION* (CPERLscope(*Perl_ppaddr_t))(pTHX_ void* pparg1, void* pparg2);
+typedef int (CPERLscope(*Perl_ppaddr_t))(pTHX_ INSTR_FLAGS ppflags, void* pparg);
 #include "instruction.h"
 
 #ifndef PERL_CALLCONV
@@ -4997,7 +4997,7 @@ typedef INSTRUCTION* (CPERLscope(*Perl_ppaddr_t))(pTHX_ void* pparg1, void* ppar
 #undef PERL_CKDEF
 #undef PERL_PPDEF
 #define PERL_CKDEF(s)	PERL_CALLCONV OP *s (pTHX_ OP *o);
-#define PERL_PPDEF(s)	PERL_CALLCONV INSTRUCTION *s (pTHX_ void* pparg1, void *pparg2);
+#define PERL_PPDEF(s)	PERL_CALLCONV int s (pTHX_ INSTR_FLAGS ppflags, void *pparg);
 
 #include "proto.h"
 

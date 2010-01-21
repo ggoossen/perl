@@ -2581,16 +2581,19 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	myop.op_type = OP_ENTERSUB;
 	myinstr[instr_idx].instr_op = (OP*)&method_op;
 	myinstr[instr_idx].instr_ppaddr = PL_ppaddr[method_op.op_type];
-	myinstr[instr_idx].instr_arg1 = NULL;
+	myinstr[instr_idx].instr_flags = 0;
+	myinstr[instr_idx].instr_arg = NULL;
 	instr_idx++;
     }
 
     myinstr[instr_idx].instr_op = (OP*)&myop;
     myinstr[instr_idx].instr_ppaddr = PL_ppaddr[myop.op_type];
-    myinstr[instr_idx].instr_arg1 = NULL;
+    myinstr[instr_idx].instr_flags = 0;
+    myinstr[instr_idx].instr_arg = NULL;
     myinstr[instr_idx+1].instr_ppaddr = PL_ppaddr[OP_INSTR_END];
     myinstr[instr_idx+1].instr_op = NULL;
-    myinstr[instr_idx+1].instr_arg1 = NULL;
+    myinstr[instr_idx+1].instr_flags = 0;
+    myinstr[instr_idx+1].instr_arg = NULL;
     oldinstr = run_get_next_instruction();
     RUN_SET_NEXT_INSTRUCTION( &myinstr[0] );
 
@@ -2707,7 +2710,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     case 0:
 	RUN_SET_NEXT_INSTRUCTION(NULL);
 	PL_op = (OP*)&myop;
-	PL_ppaddr[OP_ENTEREVAL](aTHX_ NULL, NULL);
+	PL_ppaddr[OP_ENTEREVAL](aTHX_ 0, NULL);
 	CALLRUNOPS(aTHX);
 	break;
     default:

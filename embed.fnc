@@ -341,7 +341,7 @@ p	|I32	|do_shmio	|I32 optype|NN SV** mark|NN SV** sp
 #endif
 Ap	|void	|do_join	|NN SV *sv|NN SV *delim|NN SV **mark|NN SV **sp
 : Used in pp.c and pp_hot.c
-p	|int	|do_kv		|NULLOK void *pparg1|NULLOK void *pparg2	
+p	|int	|do_kv		|INSTR_FLAGS ppflags|NULLOK void *pparg	
 Apmb	|bool	|do_open	|NN GV* gv|NN const char* name|I32 len|int as_raw \
 				|int rawmode|int rawperm|NULLOK PerlIO* supplied_fp
 Ap	|bool	|do_open9	|NN GV *gv|NN const char *name|I32 len|int as_raw \
@@ -1694,7 +1694,7 @@ sR	|I32	|run_user_filter|int idx|NN SV *buf_sv|int maxlen
 sR	|PMOP*	|make_matcher	|NN REGEXP* re
 sR	|bool	|matcher_matches_sv|NN PMOP* matcher|NN SV* sv
 s	|void	|destroy_matcher|NN PMOP* matcher
-s	|INSTRUCTION*	|do_smartmatch	|NULLOK HV* seen_this|NULLOK HV* seen_other
+s	|int	|do_smartmatch	|NULLOK HV* seen_this|NULLOK HV* seen_other
 #endif
 
 #if defined(PERL_IN_PP_HOT_C)
@@ -2403,8 +2403,8 @@ s	|SV**	|svp_const_instruction	|NN CODEGEN_PAD *bpp|int instr_index
 s	|void	|add_op	|NN CODEGEN_PAD *bpp|NN OP* o|NN bool *may_constant_fold|int flags
 s	|void	|add_kids	|NN CODEGEN_PAD *bpp|NN OP* o|NN bool *may_constant_fold
 s	|void	|append_instruction	|NN CODEGEN_PAD *bpp|NULLOK OP* o|Optype optype
-s	|void	|append_instruction_x	|NN CODEGEN_PAD *bpp|NULLOK OP* o|Optype optype|NULLOK void* instr_arg1|NULLOK void* instr_arg2
-s	|void	|save_branch_point	|NN CODEGEN_PAD *bpp|NN INSTRUCTION **instrp
+s	|void	|append_instruction_x	|NN CODEGEN_PAD *bpp|NULLOK OP* o|Optype optype|NULLOK INSTR_FLAGS instr_flags|NULLOK void* instr_arg
+s	|void	|save_branch_point	|NN CODEGEN_PAD *bpp|NN const INSTRUCTION **instrp
 s	|void	|save_instr_from_to_pparg	|NN CODEGEN_PAD *codegen_pad|int instr_from_index|int instr_to_index
 s	|SV*	|instr_fold_constants	|NN INSTRUCTION* instr|NN OP* o|bool list
 s	|void	|append_allocated_data	|NN CODEGEN_PAD *bpp|NN void *data

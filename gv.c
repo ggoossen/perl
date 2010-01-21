@@ -2288,7 +2288,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     if (PERLDB_SUB && PL_curstash != PL_debstash)
 	PL_op->op_private |= OPpENTERSUB_DB;
     PUTBACK;
-    pp_pushmark(NULL, NULL);
+    pp_pushmark(0, NULL);
 
     EXTEND(SP, notfound + 5);
     PUSHs(lr>0? right: left);
@@ -2303,7 +2303,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 
     RUN_SET_NEXT_INSTRUCTION(NULL);
 
-    PL_ppaddr[OP_ENTERSUB](aTHX_ NULL, NULL);
+    PL_ppaddr[OP_ENTERSUB](aTHX_ 0, NULL);
 
     if (run_get_next_instruction())
 	CALLRUNOPS(aTHX);

@@ -1195,12 +1195,12 @@ Perl_codeseq_dump(pTHX_ const CODESEQ *codeseq)
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ENTERTRY]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_RANGE]
 	    ) {
-	    const INSTRUCTION* target = (const INSTRUCTION*)instr->instr_arg1;
+	    const INSTRUCTION* target = (const INSTRUCTION*)instr->instr_arg;
 	    S_add_label(aTHX_ jump_points, target, &jump_point_idx);
 	}
 	else if (instr->instr_ppaddr == PL_ppaddr[OP_ENTERLOOP]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ENTERITER]) {
-	    LOOP_INSTRUCTIONS* loop_instrs = (LOOP_INSTRUCTIONS*)instr->instr_arg1;
+	    LOOP_INSTRUCTIONS* loop_instrs = (LOOP_INSTRUCTIONS*)instr->instr_arg;
 	    S_add_label(aTHX_ jump_points, loop_instrs->redo_instr, &jump_point_idx);
 	    S_add_label(aTHX_ jump_points, loop_instrs->next_instr, &jump_point_idx);
 	    S_add_label(aTHX_ jump_points, loop_instrs->last_instr, &jump_point_idx);
@@ -1227,12 +1227,12 @@ Perl_codeseq_dump(pTHX_ const CODESEQ *codeseq)
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ENTERTRY]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_RANGE]
 	    ) {
-	    const INSTRUCTION* target = (const INSTRUCTION *)instr->instr_arg1;
+	    const INSTRUCTION* target = (const INSTRUCTION *)instr->instr_arg;
 	    PerlIO_printf(Perl_debug_log, "label%"UVuf"\t", S_instr_label(aTHX_ jump_points, target));
 	}
 	else if (instr->instr_ppaddr == PL_ppaddr[OP_ENTERLOOP]
 	    || instr->instr_ppaddr == PL_ppaddr[OP_ENTERITER]) {
-	    LOOP_INSTRUCTIONS* loop_instrs = (LOOP_INSTRUCTIONS*)instr->instr_arg1;
+	    LOOP_INSTRUCTIONS* loop_instrs = (LOOP_INSTRUCTIONS*)instr->instr_arg;
 	    PerlIO_printf(Perl_debug_log, "redo=label%"UVuf"\t", 
 		S_instr_label(aTHX_ jump_points, loop_instrs->redo_instr));
 	    PerlIO_printf(Perl_debug_log, "next=label%"UVuf"\t", 

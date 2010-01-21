@@ -8,7 +8,7 @@
  *
  */
 
-#define PP(s) INSTRUCTION* Perl_##s(pTHX_ void* pparg1, void *pparg2)
+#define PP(s) int Perl_##s(pTHX_ INSTR_FLAGS ppflags, void *pparg)
 
 /*
 =head1 Stack Manipulation Macros
@@ -77,16 +77,16 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define GETTARGETSTACKED targ = (PL_op->op_flags & OPf_STACKED ? POPs : PAD_SV(PL_op->op_targ))
 #define dTARGETSTACKED SV * GETTARGETSTACKED
 
-#define GETTARGET targ = PAD_SV(((int)pparg1 & INSTRf_TARG_IN_ARG2) ? (int)pparg2 : PL_op->op_targ)
+#define GETTARGET targ = PAD_SV((ppflags & INSTRf_TARG_IN_ARG2) ? (PADOFFSET)pparg : PL_op->op_targ)
 #define dTARGET SV * GETTARGET
 
-#define GETATARGET targ = ((int)pparg1 & INSTRf_TARG_IN_ARG2 ? PAD_SV((int)pparg2) \
+#define GETATARGET targ = (ppflags & INSTRf_TARG_IN_ARG2 ? PAD_SV((PADOFFSET)pparg) \
 	: PL_op->op_flags & OPf_STACKED ? sp[-1] : PAD_SV(PL_op->op_targ))
 #define dATARGET SV * GETATARGET
 
 #define dTARG SV *targ
 
-#define NORMAL ((INSTRUCTION*)NULL)
+#define NORMAL 0
 #define DIE Perl_die
 
 /*
