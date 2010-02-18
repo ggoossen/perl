@@ -7028,14 +7028,9 @@ STATIC void	S_add_kids(pTHX_ CODEGEN_PAD *bpp, OP* o, bool *may_constant_fold)
 #define PERL_ARGS_ASSERT_ADD_KIDS	\
 	assert(bpp); assert(o); assert(may_constant_fold)
 
-STATIC void	S_append_instruction(pTHX_ CODEGEN_PAD *bpp, OP* o, Optype optype)
+STATIC void	S_append_instruction(pTHX_ CODEGEN_PAD *bpp, OP* o, Optype optype, INSTR_FLAGS instr_flags, void* instr_arg)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_APPEND_INSTRUCTION	\
-	assert(bpp)
-
-STATIC void	S_append_instruction_x(pTHX_ CODEGEN_PAD *bpp, OP* o, Optype optype, INSTR_FLAGS instr_flags, void* instr_arg)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_APPEND_INSTRUCTION_X	\
 	assert(bpp)
 
 STATIC void	S_save_branch_point(pTHX_ CODEGEN_PAD *bpp, const INSTRUCTION **instrp)

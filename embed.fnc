@@ -2402,8 +2402,7 @@ s	|OP*	|is_inplace_av	|NN OP* o
 s	|SV**	|svp_const_instruction	|NN CODEGEN_PAD *bpp|int instr_index
 s	|void	|add_op	|NN CODEGEN_PAD *bpp|NN OP* o|NN bool *may_constant_fold|int flags
 s	|void	|add_kids	|NN CODEGEN_PAD *bpp|NN OP* o|NN bool *may_constant_fold
-s	|void	|append_instruction	|NN CODEGEN_PAD *bpp|NULLOK OP* o|Optype optype
-s	|void	|append_instruction_x	|NN CODEGEN_PAD *bpp|NULLOK OP* o|Optype optype|NULLOK INSTR_FLAGS instr_flags|NULLOK void* instr_arg
+s	|void	|append_instruction	|NN CODEGEN_PAD *bpp|NULLOK OP* o|Optype optype|NULLOK INSTR_FLAGS instr_flags|NULLOK void* instr_arg
 s	|void	|save_branch_point	|NN CODEGEN_PAD *bpp|NN const INSTRUCTION **instrp
 s	|void	|save_instr_from_to_pparg	|NN CODEGEN_PAD *codegen_pad|int instr_from_index|int instr_to_index
 s	|SV*	|instr_fold_constants	|NN INSTRUCTION* instr|NN OP* o|bool list

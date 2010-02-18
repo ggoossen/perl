@@ -2093,7 +2093,6 @@
 #define add_op			S_add_op
 #define add_kids		S_add_kids
 #define append_instruction	S_append_instruction
-#define append_instruction_x	S_append_instruction_x
 #define save_branch_point	S_save_branch_point
 #define save_instr_from_to_pparg	S_save_instr_from_to_pparg
 #define instr_fold_constants	S_instr_fold_constants
@@ -4618,8 +4617,7 @@
 #define svp_const_instruction(a,b)	S_svp_const_instruction(aTHX_ a,b)
 #define add_op(a,b,c,d)		S_add_op(aTHX_ a,b,c,d)
 #define add_kids(a,b,c)		S_add_kids(aTHX_ a,b,c)
-#define append_instruction(a,b,c)	S_append_instruction(aTHX_ a,b,c)
-#define append_instruction_x(a,b,c,d,e)	S_append_instruction_x(aTHX_ a,b,c,d,e)
+#define append_instruction(a,b,c,d,e)	S_append_instruction(aTHX_ a,b,c,d,e)
 #define save_branch_point(a,b)	S_save_branch_point(aTHX_ a,b)
 #define save_instr_from_to_pparg(a,b,c)	S_save_instr_from_to_pparg(aTHX_ a,b,c)
 #define instr_fold_constants(a,b,c)	S_instr_fold_constants(aTHX_ a,b,c)
