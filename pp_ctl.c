@@ -1920,16 +1920,15 @@ PP(pp_dbstate)
 	    return NORMAL;
 	}
 	else {
+	    if (!CvCODESEQ(cv)) {
+		compile_cv(cv);
+	    }
 	    PUSHBLOCK(cx, CXt_SUB, SP);
 	    PUSHSUB_DB(cx);
 	    cx->blk_sub.ret_instr = run_get_next_instruction();
 	    CvDEPTH(cv)++;
 	    SAVECOMPPAD();
 	    PAD_SET_CUR_NOSAVE(CvPADLIST(cv), 1);
-	    if (!CvCODESEQ(cv)) {
-		CvCODESEQ(cv) = new_codeseq();
-		compile_op(CvROOT(cv), CvCODESEQ(cv));
-	    }
 	    RUN_SET_NEXT_INSTRUCTION( codeseq_start_instruction(CvCODESEQ(cv)) );
 	    return NORMAL;
 	}
@@ -2649,6 +2648,10 @@ PP(pp_goto)
 		    PL_eval_root = cx->blk_eval.old_eval_root;
 		    cx->cx_type = CXt_SUB;
 		}
+		if (!CvCODESEQ(cv)) {
+		    compile_cv(cv);
+		}
+		cx->blk_sub.codeseq = CvCODESEQ(cv);
 		cx->blk_sub.cv = cv;
 		cx->blk_sub.olddepth = CvDEPTH(cv);
 
@@ -2711,10 +2714,6 @@ PP(pp_goto)
 		    }
 		}
 		
-		if (!CvCODESEQ(cv)) {
-		    CvCODESEQ(cv) = new_codeseq();
-		    compile_op(CvROOT(cv), CvCODESEQ(cv));
-		}
 		RUN_SET_NEXT_INSTRUCTION(codeseq_start_instruction(CvCODESEQ(cv)));
 
 		RETURN;

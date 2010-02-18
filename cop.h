@@ -304,6 +304,7 @@ struct cop {
 struct block_sub {
     const INSTRUCTION *	ret_instr;	/* instruction to continue executing on exit from sub */
     /* Above here is the same for sub, format and eval.  */
+    CODESEQ *   codeseq;
     CV *	cv;
     /* Above here is the same for sub and format.  */
     AV *	savearray;
@@ -317,6 +318,7 @@ struct block_sub {
 struct block_format {
     const INSTRUCTION *	ret_instr;	/* op to execute on exit from sub */
     /* Above here is the same for sub, format and eval.  */
+    CODESEQ *   codeseq;
     CV *	cv;
     /* Above here is the same for sub and format.  */
     GV *	gv;
@@ -332,6 +334,8 @@ struct block_format {
 		CopFILE((const COP *)CvSTART(cv)),			\
 		CopLINE((const COP *)CvSTART(cv)));			\
 									\
+	assert(CvCODESEQ(cv));						\
+	cx->blk_sub.codeseq = CvCODESEQ(cv);				\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
 	cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;			\
@@ -355,6 +359,7 @@ struct block_format {
 
 
 #define PUSHFORMAT(cx, ret_instr)						\
+        cx->blk_format.codeseq = CvCODESEQ(cv);				\
 	cx->blk_format.cv = cv;						\
 	cx->blk_format.gv = gv;						\
 	cx->blk_format.ret_instr = (ret_instr);					\
@@ -416,6 +421,7 @@ struct block_format {
 struct block_eval {
     const INSTRUCTION *	ret_instr;	/* op to execute on exit from eval */
     /* Above here is the same for sub, format and eval.  */
+    CODESEQ *   codeseq;
     SV *	old_namesv;
     OP *	old_eval_root;
     SV *	cur_text;
@@ -439,6 +445,7 @@ struct block_eval {
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_parser ? PL_parser->linestr : NULL;	\
 	cx->blk_eval.cv = NULL; /* set by doeval(), as applicable */	\
+	cx->blk_eval.codeseq = NULL; /* set by doeval(), as applicable */ \
 	cx->blk_eval.ret_instr = NULL;					\
 	cx->blk_eval.cur_top_env = PL_top_env; 				\
     } STMT_END

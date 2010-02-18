@@ -1306,6 +1306,9 @@ S_doform(pTHX_ CV *cv, GV *gv, const INSTRUCTION *ret_instr)
     ENTER;
     SAVETMPS;
 
+    if(!CvCODESEQ(cv)) {
+	compile_cv(cv);
+    }
     PUSHBLOCK(cx, CXt_FORMAT, PL_stack_sp);
     PUSHFORMAT(cx, ret_instr);
     SAVECOMPPAD();
@@ -1313,10 +1316,6 @@ S_doform(pTHX_ CV *cv, GV *gv, const INSTRUCTION *ret_instr)
 
     setdefout(gv);	    /* locally select filehandle so $% et al work */
 
-    if(!CvCODESEQ(cv)) {
-	CvCODESEQ(cv) = new_codeseq();
-	compile_op( CvROOT(cv), CvCODESEQ(cv));
-    }
     RUN_SET_NEXT_INSTRUCTION( codeseq_start_instruction(CvCODESEQ(cv)) );
     return;
 }
