@@ -303,8 +303,8 @@ struct cop {
 /* subroutine context */
 struct block_sub {
     const INSTRUCTION *	ret_instr;	/* instruction to continue executing on exit from sub */
-    /* Above here is the same for sub, format and eval.  */
     CODESEQ *   codeseq;
+    /* Above here is the same for sub, format and eval.  */
     CV *	cv;
     /* Above here is the same for sub and format.  */
     AV *	savearray;
@@ -317,8 +317,8 @@ struct block_sub {
 /* format context */
 struct block_format {
     const INSTRUCTION *	ret_instr;	/* op to execute on exit from sub */
-    /* Above here is the same for sub, format and eval.  */
     CODESEQ *   codeseq;
+    /* Above here is the same for sub, format and eval.  */
     CV *	cv;
     /* Above here is the same for sub and format.  */
     GV *	gv;
@@ -335,6 +335,7 @@ struct block_format {
 		CopLINE((const COP *)CvSTART(cv)));			\
 									\
 	assert(CvCODESEQ(cv));						\
+	codeseq_refcnt_inc(CvCODESEQ(cv));				\
 	cx->blk_sub.codeseq = CvCODESEQ(cv);				\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
@@ -359,6 +360,7 @@ struct block_format {
 
 
 #define PUSHFORMAT(cx, ret_instr)						\
+	codeseq_refcnt_inc(CvCODESEQ(cv));				\
         cx->blk_format.codeseq = CvCODESEQ(cv);				\
 	cx->blk_format.cv = cv;						\
 	cx->blk_format.gv = gv;						\
@@ -402,6 +404,7 @@ struct block_format {
 		CLEAR_ARGARRAY(cx->blk_sub.argarray);			\
 	    }								\
 	}								\
+	codeseq_refcnt_dec(cx->blk_sub.codeseq);			\
 	sv = MUTABLE_SV(cx->blk_sub.cv);				\
 	if (sv && (CvDEPTH((const CV*)sv) = cx->blk_sub.olddepth))	\
 	    sv = NULL;						\
@@ -414,14 +417,15 @@ struct block_format {
     } STMT_END
 
 #define POPFORMAT(cx)							\
+    codeseq_refcnt_dec(cx->blk_format.codeseq);				\
 	setdefout(cx->blk_format.dfoutgv);				\
 	SvREFCNT_dec(cx->blk_format.dfoutgv);
 
 /* eval context */
 struct block_eval {
     const INSTRUCTION *	ret_instr;	/* op to execute on exit from eval */
-    /* Above here is the same for sub, format and eval.  */
     CODESEQ *   codeseq;
+    /* Above here is the same for sub, format and eval.  */
     SV *	old_namesv;
     OP *	old_eval_root;
     SV *	cur_text;
@@ -455,6 +459,7 @@ struct block_eval {
 	PL_in_eval = CxOLD_IN_EVAL(cx);					\
 	optype = CxOLD_OP_TYPE(cx);					\
 	PL_eval_root = cx->blk_eval.old_eval_root;			\
+	codeseq_refcnt_dec(cx->blk_eval.codeseq);			\
 	if (cx->blk_eval.old_namesv)					\
 	    sv_2mortal(cx->blk_eval.old_namesv);			\
     } STMT_END
@@ -978,6 +983,9 @@ See L<perlcall/Lightweight Callbacks>.
 	SAVETMPS; SAVEVPTR(PL_run_next_instruction);			\
 	CATCH_SET(TRUE);						\
 	PUSHSTACKi(PERLSI_SORT);					\
+	if (!CvCODESEQ(cv)) {						\
+	    Perl_compile_cv(aTHX_ cv);					\
+	}								\
 	PUSHBLOCK(cx, CXt_SUB|CXp_MULTICALL, PL_stack_sp);		\
 	PUSHSUB(cx);							\
 	if (++CvDEPTH(cv) >= 2) {					\
@@ -987,10 +995,6 @@ See L<perlcall/Lightweight Callbacks>.
 	SAVECOMPPAD();							\
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
 	multicall_cv = cv;						\
-	if (!CvCODESEQ(cv)) {						\
-	    CvCODESEQ(cv) = Perl_new_codeseq(aTHX);					\
-	    Perl_compile_op(aTHX_ CvROOT(cv), CvCODESEQ(cv)); \
-	}								\
 	multicall_instr = Perl_codeseq_start_instruction(aTHX_ CvCODESEQ(cv));	\
     } STMT_END
 

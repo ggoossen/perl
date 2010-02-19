@@ -1541,6 +1541,9 @@ PP(pp_sort)
 	    if (is_xsub)
 		PL_sortcop = (OP*)cv;
 	    else {
+		if (!CvCODESEQ(cv)) {
+		    compile_cv(cv);
+		}
 		PL_sortcop = (OP*)codeseq_start_instruction(CvCODESEQ(cv));
 	    }
 	}
@@ -1648,9 +1651,6 @@ PP(pp_sort)
 		 * so we have to do it ourselves, because the LEAVESUB fur-
 		 * ther down lowers it. */
 		if (CvDEPTH(cv)) SvREFCNT_inc_simple_void_NN(cv);
-		if (!CvCODESEQ(cv)) {
-		    compile_cv(cv);
-		}
 		PUSHSUB(cx);
 		if (!is_xsub) {
 		    AV* const padlist = CvPADLIST(cv);

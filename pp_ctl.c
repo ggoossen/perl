@@ -2615,6 +2615,7 @@ PP(pp_goto)
 	    if (CxTYPE(cx) == CXt_SUB &&
 		!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))
 		SvREFCNT_dec(cx->blk_sub.cv);
+	    codeseq_refcnt_dec(cx->blk_sub.codeseq);
 	    oldsave = PL_scopestack[PL_scopestack_ix - 1];
 	    LEAVE_SCOPE(oldsave);
 
@@ -2651,6 +2652,7 @@ PP(pp_goto)
 		if (!CvCODESEQ(cv)) {
 		    compile_cv(cv);
 		}
+		codeseq_refcnt_inc(CvCODESEQ(cv));
 		cx->blk_sub.codeseq = CvCODESEQ(cv);
 		cx->blk_sub.cv = cv;
 		cx->blk_sub.olddepth = CvDEPTH(cv);
