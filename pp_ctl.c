@@ -2445,6 +2445,8 @@ S_dofindinstruction(pTHX_ OP *o, I32 top_ix)
     CODESEQ* codeseq = CvCODESEQ(PL_main_cv);
     I32 ix;
 
+    PERL_ARGS_ASSERT_DOFINDINSTRUCTION;
+
     for (ix = top_ix; ix >= 0; ix--) {
 	const PERL_CONTEXT *cx = &cxstack[ix];
 	if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT
