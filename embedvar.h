@@ -255,7 +255,6 @@
 #define PL_replgv		(vTHX->Ireplgv)
 #define PL_restartjmpenv	(vTHX->Irestartjmpenv)
 #define PL_restartop		(vTHX->Irestartop)
-#define PL_rpeepp		(vTHX->Irpeepp)
 #define PL_rs			(vTHX->Irs)
 #define PL_run_next_instruction	(vTHX->Irun_next_instruction)
 #define PL_runops		(vTHX->Irunops)
@@ -585,7 +584,6 @@
 #define PL_Ireplgv		PL_replgv
 #define PL_Irestartjmpenv	PL_restartjmpenv
 #define PL_Irestartop		PL_restartop
-#define PL_Irpeepp		PL_rpeepp
 #define PL_Irs			PL_rs
 #define PL_Irun_next_instruction	PL_run_next_instruction
 #define PL_Irunops		PL_runops

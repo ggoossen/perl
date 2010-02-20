@@ -1673,7 +1673,8 @@ snR	|char *	|bytes_to_uni	|NN const U8 *start|STRLEN len|NN char *dest
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
-sR	|OP*	|docatch	|NULLOK OP *o
+s	|void	|docatch	|NULLOK const INSTRUCTION *instr
+sR	|INSTRUCTION*	|dofindinstruction	|NN OP *o|I32 top_ix
 sR	|OP*	|dofindlabel	|NN OP *o|NN const char *label|NN OP **opstack|NN OP **oplimit
 s	|void	|doparseform	|NN SV *sv
 snR	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize

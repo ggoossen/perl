@@ -2438,19 +2438,27 @@ PP(pp_redo)
 }
 
 STATIC INSTRUCTION *
-S_dofindinstruction(pTHX_ OP *o)
+S_dofindinstruction(pTHX_ OP *o, I32 top_ix)
 {
     INSTRUCTION* instr;
     INSTRUCTION* end;
-    CV* cv;
+    CODESEQ* codeseq = CvCODESEQ(PL_main_cv);
+    I32 ix;
 
-    if (!o)
+    for (ix = top_ix; ix >= 0; ix--) {
+	const PERL_CONTEXT *cx = &cxstack[ix];
+	if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT
+	    || (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))) {
+	    codeseq = cx->blk_sub.codeseq;
+	    break;
+	}
+    }
+
+    if (!codeseq)
 	return NULL;
 
-    cv = find_runcv(NULL);
-    assert(cv);
-    instr = codeseq_start_instruction(CvCODESEQ(cv));
-    end = instr + CvCODESEQ(cv)->xcodeseq_size;
+    instr = codeseq_start_instruction(codeseq);
+    end = instr + codeseq->xcodeseq_size;
     while(instr < end) {
 	if (instr->instr_ppaddr && instr->instr_op == o) {
 	    return instr;
@@ -2521,6 +2529,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
 PP(pp_goto)
 {
     dVAR; dSP;
+    OP *ret_op = NULL;
     const INSTRUCTION *ret_instr = NULL;
     I32 ix;
     register PERL_CONTEXT *cx;
@@ -2792,17 +2801,21 @@ PP(pp_goto)
 		break;
 	    }
 	    if (gotoprobe) {
-		ret_instr = S_dofindinstruction(aTHX_ 
-		    dofindlabel(gotoprobe, label,
-			enterops, enterops + GOTO_DEPTH)
-		    );
-		if (ret_instr)
+		ret_op = dofindlabel(gotoprobe, label,
+		    enterops, enterops + GOTO_DEPTH);
+		if (ret_op)
 		    break;
 	    }
 	    PL_lastgotoprobe = gotoprobe;
 	}
-	if (!ret_instr)
+
+	if (!ret_op)
 	    DIE(aTHX_ "Can't find label %s", label);
+	
+	ret_instr = dofindinstruction(ret_op, ix);
+
+	if (!ret_instr)
+	    DIE(aTHX_ "Can't find instruction for label %s", label);
 
 	/* if we're leaving an eval, check before we pop any frames
            that we're not going to punt, otherwise the error
@@ -2818,7 +2831,7 @@ PP(pp_goto)
 	if (*enterops && enterops[1]) {
 	    I32 i = enterops[1]->op_type == OP_ENTER && in_block ? 2 : 1;
 	    if (enterops[i])
-		deprecate("\"goto\" to jump into a construct");
+		DIE(aTHX_ "Can't \"goto\" into a construct");
 	}
 
 	/* pop unwanted frames */

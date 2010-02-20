@@ -546,8 +546,6 @@ END_EXTERN_C
 #define PL_restartjmpenv	(*Perl_Irestartjmpenv_ptr(aTHX))
 #undef  PL_restartop
 #define PL_restartop		(*Perl_Irestartop_ptr(aTHX))
-#undef  PL_rpeepp
-#define PL_rpeepp		(*Perl_Irpeepp_ptr(aTHX))
 #undef  PL_rs
 #define PL_rs			(*Perl_Irs_ptr(aTHX))
 #undef  PL_run_next_instruction
