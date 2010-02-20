@@ -2813,9 +2813,7 @@ PP(pp_goto)
 	    DIE(aTHX_ "Can't find label %s", label);
 	
 	ret_instr = dofindinstruction(ret_op, ix);
-
-	if (!ret_instr)
-	    DIE(aTHX_ "Can't find instruction for label %s", label);
+	assert(ret_instr);
 
 	/* if we're leaving an eval, check before we pop any frames
            that we're not going to punt, otherwise the error
