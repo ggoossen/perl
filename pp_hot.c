@@ -2924,7 +2924,9 @@ try_autoload:
 	register I32 items = SP - MARK;
 	AV* const padlist = CvPADLIST(cv);
 	if (!CvCODESEQ(cv)) {
+	    PUTBACK;
 	    compile_cv(cv);
+	    SPAGAIN;
 	}
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);

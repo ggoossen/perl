@@ -1262,6 +1262,7 @@ Perl_compile_op(pTHX_ OP* startop, CODESEQ* codeseq)
 
     save_scalar(PL_errgv);
     SAVEVPTR(PL_curcop);
+    SAVEOP();
 
     /* create scratch pad */
     bpp.codeseq.xcodeseq_size = 12;
