@@ -81,7 +81,7 @@ sub do_test {
 
 
             local $TODO = $repeat_todo;
-            is($dump2, $dump);
+            is($dump2, $dump, "repeat dump $_[0]");
 
 	    close(IN);
 
@@ -278,6 +278,7 @@ do_test(13,
     OWNER = $ADDR)?
     FLAGS = 0x404				# $] < 5.009
     FLAGS = 0x490				# $] >= 5.009
+    CODESEQ = 0x0				# $] >= 5.011
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
@@ -304,6 +305,7 @@ do_test(14,
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
 )?    FLAGS = 0x0
+    CODESEQ = $ADDR				# $] >= 5.011
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
@@ -593,6 +595,7 @@ do_test(23,
     FLAGS = 0x200				# $] < 5.009
     FLAGS = 0xc00				# $] >= 5.009 && $] < 5.013
     FLAGS = 0xc					# $] >= 5.013
+    CODESEQ = 0x0				# $] >= 5.013
     OUTSIDE_SEQ = 0
     PADLIST = 0x0
     OUTSIDE = 0x0 \\(null\\)');	
@@ -655,6 +658,7 @@ do_test(26,
     MUTEXP = $ADDR
     OWNER = $ADDR
 )?    FLAGS = 0x0
+    CODESEQ = 0x0				# $] >= 5.011
     OUTSIDE_SEQ = \\d+
     LINES = 0
     PADLIST = $ADDR
