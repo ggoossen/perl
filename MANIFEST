@@ -4579,7 +4579,6 @@ t/op/pos.t			See if pos works
 t/op/pow.t			See if ** works
 t/op/print.t			See if print works
 t/op/protowarn.t		See if the illegalproto warnings work
-t/op/print.t			See if print works
 t/op/push.t			See if push and pop work
 t/op/pwent.t			See if getpw*() functions work
 t/op/qq.t			See if qq works
