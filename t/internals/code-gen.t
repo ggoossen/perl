@@ -2,8 +2,13 @@
 
 use strict;
 use warnings;
+use Config;
 
 require "test.pl";
+
+if ($Config{ccflags} !~ m/\bDDEBUGGING\b/) {
+    skip_all("requires -DDEBUGGING");
+}
 
 $/ = undef;
 my @tests = split m/####\n/, <DATA>;
