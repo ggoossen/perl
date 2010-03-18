@@ -1266,6 +1266,7 @@ Perl_compile_op(pTHX_ OP* startop, CODESEQ* codeseq)
 
     /* create scratch pad */
     bpp.codeseq.xcodeseq_size = 12;
+    bpp.recursion_depth = 0;
     Newx(bpp.codeseq.xcodeseq_instructions, bpp.codeseq.xcodeseq_size, INSTRUCTION);
     bpp.codeseq.xcodeseq_svs = NULL;
     bpp.idx = 0;
