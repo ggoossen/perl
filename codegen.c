@@ -258,6 +258,8 @@ S_instr_fold_constants(pTHX_ INSTRUCTION* instr, OP* o, bool list)
     assert(PL_scopestack_ix == oldscope);
     RUN_SET_NEXT_INSTRUCTION(old_next_instruction); 
 
+    DEBUG_g( Perl_deb(aTHX_ "Constant folded into variable at 0x%p\n", sv); );
+
     return sv;
 }
 
@@ -1014,7 +1016,6 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	    SV* shared_keysv = newSVpvn_share(key,
 		                              SvUTF8(*keysvp) ? -(I32)keylen : (I32)keylen,
 		                              0);
-	    SvREFCNT_dec(*keysvp);
 	    *keysvp = shared_keysv;
 	}
 	append_instruction(bpp, o, o->op_type, flags, NULL);
