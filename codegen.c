@@ -1290,17 +1290,18 @@ Perl_compile_op(pTHX_ OP* startop, CODESEQ* codeseq)
 	append_instruction(&bpp, NULL, OP_INSTR_END, 0, NULL);
     }
 
+    /* Final NULL instruction for safety */
+    append_instruction(&bpp, NULL, OP_INSTR_END, 0, NULL);
+    bpp.codeseq.xcodeseq_instructions[bpp.idx-1].instr_ppaddr = NULL;
+
     /* copy codeseq from the pad to the actual object */
-    codeseq->xcodeseq_size = bpp.idx + 1;
+    codeseq->xcodeseq_size = bpp.idx;
     Renew(codeseq->xcodeseq_instructions, codeseq->xcodeseq_size, INSTRUCTION);
     Copy(bpp.codeseq.xcodeseq_instructions, codeseq->xcodeseq_instructions, codeseq->xcodeseq_size, INSTRUCTION);
     codeseq->xcodeseq_svs = bpp.codeseq.xcodeseq_svs;
     codeseq->xcodeseq_allocated_data_list = bpp.allocated_data_list;
     codeseq->xcodeseq_allocated_data_size = bpp.allocated_data_append - bpp.allocated_data_list;
     
-    /* Final NULL instruction */
-    codeseq->xcodeseq_instructions[bpp.idx].instr_ppaddr = NULL;
-
     {
 	/* resolve instruction pointers */
 	TARGET_INSTRPP* i;
