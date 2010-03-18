@@ -2648,7 +2648,7 @@ PP(pp_goto)
 		PUSHMARK(mark);
 		PUTBACK;
 		(void)(*CvXSUB(cv))(aTHX_ cv);
-		LEAVE_with_name("sub");
+		LEAVE;
 		RUN_SET_NEXT_INSTRUCTION(ret_instr);
 		return NORMAL;
 	    }
