@@ -1378,6 +1378,15 @@ S_modkids(pTHX_ OP *o, I32 type)
     return o;
 }
 
+/*
+=for apidoc finished_op_check
+
+Finalize an optree branch. Does some checking which can't be done in
+the ck_xxx functions and makes the branch thread-safe.
+Called recursively and by C<finish_optree>.
+
+=cut
+*/
 static void
 S_finished_op_check(pTHX_ OP* o)
 {
@@ -1569,6 +1578,16 @@ S_finished_op_check(pTHX_ OP* o)
     }
 }
 
+/*
+=for apidoc finish_optree
+
+This function finalizes the optree. Should be called directly after
+the complete optree is finished building. It does some additional
+checking which can't be done in the normal ck_xxx functions and makes
+the tree thread-safe.
+
+=cut
+*/
 void
 Perl_finish_optree(pTHX_ OP* o)
 {
