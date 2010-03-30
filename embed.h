@@ -1282,7 +1282,6 @@
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_negate		Perl_ck_negate
 #define ck_bitop		Perl_ck_bitop
-#define ck_concat		Perl_ck_concat
 #define ck_defined		Perl_ck_defined
 #define ck_delete		Perl_ck_delete
 #define ck_die			Perl_ck_die
@@ -2131,7 +2130,6 @@
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_chdir		Perl_ck_chdir
-#define ck_concat		Perl_ck_concat
 #define ck_defined		Perl_ck_defined
 #define ck_delete		Perl_ck_delete
 #define ck_die			Perl_ck_die
@@ -3783,7 +3781,6 @@
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_negate(a)		Perl_ck_negate(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
-#define ck_concat(a)		Perl_ck_concat(aTHX_ a)
 #define ck_defined(a)		Perl_ck_defined(aTHX_ a)
 #define ck_delete(a)		Perl_ck_delete(aTHX_ a)
 #define ck_die(a)		Perl_ck_die(aTHX_ a)
@@ -4657,7 +4654,6 @@
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_chdir(a)		Perl_ck_chdir(aTHX_ a)
-#define ck_concat(a)		Perl_ck_concat(aTHX_ a)
 #define ck_defined(a)		Perl_ck_defined(aTHX_ a)
 #define ck_delete(a)		Perl_ck_delete(aTHX_ a)
 #define ck_die(a)		Perl_ck_die(aTHX_ a)

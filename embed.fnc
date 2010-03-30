@@ -1528,7 +1528,6 @@ s	|void	|unwind_handler_stack|NN const void *p
 pR	|OP*	|ck_anoncode	|NN OP *o
 pR	|OP*	|ck_negate	|NN OP *o
 pR	|OP*	|ck_bitop	|NN OP *o
-pR	|OP*	|ck_concat	|NN OP *o
 pR	|OP*	|ck_defined	|NN OP *o
 pR	|OP*	|ck_delete	|NN OP *o
 pR	|OP*	|ck_die		|NN OP *o

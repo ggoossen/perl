@@ -7,7 +7,6 @@
 PERL_CKDEF(Perl_ck_anoncode)
 PERL_CKDEF(Perl_ck_bitop)
 PERL_CKDEF(Perl_ck_chdir)
-PERL_CKDEF(Perl_ck_concat)
 PERL_CKDEF(Perl_ck_defined)
 PERL_CKDEF(Perl_ck_delete)
 PERL_CKDEF(Perl_ck_die)

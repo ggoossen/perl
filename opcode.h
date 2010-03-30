@@ -1268,7 +1268,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* i_add */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* subtract */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* i_subtract */
-	MEMBER_TO_FPTR(Perl_ck_concat),	/* concat */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* concat */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* stringify */
 	MEMBER_TO_FPTR(Perl_ck_bitop),	/* left_shift */
 	MEMBER_TO_FPTR(Perl_ck_bitop),	/* right_shift */
