@@ -49,31 +49,23 @@ Perl's compiler is essentially a 3-pass compiler with interleaved phases:
 
     A bottom-up pass
     A top-down pass
-    An execution-order pass
+    A bottom-up pass
 
-The bottom-up pass is represented by all the "newOP" routines and
-the ck_ routines.  The bottom-upness is actually driven by yacc.
+The first bottom-up pass is represented by all the "newOP" routines
+and the ck_ routines.  The bottom-upness is actually driven by yacc.
 So at the point that a ck_ routine fires, we have no idea what the
 context is, either upward in the syntax tree, or either forward or
 backward in the execution order.  (The bottom-up parser builds that
-part of the execution order it knows about, but if you follow the "next"
-links around, you'll find it's actually a closed loop through the
-top level node.)
+part of the execution order it knows about, but if you follow the
+"next" links around, you'll find it's actually a closed loop through
+the top level node.) The final bottom-up pass is done by the
+finish_op_check routine.
 
 Whenever the bottom-up parser gets to a node that supplies context to
 its components, it invokes that portion of the top-down pass that applies
 to that part of the subtree (and marks the top node as processed, so
 if a node further up supplies context, it doesn't have to take the
-plunge again).  As a particular subcase of this, as the new node is
-built, it takes all the closed execution loops of its subcomponents
-and links them into a new closed loop for the higher level node.  But
-it's still not the real execution order.
-
-The actual execution order is not known till we get a grammar reduction
-to a top-level unit like a subroutine or file that will be called by
-"name" rather than via a "next" pointer.  At that point, we can call
-into peep() to do that code's portion of the 3rd pass.  It has to be
-recursive, but it's recursive on basic blocks, not on tree nodes.
+plunge again).
 */
 
 /* To implement user lexical pragmas, there needs to be a way at run time to
