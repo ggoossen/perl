@@ -1229,7 +1229,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	append_instruction(bpp, NULL, OP_INSTR_END, 0, NULL);
     	constsv = instr_fold_constants(&(bpp->codeseq.xcodeseq_instructions[start_idx]), o, FALSE);
     	if (constsv) {
-    	    bpp->idx = start_idx; /* FIXME remove pointer sets from bpp */
+    	    bpp->idx = start_idx; /* delete everything starting with start_idx */
     	    SvREADONLY_on(constsv);
     	    append_instruction(bpp, NULL, OP_INSTR_CONST, 0, (void*)constsv);
     	    Perl_av_create_and_push(aTHX_ &bpp->codeseq.xcodeseq_svs, constsv);
