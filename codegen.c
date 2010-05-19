@@ -971,7 +971,6 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 		    IV i = SvIV(constsv) - CopARYBASE_get(PL_curcop);
 		    OP* op_arg = op_av->op_type == OP_PADAV ? op_av : cUNOPx(op_av)->op_first;
 		    op_arg->op_flags |= o->op_flags & OPf_MOD;
-		    op_arg->op_private |= o->op_private & OPpLVAL_DEFER;
 		    bpp->idx = start_idx;
 		    append_instruction(bpp, op_arg,
 			OP_AELEMFAST, 0, INT2PTR(void*, i));

@@ -726,7 +726,11 @@ PP(pp_aelemfast)
     SV *sv = (svp ? *svp : &PL_sv_undef);
     PERL_UNUSED_VAR(ppflags);
     EXTEND(SP, 1);
-    if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
+    if (lval) {
+	if (!svp || *svp == &PL_sv_undef)
+	    DIE(aTHX_ PL_no_aelem, elem);
+    }
+    else if (SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
 	mg_get(sv);
     PUSHs(sv);
     RETURN;
