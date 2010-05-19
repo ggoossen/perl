@@ -3838,7 +3838,6 @@ PP(pp_require)
     encoding = PL_encoding;
     PL_encoding = NULL;
 
-    PL_op = NULL;
     if (doeval(gimme, NULL, NULL, PL_curcop->cop_seq)) {
 	CODESEQ* codeseq = new_codeseq();
 	cx->blk_eval.codeseq = codeseq;
