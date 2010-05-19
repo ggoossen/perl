@@ -453,8 +453,6 @@ TODO: {
     }
 }
 
-is($deprecated, 0);
-
 #74290
 {
     my $x;
