@@ -4061,9 +4061,7 @@ PP(pp_leaveeval)
 	(void)hv_delete(GvHVn(PL_incgv),
 			SvPVX_const(namesv), SvCUR(namesv),
 			G_DISCARD);
-	SV * const nsv = cx->blk_eval.old_namesv;
-	(void)hv_delete(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv), G_DISCARD);
-	DIE(aTHX_ "%"SVf" did not return a true value", SVfARG(nsv));
+	DIE(aTHX_ "%"SVf" did not return a true value", SVfARG(namesv));
 	/* die_unwind() did LEAVE, or we won't be here */
     }
 
