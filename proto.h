@@ -132,8 +132,8 @@ END_EXTERN_C
 /* functions with flag 'n' should come before here */
 START_EXTERN_C
 #  include "pp_proto.h"
-PERL_CALLCONV bool	Perl_try_amagic_bin(pTHX_ int method, int flags);
-PERL_CALLCONV bool	Perl_try_amagic_un(pTHX_ int method, int flags);
+PERL_CALLCONV bool	Perl_try_amagic_bin(pTHX_ int method, int flags, SV* targ);
+PERL_CALLCONV bool	Perl_try_amagic_un(pTHX_ int method, int flags, SV* targ);
 PERL_CALLCONV SV*	Perl_amagic_call(pTHX_ SV* left, SV* right, int method, int dir)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

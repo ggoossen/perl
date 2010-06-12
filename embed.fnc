@@ -172,8 +172,8 @@ END_EXTERN_C
 /* functions with flag 'n' should come before here */
 START_EXTERN_C
 #  include "pp_proto.h"
-XEop	|bool	|try_amagic_bin	|int method|int flags
-XEop	|bool	|try_amagic_un	|int method|int flags
+XEop	|bool	|try_amagic_bin	|int method|int flags|NULLOK SV* targ
+XEop	|bool	|try_amagic_un	|int method|int flags|NULLOK SV* targ
 Ap	|SV*	|amagic_call	|NN SV* left|NN SV* right|int method|int dir
 Ap	|int	|Gv_AMupdate	|NN HV* stash|bool destructing
 ApR	|CV*	|gv_handler	|NULLOK HV* stash|I32 id

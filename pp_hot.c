@@ -262,7 +262,7 @@ PP(pp_unstack)
 
 PP(pp_concat)
 {
-  dVAR; dSP; dATARGET; tryAMAGICbin_MG(concat_amg, AMGf_assign);
+  dVAR; dSP; dATARGET; tryAMAGICbin_MG(concat_amg, AMGf_assign, TARG);
   PERL_UNUSED_VAR(pparg);
   {
     dPOPTOPssrl;
@@ -374,7 +374,7 @@ PP(pp_readline)
 PP(pp_eq)
 {
     dVAR; dSP;
-    tryAMAGICbin_MG(eq_amg, AMGf_set);
+    tryAMAGICbin_MG(eq_amg, AMGf_set, NULL);
     PERL_UNUSED_VAR(pparg);
     PERL_UNUSED_VAR(ppflags);
 #ifndef NV_PRESERVES_UV
@@ -549,7 +549,7 @@ PP(pp_add)
 {
     dVAR; dSP; dATARGET; bool useleft; SV *svl, *svr;
     PERL_UNUSED_VAR(pparg);
-    tryAMAGICbin_MG(add_amg, AMGf_assign|AMGf_numeric);
+    tryAMAGICbin_MG(add_amg, AMGf_assign|AMGf_numeric, TARG);
     svr = TOPs;
     svl = TOPm1s;
 
@@ -3129,8 +3129,9 @@ PP(pp_aelem)
 	    else
 		SAVEADELETE(av, elem);
 	}
-	else if (PL_op->op_private & OPpDEREF)
+	else if (PL_op->op_private & OPpDEREF) {
 	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);
+	}
     }
     sv = (svp ? *svp : &PL_sv_undef);
     if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */

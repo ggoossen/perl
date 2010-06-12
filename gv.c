@@ -1879,7 +1879,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 */
 
 bool
-Perl_try_amagic_un(pTHX_ int method, int flags) {
+Perl_try_amagic_un(pTHX_ int method, int flags, SV* targ) {
     dVAR;
     dSP;
     SV* tmpsv;
@@ -1892,7 +1892,6 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
 	    SETs(tmpsv);
 	}
 	else {
-	    dTARGET;
 	    if (SvPADMY(TARG)) {
 		sv_setsv(TARG, tmpsv);
 		SETTARG;
@@ -1921,7 +1920,7 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
 */
 
 bool
-Perl_try_amagic_bin(pTHX_ int method, int flags) {
+Perl_try_amagic_bin(pTHX_ int method, int flags, SV* targ) {
     dVAR;
     dSP;
     SV* const left = TOPm1s;
@@ -1940,7 +1939,6 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
 		SETs(tmpsv);
 	    }
 	    else {
-		dATARGET;
 		(void)POPs;
 		if (opASSIGN || SvPADMY(TARG)) {
 		    sv_setsv(TARG, tmpsv);

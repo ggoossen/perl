@@ -1631,7 +1631,7 @@ struct xsub_details details[] = {
     {"Internals::SvREADONLY", XS_Internals_SvREADONLY, "\\[$%@];$"},
     {"Internals::SvREFCNT", XS_Internals_SvREFCNT, "\\[$%@];$"},
     {"Internals::hv_clear_placeholders", XS_Internals_hv_clear_placehold, "\\%"},
-    {"Internals::sv_dump",XS_Internals_sv_dump, "\\[$%@]");
+    {"Internals::sv_dump",XS_Internals_sv_dump, "\\[$%@]"},
     {"PerlIO::get_layers", XS_PerlIO_get_layers, "*;@"},
     {"Internals::hash_seed", XS_Internals_hash_seed, ""},
     {"Internals::rehash_seed", XS_Internals_rehash_seed, ""},
