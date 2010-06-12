@@ -278,8 +278,7 @@ PP(pp_rv2sv)
     PERL_UNUSED_ARG(pparg);
     PERL_UNUSED_ARG(ppflags);
 
-    if (!(PL_op->op_private & OPpDEREFed))
-	SvGETMAGIC(sv);
+    SvGETMAGIC(sv);
     if (SvROK(sv)) {
 	tryAMAGICunDEREF(to_sv);
 

@@ -889,8 +889,7 @@ PP(pp_rv2av)
     const bool is_pp_rv2av = PL_op->op_type == OP_RV2AV;
     const svtype type = is_pp_rv2av ? SVt_PVAV : SVt_PVHV;
 
-    if (!(PL_op->op_private & OPpDEREFed))
-	SvGETMAGIC(sv);
+    SvGETMAGIC(sv);
     if (SvROK(sv)) {
 	tryAMAGICunDEREF_var(is_pp_rv2av ? to_av_amg : to_hv_amg);
 
@@ -3131,6 +3130,13 @@ PP(pp_aelem)
 	}
 	else if (PL_op->op_private & OPpDEREF) {
 	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);
+	    if (SvAMAGIC(*svp)) {
+		/* prevent magic from being executed twice */
+		SV* copy = sv_newmortal();
+		sv_setsv_nomg(copy, *svp);
+		PUSHs(copy);
+		RETURN;
+	    }
 	}
     }
     sv = (svp ? *svp : &PL_sv_undef);
