@@ -4795,7 +4795,7 @@ PP(pp_enterwhen)
     */
     if ((0 == (PL_op->op_flags & OPf_SPECIAL)) && !SvTRUEx(POPs)) {
 	RUN_SET_NEXT_INSTRUCTION( leave_instr + 1);
-	return NORMAL;
+	RETURN;
     }
 
     ENTER_with_name("eval");

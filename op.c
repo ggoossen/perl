@@ -1202,8 +1202,12 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_ENTERWHEN:
 	if (o->op_flags & OPf_SPECIAL)
 	    scalarvoid(cUNOPo->op_first);
-	for (kid = cUNOPo->op_first->op_sibling; kid; kid = kid->op_sibling)
-	    scalarvoid(kid);
+	for (kid = cUNOPo->op_first->op_sibling; kid; kid = kid->op_sibling) {
+	    if (kid->op_sibling)
+		scalarvoid(kid);
+	    else
+		scalar(kid);
+	}
 	break;
 
     case OP_NULL:
@@ -1303,6 +1307,12 @@ Perl_list(pTHX_ OP *o)
     case OP_LIST:
 	listkids(o);
 	break;
+    case OP_ENTERWHEN:
+	kid = cUNOPo->op_first;
+	if (!(o->op_flags & OPf_SPECIAL))
+	    kid = kid->op_sibling;
+	list(kid);
+	break;
     case OP_LEAVE:
     case OP_LEAVETRY:
 	kid = cLISTOPo->op_first;
@@ -1311,7 +1321,7 @@ Perl_list(pTHX_ OP *o)
     do_kids:
 	while (kid) {
 	    OP *sib = kid->op_sibling;
-	    if (sib && kid->op_type != OP_LEAVEWHEN) {
+	    if (sib && kid->op_type != OP_ENTERWHEN) {
 		if (sib->op_type == OP_BREAK && sib->op_flags & OPf_SPECIAL) {
 		    list(kid);
 		    scalarvoid(sib);
@@ -1344,7 +1354,7 @@ S_scalarseq(pTHX_ OP *o)
 	{
             OP *kid;
 	    for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling) {
-		if (kid->op_sibling) {
+		if (kid->op_sibling && kid->op_type != OP_ENTERWHEN) {
 		    scalarvoid(kid);
 		}
 	    }
