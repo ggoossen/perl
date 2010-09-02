@@ -4519,6 +4519,7 @@ S_aassign_common_vars_right(pTHX_ OP* o)
     return FALSE;
 }
 
+/*
 =for apidoc Am|OP *|newASSIGNOP|I32 flags|OP *left|I32 optype|OP *right
 
 Constructs, checks, and returns an assignment op.  I<left> and I<right>
@@ -7607,7 +7608,7 @@ Perl_ck_readline(pTHX_ OP *o)
 #endif
 	return newop;
     }
-    return o;
+    return ck_fun(o);
 }
 
 OP *

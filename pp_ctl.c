@@ -2857,7 +2857,7 @@ PP(pp_goto)
 		 * for each op.  For now, we punt on the hard ones. */
 		if (PL_op->op_type == OP_FOREACH)
 		    DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop");
-		CALL_FPTR(PL_ppaddr[PL_op->op_type])(aTHX_ 0, NULL);
+		PL_ppaddr[PL_op->op_type](aTHX_ 0, NULL);
 	    }
 	    PL_op = oldop;
 	}

@@ -343,9 +343,7 @@ PP(pp_av2arylen)
 
 PP(pp_pos)
 {
-    dVAR; dSP; dPOPss;
     dVAR; dSP; dTARGET; dPOPss;
-    PERL_UNUSED_ARG(pparg1);
 
     if (PL_op->op_flags & OPf_MOD || LVRET) {
 	SV * const ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */

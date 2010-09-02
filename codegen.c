@@ -1073,7 +1073,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 	/* Two NEXTSTATEs in a row serve no purpose. Except if they happen
 	   to carry two labels. For now, take the easier option, and skip
 	   this optimisation if the first NEXTSTATE has a label.  */
-	if (o->op_next && o->op_next->op_type == OP_NEXTSTATE
+	if (o->op_sibling && o->op_sibling->op_type == OP_NEXTSTATE
 	     && !CopLABEL((COP*)o)
 	    )
 	    break;

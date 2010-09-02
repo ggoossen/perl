@@ -44,7 +44,7 @@ Perl_runops_standard(pTHX)
 	const INSTRUCTION* instr = PL_run_next_instruction;
 	PL_run_next_instruction++;
 	PL_op = instr->instr_op;
-	CALL_FPTR(instr->instr_ppaddr)(aTHX_ instr->instr_flags, instr->instr_arg);
+	instr->instr_ppaddr(aTHX_ instr->instr_flags, instr->instr_arg);
     } while (PL_run_next_instruction);
 
     PL_op = oldop;
@@ -100,11 +100,11 @@ Perl_runops_debug(pTHX)
 	assert(PL_stack_base[0] == &PL_sv_undef);
 	assert(PL_stack_sp >= PL_stack_base);
 	if (PL_debug) {
-	    runop_debug();
+	    Perl_runop_debug();
 	}
 	PL_run_next_instruction++;
 	PL_op = instr->instr_op;
-	CALL_FPTR(instr->instr_ppaddr)(aTHX_ instr->instr_flags, instr->instr_arg);
+	instr->instr_ppaddr(aTHX_ instr->instr_flags, instr->instr_arg);
     } while (PL_run_next_instruction);
     DEBUG_l(Perl_deb(aTHX_ "leaving RUNOPS level\n"));
 

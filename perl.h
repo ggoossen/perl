@@ -4236,10 +4236,12 @@ struct perl_memory_debug_header {
 #  endif
 #endif
 
+typedef I32 INSTR_FLAGS;
+
 typedef int (*runops_proc_t)(pTHX);
 typedef void (*share_proc_t) (pTHX_ SV *sv);
 typedef int  (*thrhook_proc_t) (pTHX);
-typedef int (*PPADDR_t[]) (pTHX_ INSTR_FLAGS ppflags, void *pparg1, void *pparg2);
+typedef int (*PPADDR_t[]) (pTHX_ INSTR_FLAGS ppflags, void *pparg);
 typedef bool (*destroyable_proc_t) (pTHX_ SV *sv);
 typedef void (*despatch_signals_proc_t) (pTHX);
 
@@ -4897,8 +4899,8 @@ typedef void (*XSUBADDR_t) (pTHX_ CV *);
 #define PERLVARIC(var,type,init) type var;
 #define PERLVARISC(var,init) const char var[sizeof(init)];
 
-typedef OP* (CPERLscope(*Perl_check_t)) (pTHX_ OP*);
-typedef void(CPERLscope(*Perl_ophook_t))(pTHX_ OP*);
+typedef OP* (*Perl_check_t) (pTHX_ OP*);
+typedef void(*Perl_ophook_t)(pTHX_ OP*);
 typedef int (*Perl_keyword_plugin_t)(pTHX_ char*, STRLEN, OP**);
 
 #define KEYWORD_PLUGIN_DECLINE 0
@@ -4984,7 +4986,7 @@ struct tempsym; /* defined in pp_pack.c */
 #include "thread.h"
 #include "pp.h"
 
-typedef int (CPERLscope(*Perl_ppaddr_t))(pTHX_ INSTR_FLAGS ppflags, void* pparg);
+typedef int (*Perl_ppaddr_t)(pTHX_ INSTR_FLAGS ppflags, void* pparg);
 #include "instruction.h"
 
 #ifndef PERL_CALLCONV
