@@ -401,6 +401,17 @@ PP(pp_rcatline)
     PERL_UNUSED_VAR(pparg);
     PERL_UNUSED_VAR(ppflags);
     PL_last_in_gv = (GV*)POPs;
+    if (!isGV_with_GP(PL_last_in_gv)) {
+	if (SvROK(PL_last_in_gv) && isGV_with_GP(SvRV(PL_last_in_gv)))
+	    PL_last_in_gv = MUTABLE_GV(SvRV(PL_last_in_gv));
+	else {
+	    dSP;
+	    XPUSHs(MUTABLE_SV(PL_last_in_gv));
+	    PUTBACK;
+	    pp_rv2gv(0, NULL);
+	    PL_last_in_gv = MUTABLE_GV(*PL_stack_sp--);
+	}
+    }
     PUTBACK;
     do_readline();
     return NORMAL;

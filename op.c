@@ -7608,7 +7608,7 @@ Perl_ck_readline(pTHX_ OP *o)
 #endif
 	return newop;
     }
-    return ck_fun(o);
+    return o;
 }
 
 OP *
