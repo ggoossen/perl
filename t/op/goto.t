@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 68;
+plan tests => 60;
 our $TODO;
 
 our $foo = 0;
