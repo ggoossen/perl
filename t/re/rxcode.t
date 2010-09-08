@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 38;
+plan tests => 42;
 
 $^R = undef;
 like( 'a',  qr/^a(?{1})(?:b(?{2}))?/, 'a =~ ab?' );
@@ -83,4 +83,23 @@ cmp_ok( scalar(@var), '==', 0, '..still nothing pushed (package)' );
     local $^R = undef;
     ok( 'abbb' =~ /^a(?{36})(?:b(?{37})|c(?{38}))+/, 'abbbb =~ a(?:b|c)+' );
     ok( $^R == 37, '$^R == 37' ) or print "# \$^R=$^R\n";
+}
+
+{
+    @var = ();
+    $var = undef;
+    $x = 0;
+    ok( 'abcd' =~ /^.*(?{ local $x = $x + 1; push @var, pos() }).c(?{ $var = $x })/ );
+    ok( scalar(@var) > 1, "backtracking actually happend");
+    is( $var, 1, "restoring values using local worked"  );
+}
+
+{
+    # test next from inside (?{}) 
+    local $TODO = "leaving (?{}) using 'next' goes wrong";
+    fresh_perl_is( <<'CODE', "aap" )
+@a = ("aap");
+for (1..2) { m/(?{ next; })/ };
+print join "*", @a;
+CODE
 }

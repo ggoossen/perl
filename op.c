@@ -1448,7 +1448,7 @@ S_finished_op_check(pTHX_ OP* o)
     case OP_ANDASSIGN:
     case OP_DORASSIGN:
 	if ( cLOGOPo->op_first->op_type == OP_CONST && ( cLOGOPo->op_first->op_private & OPpCONST_BARE ) 
-	    && ! ( cLOGOPo->op_private & OPpCONST_STRICT )
+	    && ! ( cLOGOPo->op_first->op_private & OPpCONST_STRICT )
 	    )
 	    Perl_ck_warner(aTHX_ packWARN(WARN_BAREWORD), "Bareword found in conditional");
 	break;

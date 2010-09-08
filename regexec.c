@@ -2443,17 +2443,8 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 	MAGIC *mg;
 
 	PL_reg_eval_set = RS_init;
-	DEBUG_EXECUTE_r(DEBUG_s(
-	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %"IVdf"\n",
-			  (IV)(PL_stack_sp - PL_stack_base));
-	    ));
-	SAVESTACK_CXPOS();
-	cxstack[cxstack_ix].blk_oldsp = PL_stack_sp - PL_stack_base;
 	/* Otherwise OP_NEXTSTATE will free whatever on stack now.  */
 	SAVETMPS;
-	/* Apparently this is not needed, judging by wantarray. */
-	/* SAVEI8(cxstack[cxstack_ix].blk_gimme);
-	   cxstack[cxstack_ix].blk_gimme = G_SCALAR; */
 
 	if (reginfo->sv) {
 	    /* Make $_ available to executed code. */
@@ -4014,8 +4005,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		/* execute the code in the {...} */
 		dSP;
 		SV ** const before = SP;
-		OP_4tree * const oop = PL_op;
-		COP * const ocurcop = PL_curcop;
 		PAD *old_comppad;
 		char *saved_regeol = PL_regeol;
 		struct re_save_state saved_state;
@@ -4081,9 +4070,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 		Copy(&saved_state, &PL_reg_state, 1, struct re_save_state);
 
-		PL_op = oop;
 		PAD_RESTORE_LOCAL(old_comppad);
-		PL_curcop = ocurcop;
 		PL_regeol = saved_regeol;
 		if (!logical) {
 		    /* /(?{...})/ */
