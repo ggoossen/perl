@@ -1254,7 +1254,7 @@ See L<perlcall/Lightweight Callbacks>.
     SV **newsp;			/* set by POPBLOCK */			\
     PERL_CONTEXT *cx;							\
     CV *multicall_cv;							\
-    INSTRUCTION *multicall_instr;					\
+    CODESEQ *multicall_codeseq;					\
     bool multicall_oldcatch; 						\
     U8 hasargs = 0		/* used by PUSHSUB */
 
@@ -1280,12 +1280,13 @@ See L<perlcall/Lightweight Callbacks>.
 	SAVECOMPPAD();							\
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
 	multicall_cv = cv;						\
-	multicall_instr = Perl_codeseq_start_instruction(aTHX_ CvCODESEQ(cv));	\
+	multicall_codeseq = CvCODESEQ(cv);				\
+	SvREFCNT_inc(multicall_cv);    /* decremented by LEAVESUB */	\
     } STMT_END
 
 #define MULTICALL \
     STMT_START {							\
-        Perl_run_set_next_instruction(aTHX_ multicall_instr);			\
+        Perl_run_set_next_instruction(aTHX_ Perl_codeseq_start_instruction(multicall_codeseq)); \
 	CALLRUNOPS(aTHX);						\
     } STMT_END
 
