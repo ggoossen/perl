@@ -303,6 +303,7 @@ Can't coerce readonly %s to string
 Can't coerce readonly %s to string in %s
 Can't fix broken locale name "%s"
 Can't get short module name from a handle
+Can't "goto" into a construct
 Can't goto subroutine from an eval-block
 Can't goto subroutine from an eval-string
 Can't locate object method "%s" via package "%s" (perhaps you forgot to load "%s"?)
