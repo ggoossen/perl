@@ -4123,6 +4123,7 @@ Perl_madlex(pTHX)
     switch (optype) {
 
     /* opval doesn't need a TOKEN since it can already store mp */
+    case QWLIST:
     case WORD:
     case METHOD:
     case FUNCMETH:
