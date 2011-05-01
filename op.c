@@ -907,6 +907,9 @@ Perl_scalar(pTHX_ OP *o)
     do_kids:
 	while (kid) {
 	    OP *sib = kid->op_sibling;
+	    if (PL_madskills)
+		while (sib && sib->op_type == OP_STUB)
+		    sib = sib->op_sibling;
 	    if (sib && kid->op_type != OP_ENTERWHEN)
 		scalarvoid(kid);
 	    else
@@ -1338,6 +1341,9 @@ Perl_list(pTHX_ OP *o)
     do_kids:
 	while (kid) {
 	    OP *sib = kid->op_sibling;
+	    if (PL_madskills)
+		while (sib && sib->op_type == OP_STUB)
+		    sib = sib->op_sibling;
 	    if (sib && kid->op_type != OP_ENTERWHEN)
 		scalarvoid(kid);
 	    else
@@ -1365,8 +1371,13 @@ S_scalarseq(pTHX_ OP *o)
 	    type == OP_LEAVE || type == OP_LEAVETRY)
 	{
             OP *kid;
-	    for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling) {
-		if (kid->op_sibling && kid->op_type != OP_ENTERWHEN) {
+	    OP *sib;
+	    for (kid = cLISTOPo->op_first; kid; kid = sib) {
+		sib = kid->op_sibling;
+		if (PL_madskills)
+		    while (sib && sib->op_type == OP_STUB)
+			sib = sib->op_sibling;
+		if (sib && kid->op_type != OP_ENTERWHEN) {
 		    scalarvoid(kid);
 		}
 	    }
