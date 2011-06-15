@@ -398,9 +398,7 @@ PERLVARI(Iop_mask,	char *,	NULL)	/* masked operations for safe evals */
 /* current interpreter roots */
 PERLVAR(Imain_cv,	CV *)
 PERLVAR(Imain_root,	OP *)
-PERLVAR(Imain_start,	INSTRUCTION *)
 PERLVAR(Ieval_root,	OP *)
-PERLVAR(Ieval_start,	INSTRUCTION *)
 
 /* runtime control stuff */
 PERLVARI(Icurcopdb,	COP *,	NULL)

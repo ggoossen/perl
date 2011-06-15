@@ -465,6 +465,10 @@ Perl_cv_undef(pTHX_ CV *cv)
     if (CvISXSUB(cv) && CvXSUB(cv)) {
 	CvXSUB(cv) = NULL;
     }
+    if (CvCODESEQ(cv)) {
+	codeseq_refcnt_dec(CvCODESEQ(cv));
+	CvCODESEQ(cv) = NULL;
+    }
     /* delete all flags except WEAKOUTSIDE and CVGV_RC, which indicate the
      * ref status of CvOUTSIDE and CvGV */
     CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC);
@@ -1946,6 +1950,14 @@ Perl_cv_clone(pTHX_ CV *proto)
 	}
 	PL_curpad[ix] = sv;
     }
+
+    if (!CvCODESEQ(proto)) {
+	compile_cv(cv);
+	CvCODESEQ(proto)       = CvCODESEQ(cv);
+    }
+    else
+	CvCODESEQ(cv)       = CvCODESEQ(proto);
+    codeseq_refcnt_inc(CvCODESEQ(proto));
 
     DEBUG_Xv(
 	PerlIO_printf(Perl_debug_log, "\nPad CV clone\n");

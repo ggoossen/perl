@@ -65,6 +65,11 @@ Perl_ck_warner
 Perl_ck_warner_d
 Perl_ckwarn
 Perl_ckwarn_d
+Perl_codeseq_refcnt_dec
+Perl_codeseq_refcnt_inc
+Perl_codeseq_start_instruction
+Perl_compile_cv
+Perl_compile_op
 Perl_cop_fetch_label
 Perl_cop_store_label
 Perl_croak
@@ -407,6 +412,7 @@ Perl_newWHENOP
 Perl_newWHILEOP
 Perl_newXS
 Perl_newXS_flags
+Perl_new_codeseq
 Perl_new_collate
 Perl_new_ctype
 Perl_new_numeric
@@ -515,6 +521,8 @@ Perl_require_pv
 Perl_rninstr
 Perl_rsignal
 Perl_rsignal_state
+Perl_run_exec_codeseq
+Perl_run_get_next_instruction
 Perl_runops_debug
 Perl_runops_standard
 Perl_rv2cv_op_cv
