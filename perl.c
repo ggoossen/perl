@@ -2229,7 +2229,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
     ENTER;
     PL_restartjmpenv = NULL;
-    PL_restartop = 0;
+    PL_restart_instr = NULL;
     return NULL;
 }
 
@@ -2285,7 +2285,7 @@ perl_run(pTHXx)
 	ret = STATUS_EXIT;
 	break;
     case 3:
-	if (PL_restartop) {
+	if (PL_restart_instr) {
 	    POPSTACK_TO(PL_mainstack);
 	    goto redo_body;
 	}
@@ -2306,7 +2306,7 @@ S_run_body(pTHX_ I32 oldscope)
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $` $& $' support.\n",
                     PL_sawampersand ? "Enabling" : "Omitting"));
 
-    if (!PL_restartop) {
+    if (!PL_restart_instr) {
 #ifdef PERL_MAD
 	if (PL_xmlfp) {
 	    xmldump_all();
@@ -2339,10 +2339,10 @@ S_run_body(pTHX_ I32 oldscope)
 
     PERL_SET_PHASE(PERL_PHASE_RUN);
 
-    if (PL_restartop) {
+    if (PL_restart_instr) {
 	PL_restartjmpenv = NULL;
-	PL_op = PL_restartop;
-	PL_restartop = 0;
+	PL_op = PL_restart_instr;
+	PL_restart_instr = 0;
 	CALLRUNOPS(aTHX);
     }
     else if (PL_main_start) {
@@ -2668,10 +2668,10 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	    my_exit_jump();
 	    /* NOTREACHED */
 	case 3:
-	    if (PL_restartop) {
+	    if (PL_restart_instr) {
 		PL_restartjmpenv = NULL;
-		PL_op = PL_restartop;
-		PL_restartop = 0;
+		PL_op = PL_restart_instr;
+		PL_restart_instr = 0;
 		goto redo_body;
 	    }
 	    PL_stack_sp = PL_stack_base + oldmark;
@@ -2775,10 +2775,10 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	my_exit_jump();
 	/* NOTREACHED */
     case 3:
-	if (PL_restartop) {
+	if (PL_restart_instr) {
 	    PL_restartjmpenv = NULL;
-	    PL_op = PL_restartop;
-	    PL_restartop = 0;
+	    PL_op = PL_restart_instr;
+	    PL_restart_instr = 0;
 	    goto redo_body;
 	}
       fail:
@@ -4753,7 +4753,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    my_exit_jump();
 	    /* NOTREACHED */
 	case 3:
-	    if (PL_restartop) {
+	    if (PL_restart_instr) {
 		PL_curcop = &PL_compiling;
 		CopLINE_set(PL_curcop, oldline);
 		JMPENV_JUMP(3);

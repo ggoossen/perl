@@ -1189,7 +1189,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "BLK_FORMAT.HASARGS = %d\n",
 		      (int)CxHASARGS(cx));
 	PerlIO_printf(Perl_debug_log, "BLK_FORMAT.RETOP = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_format.retop));
+		PTR2UV(cx->blk_format.ret_instr));
 	break;
     case CXt_SUB:
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.CV = 0x%"UVxf"\n",
@@ -1200,7 +1200,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		(int)CxHASARGS(cx));
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.LVAL = %d\n", (int)CxLVAL(cx));
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.RETOP = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_sub.retop));
+		PTR2UV(cx->blk_sub.ret_instr));
 	break;
     case CXt_EVAL:
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_IN_EVAL = %ld\n",
@@ -1214,7 +1214,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_EVAL_ROOT = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_eval.old_eval_root));
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.RETOP = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_eval.retop));
+		PTR2UV(cx->blk_eval.ret_instr));
 	break;
 
     case CXt_LOOP_LAZYIV:

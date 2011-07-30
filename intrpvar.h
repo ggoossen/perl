@@ -126,7 +126,7 @@ PERLVAR(Itoptarget,	SV *)
 PERLVAR(Idefstash,	HV *)		/* main symbol table */
 PERLVAR(Icurstash,	HV *)		/* symbol table for current package */
 
-PERLVAR(Irestartop,	OP *)		/* propagating an error from croak? */
+PERLVAR(Irestart_instr,	INSTRUCTION *)		/* propagating an error from croak? */
 PERLVAR(Irestartjmpenv,	JMPENV *)	/* target frame for longjmp in die */
 PERLVAR(Icurcop,	COP *)
 PERLVAR(Icurstack,	AV *)		/* THE STACK */
@@ -144,7 +144,7 @@ PERLVAR(Ihv_fetch_ent_mh, HE*)		/* owned by hv_fetch_ent() */
 PERLVAR(Ilastgotoprobe,	OP*)		/* from pp_ctl.c */
 
 /* sort stuff */
-PERLVAR(Isortcop,	OP *)		/* user defined sort routine */
+PERLVAR(Isortcop,	INSTRUCTION *)		/* user defined sort routine */
 PERLVAR(Isortstash,	HV *)		/* which is in some package or other */
 PERLVAR(Ifirstgv,	GV *)		/* $a */
 PERLVAR(Isecondgv,	GV *)		/* $b */
@@ -398,9 +398,9 @@ PERLVARI(Iop_mask,	char *,	NULL)	/* masked operations for safe evals */
 /* current interpreter roots */
 PERLVAR(Imain_cv,	CV *)
 PERLVAR(Imain_root,	OP *)
-PERLVAR(Imain_start,	OP *)
+PERLVAR(Imain_start,	INSTRUCTION *)
 PERLVAR(Ieval_root,	OP *)
-PERLVAR(Ieval_start,	OP *)
+PERLVAR(Ieval_start,	INSTRUCTION *)
 
 /* runtime control stuff */
 PERLVARI(Icurcopdb,	COP *,	NULL)
