@@ -105,7 +105,7 @@ PP(pp_and)
     else {
         if (PL_op->op_type == OP_AND)
 	    --SP;
-	RETURNOP(cLOGOP->op_other);
+	RETURNINSTR(cLOGOP->op_other);
     }
 }
 
@@ -214,9 +214,9 @@ PP(pp_cond_expr)
     dVAR; dSP;
     PERL_ASYNC_CHECK();
     if (SvTRUEx(POPs))
-	RETURNOP(cLOGOP->op_other);
+	RETURNINSTR(cLOGOP->op_other);
     else
-	RETURNOP(cLOGOP->op_next);
+	RETURNINSTR(cLOGOP->op_next);
 }
 
 PP(pp_unstack)
@@ -380,7 +380,7 @@ PP(pp_or)
     else {
 	if (PL_op->op_type == OP_OR)
             --SP;
-	RETURNOP(cLOGOP->op_other);
+	RETURNINSTR(cLOGOP->op_other);
     }
 }
 
@@ -398,7 +398,7 @@ PP(pp_defined)
         if (!sv || !SvANY(sv)) {
 	    if (op_type == OP_DOR)
 		--SP;
-            RETURNOP(cLOGOP->op_other);
+            RETURNINSTR(cLOGOP->op_other);
         }
     }
     else {
@@ -434,7 +434,7 @@ PP(pp_defined)
             RETURN; 
         if(op_type == OP_DOR)
             --SP;
-        RETURNOP(cLOGOP->op_other);
+        RETURNINSTR(cLOGOP->op_other);
     }
     /* assuming OP_DEFINED */
     if(defined) 
@@ -1526,7 +1526,7 @@ ret_no:
     RETPUSHNO;
 }
 
-OP *
+INSTRUCTION *
 Perl_do_readline(pTHX)
 {
     dVAR; dSP; dTARGETSTACKED;
@@ -2307,7 +2307,7 @@ PP(pp_subst)
 	     * iters maxiters r_flags oldsave rxtainted orig dstr targ
 	     * s m strend rx once */
 	    PUSHSUBST(cx);
-	    RETURNOP(cPMOP->op_pmreplrootu.op_pmreplroot);
+	    RETURNINSTR(cPMOP->op_pmreplrootu.op_pmreplroot);
 	}
 	r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
 	do {
@@ -2450,7 +2450,7 @@ PP(pp_grepwhile)
 	else
 	    DEFSV_set(src);
 
-	RETURNOP(cLOGOP->op_other);
+	RETURNINSTR(cLOGOP->op_other);
     }
 }
 
@@ -2519,7 +2519,7 @@ PP(pp_leavesub)
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVESUB(sv);
-    return cx->blk_sub.retop;
+    return cx->blk_sub.ret_instr;
 }
 
 PP(pp_entersub)
@@ -2654,7 +2654,7 @@ try_autoload:
 	AV* const padlist = CvPADLIST(cv);
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
-	cx->blk_sub.retop = PL_op->op_next;
+	cx->blk_sub.ret_instr = PL_op->op_next;
 	CvDEPTH(cv)++;
 	/* XXX This would be a natural place to set C<PL_compcv = cv> so
 	 * that eval'' ops within this sub know the correct lexical space.
@@ -2711,7 +2711,7 @@ try_autoload:
 	if (CvDEPTH(cv) == PERL_SUB_DEPTH_WARN && ckWARN(WARN_RECURSION)
 	    && !(PERLDB_SUB && cv == GvCV(PL_DBsub)))
 	    sub_crush_depth(cv);
-	RETURNOP(CvSTART(cv));
+	RETURNINSTR(CvSTART(cv));
     }
     else {
 	I32 markix = TOPMARK;
