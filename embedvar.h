@@ -160,6 +160,7 @@
 #define PL_incgv		(vTHX->Iincgv)
 #define PL_initav		(vTHX->Iinitav)
 #define PL_inplace		(vTHX->Iinplace)
+#define PL_instruction		(vTHX->Iinstruction)
 #define PL_isarev		(vTHX->Iisarev)
 #define PL_known_layers		(vTHX->Iknown_layers)
 #define PL_last_in_gv		(vTHX->Ilast_in_gv)
@@ -224,7 +225,6 @@
 #define PL_padix_floor		(vTHX->Ipadix_floor)
 #define PL_parser		(vTHX->Iparser)
 #define PL_patchlevel		(vTHX->Ipatchlevel)
-#define PL_peepp		(vTHX->Ipeepp)
 #define PL_perl_destruct_level	(vTHX->Iperl_destruct_level)
 #define PL_perldb		(vTHX->Iperldb)
 #define PL_perlio		(vTHX->Iperlio)
@@ -252,7 +252,6 @@
 #define PL_replgv		(vTHX->Ireplgv)
 #define PL_restart_instr	(vTHX->Irestart_instr)
 #define PL_restartjmpenv	(vTHX->Irestartjmpenv)
-#define PL_rpeepp		(vTHX->Irpeepp)
 #define PL_rs			(vTHX->Irs)
 #define PL_runops		(vTHX->Irunops)
 #define PL_savebegin		(vTHX->Isavebegin)
@@ -488,6 +487,7 @@
 #define PL_Iincgv		PL_incgv
 #define PL_Iinitav		PL_initav
 #define PL_Iinplace		PL_inplace
+#define PL_Iinstruction		PL_instruction
 #define PL_Iisarev		PL_isarev
 #define PL_Iknown_layers	PL_known_layers
 #define PL_Ilast_in_gv		PL_last_in_gv
@@ -552,7 +552,6 @@
 #define PL_Ipadix_floor		PL_padix_floor
 #define PL_Iparser		PL_parser
 #define PL_Ipatchlevel		PL_patchlevel
-#define PL_Ipeepp		PL_peepp
 #define PL_Iperl_destruct_level	PL_perl_destruct_level
 #define PL_Iperldb		PL_perldb
 #define PL_Iperlio		PL_perlio
@@ -580,7 +579,6 @@
 #define PL_Ireplgv		PL_replgv
 #define PL_Irestart_instr	PL_restart_instr
 #define PL_Irestartjmpenv	PL_restartjmpenv
-#define PL_Irpeepp		PL_rpeepp
 #define PL_Irs			PL_rs
 #define PL_Irunops		PL_runops
 #define PL_Isavebegin		PL_savebegin

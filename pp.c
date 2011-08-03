@@ -248,7 +248,7 @@ PP(pp_rv2gv)
 /* Helper function for pp_rv2sv and pp_rv2av  */
 GV *
 Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
-		const svtype type, SV ***spp)
+                const svtype type, SV ***spp, const bool boolkeys)
 {
     dVAR;
     GV *gv;
@@ -262,10 +262,7 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
 	    Perl_die(aTHX_ PL_no_usym, what);
     }
     if (!SvOK(sv)) {
-	if (
-	  PL_op->op_flags & OPf_REF &&
-	  PL_op->op_next->op_type != OP_BOOLKEYS
-	)
+	if (PL_op->op_flags & OPf_REF && !boolkeys)
 	    Perl_die(aTHX_ PL_no_usym, what);
 	if (ckWARN(WARN_UNINITIALIZED))
 	    report_uninit(sv);
@@ -301,8 +298,7 @@ PP(pp_rv2sv)
     dVAR; dSP; dTOPss;
     GV *gv = NULL;
 
-    if (!(PL_op->op_private & OPpDEREFed))
-	SvGETMAGIC(sv);
+    SvGETMAGIC(sv);
     if (SvROK(sv)) {
 	if (SvAMAGIC(sv)) {
 	    sv = amagic_deref_call(sv, to_sv_amg);
@@ -324,7 +320,7 @@ PP(pp_rv2sv)
 	gv = MUTABLE_GV(sv);
 
 	if (!isGV_with_GP(gv)) {
-	    gv = Perl_softref2xv(aTHX_ sv, "a SCALAR", SVt_PV, &sp);
+	    gv = Perl_softref2xv(aTHX_ sv, "a SCALAR", SVt_PV, &sp, 0);
 	    if (!gv)
 		RETURN;
 	}
@@ -509,8 +505,12 @@ S_refto(pTHX_ SV *sv)
 	SvTEMP_off(sv);
 	SvREFCNT_inc_void_NN(sv);
     }
-    else if (SvPADTMP(sv) && !IS_PADGV(sv))
+    else if (SvPADTMP(sv) && !IS_PADGV(sv)) {
+	SV* org_sv = sv;
         sv = newSVsv(sv);
+	if (SvREADONLY(org_sv))
+	    SvREADONLY_on(sv);
+    }
     else {
 	SvTEMP_off(sv);
 	SvREFCNT_inc_void_NN(sv);
@@ -2110,8 +2110,7 @@ PP(pp_ncmp)
 {
     dVAR; dSP;
     SV *left, *right;
-    I32 value;
-    dTARGET;
+    I32 value; dTARGET;
     tryAMAGICbin_MG(ncmp_amg, AMGf_numeric, TARG);
     right = POPs;
     left  = TOPs;
@@ -2533,10 +2532,11 @@ PP(pp_i_modulo)
 	  dPOPTOPiirl_nomg;
 	  if (!right)
 	       DIE(aTHX_ "Illegal modulus zero");
+	  /* possibly do the check at compile time? */
 	  /* The assumption is to use hereafter the old vanilla version... */
-	  PL_op->op_ppaddr =
-	       PL_ppaddr[OP_I_MODULO] =
-	           Perl_pp_i_modulo_0;
+	  /* PL_op->op_ppaddr = */
+	  /*      PL_ppaddr[OP_I_MODULO] = */
+	  /*          Perl_pp_i_modulo_0; */
 	  /* .. but if we have glibc, we might have a buggy _moddi3
 	   * (at least glicb 2.2.5 is known to have this bug), in other
 	   * words our integer modulus with negative quad as the second
@@ -2548,15 +2548,15 @@ PP(pp_i_modulo)
 	       IV l =   3;
 	       IV r = -10;
 	       /* Cannot do this check with inlined IV constants since
-		* that seems to work correctly even with the buggy glibc. */
+	  	* that seems to work correctly even with the buggy glibc. */
 	       if (l % r == -3) {
-		    /* Yikes, we have the bug.
-		     * Patch in the workaround version. */
-		    PL_op->op_ppaddr =
-			 PL_ppaddr[OP_I_MODULO] =
-			     &Perl_pp_i_modulo_1;
-		    /* Make certain we work right this time, too. */
-		    right = PERL_ABS(right);
+	  	    /* Yikes, we have the bug.
+	  	     * Patch in the workaround version. */
+	  	    /* PL_op->op_ppaddr = */
+	  	    /* 	 PL_ppaddr[OP_I_MODULO] = */
+	  	    /* 	     &Perl_pp_i_modulo_1; */
+	  	    /* Make certain we work right this time, too. */
+	  	    right = PERL_ABS(right);
 	       }
 	  }
 	  /* avoid FPE_INTOVF on some platforms when left is IV_MIN */
@@ -4466,7 +4466,7 @@ PP(pp_rkeys)
     if (PL_op->op_flags & OPf_SPECIAL && SvTYPE(sv) == SVt_PVAV)
 	DIE(aTHX_
 	   "Can't modify %s in %s",
-	    PL_op_desc[PL_op->op_type], PL_op_desc[PL_op->op_next->op_type]
+	    PL_op_desc[PL_op->op_type], PL_op_desc[PL_instruction[1].instr_op->op_type]
 	);
 
     /* Delegate to correct function for op type */
@@ -5329,7 +5329,7 @@ PP(pp_reverse)
     dVAR; dSP; dMARK;
 
     if (GIMME == G_ARRAY) {
-	if (PL_op->op_private & OPpREVERSE_INPLACE) {
+	if (PL_instruction->instr_flags & INSTRf_REVERSE_INPLACE) {
 	    AV *av;
 
 	    /* See pp_sort() */
@@ -5892,15 +5892,15 @@ PP(pp_split)
 
 PP(pp_once)
 {
-    dSP;
     SV *const sv = PAD_SVl(PL_op->op_targ);
+    INSTRUCTION * other_instr = (INSTRUCTION*)PL_instruction->instr_arg;
 
     if (SvPADSTALE(sv)) {
 	/* First time. */
 	SvPADSTALE_off(sv);
-	RETURNINSTR(cLOGOP->op_other);
+	return NORMAL;
     }
-    RETURNINSTR(cLOGOP->op_next);
+    return other_instr;
 }
 
 PP(pp_lock)
@@ -5936,6 +5936,7 @@ PP(unimplemented_op)
     if(OP_IS_SOCKET(op_type))
 	DIE(aTHX_ PL_no_sock_func, name);
     DIE(aTHX_ "panic: unimplemented op %s (#%d) called", name,	op_type);
+    return NORMAL;
 }
 
 PP(pp_boolkeys)
@@ -5956,6 +5957,11 @@ PP(pp_boolkeys)
 
     XPUSHs(boolSV(HvUSEDKEYS(hv) != 0));
     RETURN;
+}
+
+PP(pp_instr_end)
+{
+    return NULL;
 }
 
 /*

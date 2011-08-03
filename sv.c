@@ -12124,7 +12124,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_sub.oldcomppad = (PAD*)ptr_table_fetch(PL_ptr_table,
 					   ncx->blk_sub.oldcomppad);
 		ncx->blk_sub.codeseq = codeseq_dup_inc( ncx->blk_sub.codeseq, param );
-		ncx->blk_sub.ret_instr = ncx->blk_sub.ret_instr;
+		ncx->blk_sub.ret_instr = instruction_dup( ncx->blk_sub.ret_instr, param );
 		break;
 	    case CXt_EVAL:
 		ncx->blk_eval.old_namesv = sv_dup_inc(ncx->blk_eval.old_namesv,
@@ -12133,7 +12133,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		if (ncx->blk_eval.codeseq) {
 		    ncx->blk_eval.codeseq	= codeseq_dup_inc(ncx->blk_eval.codeseq, param);
 		}
-		ncx->blk_eval.ret_instr = ncx->blk_sub.ret_instr;
+		ncx->blk_eval.ret_instr = instruction_dup( ncx->blk_sub.ret_instr, param );
 		break;
 	    case CXt_LOOP_LAZYSV:
 		ncx->blk_loop.state_u.lazysv.end
@@ -12158,14 +12158,19 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 			= gv_dup((const GV *)ncx->blk_loop.itervar_u.gv,
 				    param);
 		}
+		ncx->blk_loop.loop_instrs = loop_instructions_dup( ncx->blk_loop.loop_instrs, param );
 		break;
 	    case CXt_FORMAT:
 		ncx->blk_format.codeseq	= codeseq_dup_inc(ncx->blk_format.codeseq, param);
-		ncx->blk_format.ret_instr = ncx->blk_format.ret_instr;
+		ncx->blk_format.ret_instr = instruction_dup(ncx->blk_format.ret_instr, param);
 		ncx->blk_format.cv	= cv_dup(ncx->blk_format.cv, param);
 		ncx->blk_format.gv	= gv_dup(ncx->blk_format.gv, param);
 		ncx->blk_format.dfoutgv	= gv_dup_inc(ncx->blk_format.dfoutgv,
 						     param);
+		break;
+	    case CXt_GIVEN:
+	    case CXt_WHEN:
+		ncx->blk_givwhen.leave_instr = instruction_dup( ncx->blk_givwhen.leave_instr, param );
 		break;
 	    case CXt_BLOCK:
 	    case CXt_NULL:
@@ -12712,6 +12717,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #ifdef DEBUGGING
     PoisonNew(my_perl, 1, PerlInterpreter);
     PL_op = NULL;
+    PL_instruction = NULL;
     PL_curcop = NULL;
     PL_defstash = NULL; /* may be used by perl malloc() */
     PL_markstack = 0;
@@ -12977,7 +12983,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_chopset		= proto_perl->Ichopset;	/* XXX never deallocated */
 
     PL_restartjmpenv	= proto_perl->Irestartjmpenv;
-    PL_restart_instr	= proto_perl->Irestart_instr;
     PL_in_eval		= proto_perl->Iin_eval;
     PL_delaymagic	= proto_perl->Idelaymagic;
     PL_phase		= proto_perl->Iphase;
@@ -12997,9 +13002,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_colorset		= 0;		/* reinits PL_colors[] */
     /*PL_colors[6]	= {0,0,0,0,0,0};*/
 
-    /* Pluggable optimizer */
-    PL_peepp		= proto_perl->Ipeepp;
-    PL_rpeepp		= proto_perl->Irpeepp;
     /* op_free() hook */
     PL_opfreehook	= proto_perl->Iopfreehook;
 
@@ -13321,10 +13323,16 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 	/*Newxz(PL_savestack, PL_savestack_max, ANY);*/
 	PL_savestack		= ss_dup(proto_perl, param);
+
+	PL_instruction         = instruction_dup(proto_perl->Iinstruction, param);
+	PL_restart_instr       = instruction_dup(proto_perl->Irestart_instr, param);
     }
     else {
 	init_stacks();
 	ENTER;			/* perl_destruct() wants to LEAVE; */
+
+	PL_instruction   = NULL;
+	PL_restart_instr = NULL;
     }
 
     PL_statgv		= gv_dup(proto_perl->Istatgv, param);
@@ -13851,6 +13859,20 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 				    keysv, index, subscript_type);
       }
 
+    case OP_RV2SV:
+	if (cUNOPx(obase)->op_first->op_type == OP_GV) {
+	    /* $global */
+	    gv = cGVOPx_gv(cUNOPx(obase)->op_first);
+	    if (!gv || !GvSTASH(gv))
+		break;
+	    if (match && (GvSV(gv) != uninit_sv))
+		break;
+	    return varname(gv, '$', 0, NULL, 0, FUV_SUBSCRIPT_NONE);
+	}
+	else /* ${expr} */
+	    return find_uninit_var(cUNOPx(obase)->op_first,
+		uninit_sv, 1);
+
     case OP_PADSV:
 	if (match && PAD_SVl(obase->op_targ) != uninit_sv)
 	    break;
@@ -13878,7 +13900,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
     case OP_AELEMFAST:
 	{
 	    gv = cGVOPx_gv(obase);
-	    if (!gv)
+	    if (!gv || GvSTASH(gv))
 		break;
 	    if (match) {
 		SV **svp;
@@ -13903,6 +13925,9 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 
     case OP_AELEM:
     case OP_HELEM:
+    {
+	bool negate = FALSE;
+
 	if (PL_op == obase)
 	    /* $a[uninit_expr] or $h{uninit_expr} */
 	    return find_uninit_var(cBINOPx(obase)->op_last, uninit_sv, match);
@@ -13920,7 +13945,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		&& cUNOPo->op_first->op_type == OP_GV)
 	{
 	    gv = cGVOPx_gv(cUNOPo->op_first);
-	    if (!gv)
+	    if (!gv || !GvSTASH(gv))
 		break;
 	    sv = o->op_type
 		== OP_RV2HV ? MUTABLE_SV(GvHV(gv)) : MUTABLE_SV(GvAV(gv));
@@ -13928,28 +13953,44 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	if (!sv)
 	    break;
 
+	if (kid && kid->op_type == OP_NEGATE) {
+	    negate = TRUE;
+	    kid = cUNOPx(kid)->op_first;
+	}
+
 	if (kid && kid->op_type == OP_CONST && SvOK(cSVOPx_sv(kid))) {
 	    /* index is constant */
+	    SV* kidsv;
+	    if (negate) {
+		kidsv = sv_2mortal(newSVpvs("-"));
+		sv_catsv(kidsv, cSVOPx_sv(kid));
+	    }
+	    else
+		kidsv = cSVOPx_sv(kid);
 	    if (match) {
 		if (SvMAGICAL(sv))
 		    break;
 		if (obase->op_type == OP_HELEM) {
-		    HE* he = hv_fetch_ent(MUTABLE_HV(sv), cSVOPx_sv(kid), 0, 0);
+		    HE* he = hv_fetch_ent(MUTABLE_HV(sv), kidsv, 0, 0);
 		    if (!he || HeVAL(he) != uninit_sv)
 			break;
 		}
 		else {
-		    SV * const * const svp = av_fetch(MUTABLE_AV(sv), SvIV(cSVOPx_sv(kid)), FALSE);
+		    SV * const * const svp = av_fetch(MUTABLE_AV(sv),
+			negate ? - SvIV(cSVOPx_sv(kid)) : SvIV(cSVOPx_sv(kid)),
+			FALSE);
 		    if (!svp || *svp != uninit_sv)
 			break;
 		}
 	    }
-	    if (obase->op_type == OP_HELEM)
+	    if (obase->op_type == OP_HELEM) {
 		return varname(gv, '%', o->op_targ,
-			    cSVOPx_sv(kid), 0, FUV_SUBSCRIPT_HASH);
+			    kidsv, 0, FUV_SUBSCRIPT_HASH);
+	    }
 	    else
 		return varname(gv, '@', o->op_targ, NULL,
-			    SvIV(cSVOPx_sv(kid)), FUV_SUBSCRIPT_ARRAY);
+		    negate ? - SvIV(cSVOPx_sv(kid)) : SvIV(cSVOPx_sv(kid)),
+		    FUV_SUBSCRIPT_ARRAY);
 	}
 	else  {
 	    /* index is an expression;
@@ -13975,6 +14016,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		o->op_targ, NULL, 0, FUV_SUBSCRIPT_WITHIN);
 	}
 	break;
+    }
 
     case OP_AASSIGN:
 	/* only examine RHS */
@@ -14031,7 +14073,6 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 
 
     case OP_ENTEREVAL: /* could be eval $undef or $x='$undef'; eval $x */
-    case OP_RV2SV:
     case OP_CUSTOM: /* XS or custom code could trigger random warnings */
 
 	/* the following ops are capable of returning PL_sv_undef even for
@@ -14172,6 +14213,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    }
 	    o2 = kid;
 	}
+
 	if (o2)
 	    return find_uninit_var(o2, uninit_sv, match);
 
