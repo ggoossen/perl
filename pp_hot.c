@@ -424,6 +424,8 @@ PP(pp_or)
     INSTRUCTION * true_branch_instr = (INSTRUCTION*) PL_instruction->instr_arg;
     PERL_ASYNC_CHECK();
     if (SvTRUE(TOPs)) {
+	if (PL_op->op_type == OP_WHILE_AND)
+            --SP;
 	RETURNINSTR(true_branch_instr);
     }
     else {

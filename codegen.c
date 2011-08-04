@@ -562,12 +562,14 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 		  ...
 	      label1:
 		  <op_other>
+		  unstack
 		  <op_first>
 		  or		       label1
 		  ...
 	    */
 	    int restart_idx = bpp->idx;
 	    add_op(bpp, op_other, &kid_may_constant_fold, 0);
+	    append_instruction(bpp, NULL, OP_UNSTACK, 0, NULL);
 	    add_op(bpp, op_first, &kid_may_constant_fold, 0);
 	    append_instruction(bpp, o, OP_OR, 0, NULL);
 	    save_instr_from_to_pparg(bpp, bpp->idx-1, restart_idx);
@@ -578,6 +580,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 		  instr_jump	       label2
 	      label1:
 		  <op_other>
+		  unstack
 	      label2:
 		  <op_first>
 		  or		       label1
@@ -589,6 +592,7 @@ S_add_op(pTHX_ CODEGEN_PAD* bpp, OP* o, bool *may_constant_fold, int flags)
 
 	    restart_idx = bpp->idx;
 	    add_op(bpp, op_other, &kid_may_constant_fold, 0);
+	    append_instruction(bpp, NULL, OP_UNSTACK, 0, NULL);
 
 	    save_instr_from_to_pparg(bpp, start_idx, bpp->idx);
 	    add_op(bpp, op_first, &kid_may_constant_fold, 0);
@@ -1353,6 +1357,7 @@ Perl_compile_op(pTHX_ OP* rootop, CODESEQ* codeseq)
     save_scalar(PL_errgv);
     SAVEVPTR(PL_curcop);
     SAVEOP();
+    SAVEVPTR(PL_instruction);
     SAVEBOOL(PL_tainting);
     PL_tainting = FALSE;
 

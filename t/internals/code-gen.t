@@ -367,3 +367,23 @@ label1:
     gvsv
     leave
     instr_end
+####
+if ($a) {
+    1 while 1
+}
+----
+    enter
+    nextstate
+    gvsv
+    and	label1
+    enter
+    instr_jump	label2
+label3:
+    const
+label2:
+    const
+    or	label3
+    leave
+label1:
+    leave
+    instr_end
